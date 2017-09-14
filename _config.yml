@@ -1,11 +1,13 @@
 # Basic
-title: Vno Jekyll
-subtitle: A blog-orientation theme for Jekyll
-welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank">Download the theme</a>
-description: Vno Jekyll is a port of my Ghost theme vno.
-creator: <a href="http://onev.cat">@onevcat</a>
+title: 张伟(WeiZhang555)的站点
+subtitle: Wei Zhang's website
+email: zhangwei_cs@qq.com
+description: > # this means to ignore newlines until "baseurl:"
+    这是一个懒人尝试留下只言片语的地方，这是一个IT人员尝试与世界分享自己的知识的地方。从今天起，试着多留下点什么，分享点什么 ^~^
+welcome_message: 
+creator: <a href="https://weizhang555.github.io">@weizhang555</a>
 
-url: "http://vno.onevcat.com"
+url: "https://weizhang555.github.io"
 
 permalink: /:year/:month/:title/
 
@@ -22,7 +24,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-    - {title: Projects, description: My Projects, url: 'http://project.onevcat.com'}
+    - {title: Projects, description: My Projects, url: 'https://github.com/WeiZhang555'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
@@ -32,16 +34,15 @@ paginate_path: "page/:num/"
 
 # Comment
 comment:
-    disqus: vno-jekyll
+    disqus: weizhang555
     # duoshuo: 
     
 # Social
 social:
-    weibo: onevcat
-    github: onevcat
-    twitter: onevcat
-    gplus: 107108267983477358170
-    mail: onev@onevcat.com
+    github: WeiZhang555
+    twitter: WeiZhang555
+    # gplus: 107108267983477358170
+    mail: zhangwei_cs@qq.com
 
 # Google Analytics
 ga:
