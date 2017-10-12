@@ -17,7 +17,8 @@ containerd-shim会调用runc最终启动容器。
 随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd，
 docker会越来越侧重于编排调度部分--swarm。
 
-简单分析下containerd的代码架构，作为官方containerd文档的一个补充。本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9为标准讲解。
+简单分析下containerd的代码架构，作为官方containerd文档的一个补充。
+本篇以git commit `d700a9c35b09239c8c056cd5df73bc19a79db9a9` 为标准讲解。
 
 ## 2. grpc
 
@@ -38,9 +39,12 @@ content.pb.go  content.proto
 
 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件，
 而程序最终使用的content.pb.go则可以由grpc命令自动生成。
+containerd在Makefile中提供了生成`.pb.go`的指令
 
 ```
-# protoc --go_out=. *.proto
+// 安装依赖的库
+# cd containerd && make setup 
+# make protos
 ```
 
 打开content.proto 来看，里面主要定义了一个service：
@@ -78,7 +82,7 @@ content.pb.go  content.proto
 
 使用protoc命令生成的.pb.go文件内同步包含server端和client端的接口实现。
 
-## containerd启动
+## 3. containerd启动
 
 以containerd启动过程来看。入口为cmd/containerd/main.go, 程序一启动首先就把信号处理函数准备好了。
 
@@ -101,7 +105,14 @@ cmd/containerd/main.go:
 
 前面都是创建目录，主要看加载plugin的部分。
 
-1. load plugins
+* 3.1. load plugins
+
+```
+server/server.go:
+func New(ctx context.Context, config *Config) (*Server, error):
+ 
+52     plugins, err := loadPlugins(config)
+```
 
 核心代码：
 
@@ -138,7 +149,7 @@ cmd/containerd/main.go:
 164行进入plugin包，内部实现是golang从1.8（？）开始支持的新特性--go语言自带的plugin支持，
 可以加载用户自定义的插件。
 
-168和175是注册了两个最基本的插件，一个是`content`插件，一个是metadata插件，这两个插件基本上是其他插件的基础。
+168和175是注册了两个最基本的插件，一个是`content`插件，一个是`metadata`插件，这两个插件基本上是其他插件的基础。
 其中content插件主要是依赖content/local那个子package，metadata主要是操纵boltdb数据库meta.db
 
 ```
@@ -168,7 +179,7 @@ meta.db
 但是Registration难道只有两个吗？两个插件为什么需要这么复杂？
 答案是当然不是只有两个，还有其他的插件，只是他们初始化过程比较隐晦，不是那么直观。
 
-2. 其他插件在哪儿？
+* 3.2. 其他插件在哪儿？
 
 答案是在以下两个文件中：
 
@@ -209,7 +220,7 @@ cmd/containerd/builtins_linux.go:
 services/content/service.go:
  38 func init() {
  39     plugin.Register(&plugin.Registration{
- 40         Type: plugin.GRPCPlugin,
+ 40         Type: plugin.GRPCPlugin,  // "io.containerd.grpc.v1"
  41         ID:   "content",
  42         Requires: []plugin.PluginType{
  43             plugin.ContentPlugin,
@@ -220,6 +231,184 @@ services/content/service.go:
  48 }
 ```
 
-(未完待续)
+`init()`函数是golang的基本用法，会在这个package被引用到的时候自动初始化执行。
+这里就是注册了另一个plugin.
+需要注意的是，`plugin.GRPCPlugin`这个类型的插件有不止一种，一般都是通过grpc service对外提供服务的。
+在上面提到的import的其他包里，你可以找到很多GRPCPlugin类型的插件。
+这个插件依赖于`plugin.ContentPlugin`和`plugin.MetadataPlugin`，
+也就是说初始化过程中，一定会先初始化它依赖的ContentPlugin和MetadataPlugin再初始化它。
+Init函数指向NewService这个函数。这个函数本文后面会继续打开来看，我们先暂停到这里。
+到此，我们知道了所有plugin都是在哪里找到的。
+
+* 3.3. 注册和启动service
+
+继续回到`server.New`的实现中，`loadPlugins`完成之后，所有的plugin都加入到`plugins`这个数组中了，
+下一步就是处理这个数组。下面是一段长长的代码：
+
+```
+server/server.go:
+func New(ctx context.Context, config *Config) (*Server, error):
+ 
+ 68     for _, p := range plugins {
+ 69         id := p.URI()  // fmt.Sprintf("%s.%s", r.Type, r.ID)
+ 70         log.G(ctx).WithField("type", p.Type).Infof("loading plugin %q...", id)
+ 71 
+ 72         initContext := plugin.NewContext(
+ 73             ctx,
+ 74             initialized,
+ 75             config.Root,  // 默认是"/var/lib/containerd"
+ 76             config.State, // 默认是"/run/containerd"
+ 77             id,
+ 78         )
+ 79         initContext.Events = s.events
+ 80         initContext.Address = config.GRPC.Address // 默认是"/run/containerd/containerd.sock"
+ 81 
+ 82         // load the plugin specific configuration if it is provided
+ 83         if p.Config != nil {
+ 84             pluginConfig, err := config.Decode(p.ID, p.Config)
+ 85             if err != nil {
+ 86                 return nil, err
+ 87             }
+ 88             initContext.Config = pluginConfig
+ 89         }
+ 90         instance, err := p.Init(initContext)
+ 91         if err != nil {
+ 92             if plugin.IsSkipPlugin(err) {
+ 93                 log.G(ctx).WithField("type", p.Type).Infof("skip loading plugin %q...", id)
+ 94             } else {
+ 95                 log.G(ctx).WithError(err).Warnf("failed to load plugin %s", id)
+ 96             }
+ 97             continue
+ 98         }
+ 99 
+100         if types, ok := initialized[p.Type]; ok {
+101             types[p.ID] = instance
+102         } else {
+103             initialized[p.Type] = map[string]interface{}{
+104                 p.ID: instance,
+105             }
+106         }
+107         // check for grpc services that should be registered with the server
+108         if service, ok := instance.(plugin.Service); ok {
+109             services = append(services, service)
+110         }
+111     }
+112     // register services after all plugins have been initialized
+113     for _, service := range services {
+114         if err := service.Register(rpc); err != nil {
+115             return nil, err
+116         }
+117     }
+
+```
+
+90行之前都是准备initContext，这个initContext是会传递给每个plugin的Init函数使用的一个初始化数据。
+随后重点是90行，会调用每个plugin的Init函数，入参为刚才准备的initContext。
+`initialized`数组每一轮迭代都会把当前初始化完成的插件放进去，然后传递给下一个`plugin`的`initContext`作为初始化必须的数据，
+下一个插件就可以访问它所依赖的任何一个组件了。
+
+108行需要注意的是，每个插件执行完`Init`函数所返回的`instance` interface，都会尝试去转换成`plugin.Service`接口，
+如果它实现了`plugin.Service`这个接口，那么它就是一个service，需要加到`services`列表，
+等待最后在114行执行Register函数进行注册。
+
+```
+plugin/plugin.go:
+ 55 type Service interface {                                               
+ 56     Register(*grpc.Server) error
+ 57 }   
+```
+
+也即是说，只要`instance`实现了`Register`接口，就是一个服务。
+
+仍然以content service为例。
+
+```
+services/content/service.go:
+ 38 func init() {
+ 39     plugin.Register(&plugin.Registration{
+ 40         Type: plugin.GRPCPlugin,
+ 41         ID:   "content",
+ 42         Requires: []plugin.PluginType{
+ 43             plugin.ContentPlugin,
+ 44             plugin.MetadataPlugin,
+ 45         },
+ 46         Init: NewService,
+ 47     })
+ 48 }
+ 49 
+ 50 func NewService(ic *plugin.InitContext) (interface{}, error) {
+ 51     c, err := ic.Get(plugin.ContentPlugin)
+ 52     if err != nil {
+ 53         return nil, err
+ 54     }
+ 55     m, err := ic.Get(plugin.MetadataPlugin)
+ 56     if err != nil {
+ 57         return nil, err
+ 58     }
+ 59     cs := metadata.NewContentStore(m.(*bolt.DB), c.(content.Store))
+ 60     return &Service{
+ 61         store:     cs,
+ 62         publisher: ic.Events,
+ 63     }, nil
+ 64 }
+ 65 
+ 66 func (s *Service) Register(server *grpc.Server) error {
+ 67     api.RegisterContentServer(server, s)
+ 68     return nil
+ 69 }
+```
+
+可以看到content plugin的Init函数返回了`content.Service`结构体，这个结构体实现了`Register`函数，
+它是一个service。
+其中67行会跳转到以下：
+
+```
+api/services/content/v1/content.pb.go:
+ 619 // Server API for Content service
+ 620 
+ 621 type ContentServer interface {
+ 622     // Info returns information about a committed object.
+ 623     //
+ 624     // This call can be used for getting the size of content and checking for
+ 625     // existence.
+ 626     Info(context.Context, *InfoRequest) (*InfoResponse, error)
+ 627     // Update updates content metadata.
+ 628     //
+ 629     // This call can be used to manage the mutable content labels. The
+ 630     // immutable metadata such as digest, size, and committed at cannot
+ 631     // be updated.
+ 632     Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
+ 633     // List streams the entire set of content as Info objects and closes the
+ 634     // stream.
+ 635     //
+ 636     // Typically, this will yield a large response, chunked into messages.
+ 637     // Clients should make provisions to ensure they can handle the entire data
+ 638     // set.
+ 639     List(*ListContentRequest, Content_ListServer) error
+ 640     // Delete will delete the referenced object.
+ 641     Delete(context.Context, *DeleteContentRequest) (*google_protobuf3.Empty, error)
+...省略...
+
+ 677 func RegisterContentServer(s *grpc.Server, srv ContentServer) {
+ 678     s.RegisterService(&_Content_serviceDesc, srv)
+ 679 }
+```
+
+也就是`content.Service`必须是`ContentServer`的一个实现。
+
+下面一句划重点：
+
+**`api/services`包定义了所有用户自定义的grpc服务的接口，其中`.proto`文件包含了用户自定义的service接口，
+而`.pb.go`是protoc自动生成的service定义，包含server端和client端定义；`services/`包里实现了`api/services/`用户定义的接口**
+
+`api/services`包含的是接口定义，`services`包是实现。
+
+在上文中`services/content/service.go`包含了content service的server端实现，而`services/content/store.go`对client端做了封装，
+更加便于使用。
+
+## 4. 总结
+
+上文对containerd的启动流程做了总结，主要是围绕containerd如何启动多个grpc service给出分析的。grpc可以说是containerd的实现核心，
+与docker daemon的http restful API还是有较大不同。后续会针对部分单独的组件再来做分析。
 
 [containerd源码分析xmind文件](/images/containerd阅读.xmind)
