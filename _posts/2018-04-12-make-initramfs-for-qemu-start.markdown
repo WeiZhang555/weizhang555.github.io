@@ -1,9 +1,17 @@
 ---
 layout: post
-title:  "Kernel debug basics-- how to make an initramfs"
+title:  "Kernel调试基础--制作initramfs"
 date:   2018-04-12 19:10:00 +0800
 categories: jekyll update
 ---
+
+通过自己制作initramfs可以使用qemu启动自定义的内核，
+可以用于调试或测试。这里记录一下制作简单的initramfs的脚本，
+方便后续使用。
+
+本文参考了链接：[Building a minimal Linux / Busybox OS for Qemu](https://gist.github.com/pacalet/660fa6472e0bcd53f71fc31f167c628f)
+
+完整脚本如下：
 
 ```
 #!/bin/bash
