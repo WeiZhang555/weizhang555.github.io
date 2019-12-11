@@ -5,23 +5,18 @@ date:   2019-12-11 11:11:00 +0800
 categories: jekyll update
 ---
 
-# Kubernetes安装
+kubeadm安装三节点集群
 
-<a name="5fc03aac"></a>
-# kubeadm安装三节点集群
-
-<a name="72c7d6dc"></a>
 ## 测试环境
 
 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
 
-<a name="f26ef914"></a>
+
 ## 下载
 
 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。<br />
 具体的安装步骤暂时略过。
 
-<a name="d0093f99"></a>
 ## 配置kubelet
 
 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
@@ -73,7 +68,7 @@ EOF
 
 docker我这里默认都配置好了，就不详细讲解了。
 
-<a name="9a40d5ce"></a>
+
 # 拉起master节点
 
 这里我们用test-vm作为master节点。
@@ -156,8 +151,7 @@ kube-scheduler-test-vm            1/1     Running   0          5m12s
 
 不过我就遇到了一个小问题，coredns一直不变成running，利用命令`kubectl -n kube-system describe pod coredns-9f7ddc475-8jl54`查看错误发现，/opt/cni/bin/bridge找不到导致无法teardown pod，我找到了个bridge的cni插件放过去就解决了。
 
-<a name="3188aba9"></a>
-# 增加worker
+## 增加worker
 
 在worker节点test-vm-1，test-vm-2上执行同样步骤：
 
