@@ -1,17 +1,15 @@
-<section class="post-comments">
-	<div id="container"></div>
-	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
-	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
-	<script>
-	var gitment = new Gitment({
-	  id: 'location.href', // 可选。默认为 location.href
-	  owner: 'WeiZhang555',
-	  repo: 'https://github.com/WeiZhang555/weizhang555.github.io',
-	  oauth: {
-		client_id: 'b051d344112e8cd563e8',
-		client_secret: 'df3a893a36350e69d156fc2c50d215ef5ec78d09',
-	  },
-	})
-	gitment.render('container')
-	</script>
-</section>
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  id: '{{ page.title }}',
+  owner: 'weizhang555',
+  repo: 'weizhang555.github.io',
+  oauth: {
+	client_id: '26371c480e85f4635b9d',
+	client_secret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  },
+})
+gitment.render('container')
+</script>
