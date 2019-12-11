@@ -69,7 +69,7 @@ EOF
 docker我这里默认都配置好了，就不详细讲解了。
 
 
-# 拉起master节点
+## 拉起master节点
 
 这里我们用test-vm作为master节点。
 
