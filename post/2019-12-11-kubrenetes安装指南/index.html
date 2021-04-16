@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="张伟的小站">
+    
+    <link rel="shortcut icon" href="https://weizhang555.github.io/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>kubernetes安装指南</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://weizhang555.github.io">Knock, knock</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li><li>
+                <a href="/about/" title="about">about</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>kubernetes安装指南</h1>
+            <div>
+                <time>December 11, 2019</time>
+                </div>
+    </header><p>kubeadm安装三节点集群</p>
+<h2 id="测试环境">测试环境</h2>
+<p>三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04</p>
+<h2 id="下载">下载</h2>
+<p>kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。<br />
+具体的安装步骤暂时略过。</p>
+<h2 id="配置kubelet">配置kubelet</h2>
+<p>三台节点可以手动配置一下kubelet服务，配置方法都是一样的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># cat &gt; /lib/systemd/system/kubelet.service  &lt;&lt; EOF</span>
+<span class="o">[</span>Unit<span class="o">]</span>
+<span class="nv">Description</span><span class="o">=</span>kubelet: The Kubernetes Node Agent
+<span class="nv">Documentation</span><span class="o">=</span>http://kubernetes.io/docs/
+
+<span class="o">[</span>Service<span class="o">]</span>
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/bin/kubelet
+<span class="nv">Restart</span><span class="o">=</span>always
+<span class="nv">StartLimitInterval</span><span class="o">=</span><span class="m">0</span>
+<span class="nv">RestartSec</span><span class="o">=</span><span class="m">10</span>
+
+<span class="o">[</span>Install<span class="o">]</span>
+<span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+EOF
+</code></pre></div><p>上面就是简单的调用了下kubelet命令，实际上还有很多参数，这个不着急。因为我们是用kubeadm配置的，所以实际上生效的是kubeadm为kubelet设置的参数，kubelet的启动将依赖kubeadm设置的bootstrap配置：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># mkdir -p /etc/systemd/system/kubelet.service.d/</span>
+<span class="c1"># cat &gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &lt;&lt; EOF</span>
+<span class="o">[</span>Service<span class="o">]</span>
+<span class="nv">Environment</span><span class="o">=</span><span class="s2">&#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&#34;</span>
+<span class="nv">Environment</span><span class="o">=</span><span class="s2">&#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&#34;</span>
+<span class="c1"># This is a file that &#34;kubeadm init&#34; and &#34;kubeadm join&#34; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically</span>
+<span class="nv">EnvironmentFile</span><span class="o">=</span>-/var/lib/kubelet/kubeadm-flags.env
+<span class="c1"># This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably,</span>
+<span class="c1"># the user should use the .NodeRegistration.KubeletExtraArgs object in the configuration files instead.</span>
+<span class="c1"># KUBELET_EXTRA_ARGS should be sourced from this file.</span>
+<span class="nv">EnvironmentFile</span><span class="o">=</span>-/etc/default/kubelet
+<span class="nv">ExecStart</span><span class="o">=</span>
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/bin/kubelet <span class="nv">$KUBELET_KUBECONFIG_ARGS</span> <span class="nv">$KUBELET_CONFIG_ARGS</span> <span class="nv">$KUBELET_KUBEADM_ARGS</span> <span class="nv">$KUBELET_EXTRA_ARGS</span>
+EOF
+</code></pre></div><p>设置开机启动</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># systemctl daemon-reload</span>
+<span class="c1"># systemctl enable kubelet</span>
+<span class="c1"># systemctl start kubelet</span>
+<span class="c1"># swapoff -a    //K8s要求关闭swap</span>
+</code></pre></div><p>docker我这里默认都配置好了，就不详细讲解了。</p>
+<h2 id="拉起master节点">拉起master节点</h2>
+<p>这里我们用test-vm作为master节点。</p>
+<p>主要参考这个： <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/</a></p>
+<p>这里我先想好要用什么网络方案，自己尝试了下calico，总感觉有点问题。保守点先选择Flannel好了。<br />
+引用一段：</p>
+<blockquote>
+<p>For flannel to work correctly, you must pass &ndash;pod-network-cidr=10.244.0.0/16 to kubeadm init.</p>
+</blockquote>
+<p>master节点拉起K8s control plane：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kubeadm init --pod-network-cidr=10.244.0.0/16 --image-repository=docker.io/mirrorgooglecontainers --kubernetes-version=1.13.4 --ignore-preflight-errors=SystemVerification</span>
+</code></pre></div><p>镜像仓库选用了docker.io/mirrorgooglecontainers 是因为默认是从k8s.io这个镜像仓库拉K8s控制组件的，这个在CN是被和谐的；K8s版本这里我永乐1.13.4，init过程把SystemVerification禁用了，是因为我的内核版本太高了（5.0.0-16），检查报错。</p>
+<p>运行中你可能会发现报错docker.io/mirrorgooglecontainers/coredns 镜像拉取不下来，那是因为我把所有仓库都默认换到coredns里，mirrorgooglecontainer里面并不包含coredns。手动拉取一个coredns镜像并且tag为docker.io/mirrorgooglecontainers/coredns 就可以了（tag省略了）。</p>
+<p>现在开始烧香拜佛，不顺利的话会看到报错or看不到报错，慢慢debug吧；一切顺利的话可以看到成功消息：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">Your Kubernetes master has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p <span class="nv">$HOME</span>/.kube
+  sudo cp -i /etc/kubernetes/admin.conf <span class="nv">$HOME</span>/.kube/config
+  sudo chown <span class="k">$(</span>id -u<span class="k">)</span>:<span class="k">$(</span>id -g<span class="k">)</span> <span class="nv">$HOME</span>/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run <span class="s2">&#34;kubectl apply -f [podnetwork].yaml&#34;</span> with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of machines by running the following on each node
+as root:
+
+  kubeadm join 192.168.122.2:6443 --token 8e8iei.lh8gumyd8ap7kgtz --discovery-token-ca-cert-hash sha256:84f7d6aeec39dc6efe60db6c82f8d97dc220c96e6455a1710c17daa060ef9300
+</code></pre></div><p>自己按照上面信息指引把$HOME/.kube/config搞好，就可以用普通用户操作k8s集群了。下面的kubeadm留好，后面要在worker上用。</p>
+<p>查看下状态：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kubectl get node</span>
+NAME      STATUS     ROLES    AGE    VERSION
+test-vm   NotReady   master   5m4s   v1.13.4
+
+<span class="c1"># kubectl get componentstatus</span>
+NAME                 STATUS    MESSAGE              ERROR
+controller-manager   Healthy   ok                   
+scheduler            Healthy   ok                   
+etcd-0               Healthy   <span class="o">{</span><span class="s2">&#34;health&#34;</span>: <span class="s2">&#34;true&#34;</span><span class="o">}</span>  
+
+<span class="c1"># kubectl -n kube-system get pod</span>
+NAME                              READY   STATUS    RESTARTS   AGE
+coredns-9f7ddc475-8jl54           0/1     Pending   <span class="m">0</span>          6m3s
+coredns-9f7ddc475-g79j2           0/1     Pending   <span class="m">0</span>          6m3s
+etcd-test-vm                      1/1     Running   <span class="m">0</span>          5m10s
+kube-apiserver-test-vm            1/1     Running   <span class="m">0</span>          5m28s
+kube-controller-manager-test-vm   1/1     Running   <span class="m">0</span>          5m7s
+kube-proxy-vqqf4                  1/1     Running   <span class="m">0</span>          6m3s
+kube-scheduler-test-vm            1/1     Running   <span class="m">0</span>          5m12s
+</code></pre></div><p>可以看到K8s的控制面正常，但是coredns pending了，这个是因为网络还没配置。<br />
+先别动worker节点，我们先把网络配好。</p>
+<p>上面我们说用Flannel：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml</span>
+</code></pre></div><p>如果<code>kubectl -n kube-system get pod</code> 显示coredns变成running了，那就说明一切顺利，都成功了。</p>
+<p>不过我就遇到了一个小问题，coredns一直不变成running，利用命令<code>kubectl -n kube-system describe pod coredns-9f7ddc475-8jl54</code>查看错误发现，/opt/cni/bin/bridge找不到导致无法teardown pod，我找到了个bridge的cni插件放过去就解决了。</p>
+<h2 id="增加worker">增加worker</h2>
+<p>在worker节点test-vm-1，test-vm-2上执行同样步骤：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kubeadm join 192.168.122.2:6443 --token 8e8iei.lh8gumyd8ap7kgtz --discovery-token-ca-cert-hash sha256:84f7d6aeec39dc6efe60db6c82f8d97dc220c96e6455a1710c17daa060ef9300 --ignore-preflight-errors=SystemVerification</span>
+</code></pre></div><p>第二个worker也如法炮制。<br />
+顺利的话可以在master节点上看到三个node了。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kubectl get node</span>
+NAME        STATUS   ROLES    AGE   VERSION
+test-vm     Ready    master   28m   v1.13.4
+test-vm-1   Ready    &lt;none&gt;   51s   v1.13.4
+test-vm-2   Ready    &lt;none&gt;   61s    v1.13.4
+</code></pre></div></article>
+
+        </main><footer id="footer">
+    Copyright © 2021 Zhang Wei
+</footer>
+</body>
+</html>

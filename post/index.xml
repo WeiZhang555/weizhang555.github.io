@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Knock, knock</title>
+    <link>https://weizhang555.github.io/post/</link>
+    <description>Recent content in Posts on Knock, knock</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 11 Dec 2019 11:30:46 +0800</lastBuildDate>
+    
+	<atom:link href="https://weizhang555.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    <item>
+      <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
+      <link>https://weizhang555.github.io/post/2019-12-11-runc%E4%B8%BB%E6%9C%BA%E9%80%83%E9%80%B8%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</link>
+      <pubDate>Wed, 11 Dec 2019 11:30:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2019-12-11-runc%E4%B8%BB%E6%9C%BA%E9%80%83%E9%80%B8%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</guid>
+      <description>尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC 复现成功。
+注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
+复现方式：
+在一个terminal里面：
+zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 另一个terminal内执行：
+$ docker exec -ti 5b28d7ab5083 /bin/sh 此时第一个terminal的打印：
+zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash root@5b28d7ab5083:/# /exploit [+] Overwritten /bin/sh successfully [+] Found the PID: 17 [+] Successfully got the file handle [-]Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy [+] Successfully got write handle &amp;amp;{0xc0000501e0} root@5b28d7ab5083:/# /tmp/下多了一个passwd文件。
+Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。
+修改过的源码：
+package main // Implementation of CVE-2019-5736 // Created with help from @singe, @_cablethief, and @feexd.</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>kubernetes安装指南</title>
+      <link>https://weizhang555.github.io/post/2019-12-11-kubrenetes%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/</link>
+      <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2019-12-11-kubrenetes%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/</guid>
+      <description>kubeadm安装三节点集群
+测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
+具体的安装步骤暂时略过。
+配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
+# cat &amp;gt; /lib/systemd/system/kubelet.service &amp;lt;&amp;lt; EOF [Unit] Description=kubelet: The Kubernetes Node Agent Documentation=http://kubernetes.io/docs/ [Service] ExecStart=/usr/bin/kubelet Restart=always StartLimitInterval=0 RestartSec=10 [Install] WantedBy=multi-user.target EOF 上面就是简单的调用了下kubelet命令，实际上还有很多参数，这个不着急。因为我们是用kubeadm配置的，所以实际上生效的是kubeadm为kubelet设置的参数，kubelet的启动将依赖kubeadm设置的bootstrap配置：
+# mkdir -p /etc/systemd/system/kubelet.service.d/ # cat &amp;gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &amp;lt;&amp;lt; EOF [Service] Environment=&amp;#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&amp;#34; Environment=&amp;#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&amp;#34; # This is a file that &amp;#34;kubeadm init&amp;#34; and &amp;#34;kubeadm join&amp;#34; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env # This is a file that the user can use for overrides of the kubelet args as a last resort.</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>Notary介绍</title>
+      <link>https://weizhang555.github.io/post/2019-12-11-notary%E4%BB%8B%E7%BB%8D/</link>
+      <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2019-12-11-notary%E4%BB%8B%E7%BB%8D/</guid>
+      <description>1. TUF 
+1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
+
+1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
+TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;ldquo;2.3 Notary的密钥管理&amp;rdquo;
+
+1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
+
+step 0: 加载可信的root元数据文件 这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。
+
+step 1: 更新root元数据文件 由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。
+
+step 1.1: 使用N代表可信root元数据文件的版本号 
+step 1.2: 下载root元数据文件的N+1版本 文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。
+
+step 1.3: 检查签名 N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。
+如果N+1版本的root元数据没有被正确签名，退出并报错。
+
+step 1.4: 检查回滚攻击(rollback attach) 当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。
+
+step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查 
+step 1.6: 设置受信任的root元数据文件为新的元数据文件 
+step 1.7: 重复step 1.</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>创建kata的K8s集群</title>
+      <link>https://weizhang555.github.io/post/2018-08-18-create-k8s-cluster-with-kata/</link>
+      <pubDate>Sat, 18 Aug 2018 19:10:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2018-08-18-create-k8s-cluster-with-kata/</guid>
+      <description>本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
+本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
+言归正传。
+安装环境 Virtual Machine:
+OS: Ubuntu 18.04
+CPU: 4
+Memory: 8G
+在虚拟化环境中，务必保证嵌套虚拟化打开。
+ 虚拟化软件必须要支持  可以在guest OS里面通过以下命令检查：
+$ sudo grep -E &amp;#34;(vmx|svm)&amp;#34; --color=always /proc/cpuinfo 如果没有显示则不支持硬件虚拟化。需要打开相应的虚拟化选项，如果是物理机则需要bios里面启用虚拟化支持。
+启动kvm_intel的嵌套虚拟化支持  # modprobe -r kvm_intel # modprobe kvm_intel nested=1 安装kata-containers 参考：
+https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md
+运行以下命令：
+$ sudo sh -c &amp;#34;echo &amp;#39;deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/ /&amp;#39; &amp;gt; /etc/apt/sources.list.d/kata-containers.list&amp;#34; $ curl -sL http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/Release.key | sudo apt-key add - $ sudo -E apt-get update $ sudo -E apt-get -y install kata-runtime kata-proxy kata-shim 安装docker 参考：</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>Kernel调试基础--制作initramfs</title>
+      <link>https://weizhang555.github.io/post/2018-04-12-make-initramfs-for-qemu-start/</link>
+      <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2018-04-12-make-initramfs-for-qemu-start/</guid>
+      <description>通过自己制作initramfs可以使用qemu启动自定义的内核， 可以用于调试或测试。这里记录一下制作简单的initramfs的脚本， 方便后续使用。
+本文参考了链接：Building a minimal Linux / Busybox OS for Qemu
+完整脚本如下：
+#!/bin/bash set -e CWD=`pwd` BUSYBOX_FILE=busybox-1.28.1 BUSYBOX_SRC=/tmp/busybox BUSYBOX_BUILD=/tmp/busybox-build INITRAMFS_DIR=/tmp/initramfs mkdir -p $BUSYBOX_SRC $BUSYBOX_BUILD $INITRAMFS_DIR if [ ! -e $BUSYBOX_FILE ]; then wget http://busybox.net/downloads/${BUSYBOX_FILE}.tar.bz2 fi tar -C $BUSYBOX_SRC -xvf ${BUSYBOX_FILE}.tar.bz2 cd ${BUSYBOX_SRC}/${BUSYBOX_FILE} &amp;amp;&amp;amp; make O=${BUSYBOX_BUILD} defconfig # enable busybox static build cd ${BUSYBOX_BUILD} &amp;amp;&amp;amp; sed -i &amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34; .config \  &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make install cd $INITRAMFS_DIR &amp;amp;&amp;amp; rm -rfv * &amp;amp;&amp;amp; mkdir -p bin sbin etc proc sys usr/bin usr/sbin \  &amp;amp;&amp;amp; cp -a $BUSYBOX_BUILD/_install/* .</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>Kata Containers介绍，附上演讲ppt</title>
+      <link>https://weizhang555.github.io/post/2018-04-08-kata-containers-introduction/</link>
+      <pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2018-04-08-kata-containers-introduction/</guid>
+      <description>最近在51cto举办的meetup上做了关于Kata Containers的演讲， KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv， 融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。
+详细可以直接参观Kata Containers的github主页： https://github.com/kata-containers/runtime
+演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html
+完整的演讲ppt可以在此处下载： Kata介绍与Huawei_iSula安全容器-张伟.ppt</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>containerd源码阅读(1)--框架篇</title>
+      <link>https://weizhang555.github.io/post/2017-09-20-containerd-code-analysis/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2017-09-20-containerd-code-analysis/</guid>
+      <description>1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
+随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分&amp;ndash;swarm。
+简单分析下containerd的代码架构，作为官方containerd文档的一个补充。 本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9 为标准讲解。
+2. grpc containerd的架构极其依赖grpc协议。
+# ls api/services/ containers content diff events images namespaces snapshot tasks version api/services目录下存放着containerd提供的不同服务对应的grpc接口。 以比较基础的content服务为例，
+# ls api/services/content/v1/ content.pb.go content.proto 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件， 而程序最终使用的content.pb.go则可以由grpc命令自动生成。 containerd在Makefile中提供了生成.pb.go的指令
+// 安装依赖的库 # cd containerd &amp;amp;&amp;amp; make setup  # make protos 打开content.proto 来看，里面主要定义了一个service：
+13 service Content { 14 // Info returns information about a committed object. 15 // 16 // This call can be used for getting the size of content and checking for 17 // existence.</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>runc源码阅读</title>
+      <link>https://weizhang555.github.io/post/2017-09-17-runc-code-analysis/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2017-09-17-runc-code-analysis/</guid>
+      <description>runc是docker的核心底层依赖，是容器运行的runtime，目前所属的仓库是opencontainers/runc, 是docker将原先的libcontainer模块独立出来，并贡献给oci社区的产物。
+一直想写一下runc的源码分析，但是一直没有时间。暂时先把自己阅读runc过程中画得xmind思维脑图放出来吧， 里面的内容是runc的代码流程分析。有时间再回来补齐源码分析。
+runc源码分析xmind文件</description>
+    </item>
+    
+    
+    
+    <item>
+      <title>起个头</title>
+      <link>https://weizhang555.github.io/post/2017-09-12-first-page/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/post/2017-09-12-first-page/</guid>
+      <description>之前也在其他地方开过博客，每次都坚持不了多久，零零散散写一些，回头看一下没多少有价值的东西。 这次搬家到github pages上面，算是个新的开始，旧的东西就随风而去吧，不带过来了。
+从今天开始，尽量腾点时间，多写点技术文章，不在乎长度，不必刻意追求深度，尽量多留下点东西。
+目前在研究容器领域的东西，就多写点docker容器相关的文章吧。
+共勉。</description>
+    </item>
+    
+    
+  </channel>
+</rss>

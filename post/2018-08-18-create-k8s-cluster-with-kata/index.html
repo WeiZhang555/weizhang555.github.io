@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="张伟的小站">
+    
+    <link rel="shortcut icon" href="https://weizhang555.github.io/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>创建kata的K8s集群</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://weizhang555.github.io">Knock, knock</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li><li>
+                <a href="/about/" title="about">about</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>创建kata的K8s集群</h1>
+            <div>
+                <time>August 18, 2018</time>
+                </div>
+    </header><p>本文介绍下如何创建kata的k8s集群，
+kata项目链接：https://github.com/kata-containers
+kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。</p>
+<p>本文参考了官方的安装说明：
+<a href="https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md">https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md</a>
+实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。</p>
+<p>言归正传。</p>
+<h2 id="安装环境">安装环境</h2>
+<p>Virtual Machine:</p>
+<p>OS: Ubuntu 18.04</p>
+<p>CPU: 4</p>
+<p>Memory: 8G</p>
+<p>在虚拟化环境中，务必保证嵌套虚拟化打开。</p>
+<ol>
+<li>虚拟化软件必须要支持</li>
+</ol>
+<p>可以在guest OS里面通过以下命令检查：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ sudo grep -E <span class="s2">&#34;(vmx|svm)&#34;</span> --color<span class="o">=</span>always /proc/cpuinfo
+</code></pre></div><p>如果没有显示则不支持硬件虚拟化。需要打开相应的虚拟化选项，如果是物理机则需要bios里面启用虚拟化支持。</p>
+<ol start="2">
+<li>启动kvm_intel的嵌套虚拟化支持</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># modprobe -r kvm_intel</span>
+<span class="c1"># modprobe kvm_intel nested=1</span>
+</code></pre></div><h2 id="安装kata-containers">安装kata-containers</h2>
+<p>参考：</p>
+<p><a href="https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md">https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md</a></p>
+<p>运行以下命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ sudo sh -c <span class="s2">&#34;echo &#39;deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_</span><span class="k">$(</span>lsb_release -rs<span class="k">)</span><span class="s2">/ /&#39; &gt; /etc/apt/sources.list.d/kata-containers.list&#34;</span>
+$ curl -sL  http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_<span class="k">$(</span>lsb_release -rs<span class="k">)</span>/Release.key <span class="p">|</span> sudo apt-key add -
+$ sudo -E apt-get update
+$ sudo -E apt-get -y install kata-runtime kata-proxy kata-shim
+</code></pre></div><h2 id="安装docker">安装docker</h2>
+<p>参考：</p>
+<p><a href="https://github.com/kata-containers/documentation/blob/master/install/docker/ubuntu-docker-install.md">https://github.com/kata-containers/documentation/blob/master/install/docker/ubuntu-docker-install.md</a></p>
+<p>实际上在本文写成之时，k8s+docker+kata的路子还没走通，必须依赖一个将annotation透传的补丁：</p>
+<p>PR: <a href="https://github.com/moby/moby/pull/37289">https://github.com/moby/moby/pull/37289</a></p>
+<p>docker公司一向强势，这个pr虽然很有用，但是也不知道还要多久才会被合入。</p>
+<p>所以本文运行kata的k8s集群使用的是cri-containerd而不是docker。</p>
+<p>不过笔者仍然建议先安装docker，来尝试kata-containers。你可以简单的运行以下命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker run -ti --runtime kata busybox sh
+<span class="c1">#</span>
+</code></pre></div><p>运行成功后可以通过 <code>ps -ef | grep qemu</code> 来查看kata-containers后台对应的qemu进程。</p>
+<h2 id="安装cri-containerd">安装cri-containerd</h2>
+<p>参考： <a href="https://github.com/containerd/cri/blob/master/docs/installation.md">https://github.com/containerd/cri/blob/master/docs/installation.md</a></p>
+<h3 id="step-0-安装依赖">step 0: 安装依赖</h3>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ sudo apt-get update
+$ sudo apt-get install libseccomp2
+</code></pre></div><h3 id="step-1-下载containerd的tar包">step 1: 下载containerd的tar包：</h3>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">VERSION</span><span class="o">=</span>1.1.2
+$ wget https://storage.googleapis.com/cri-containerd-release/cri-containerd-<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>.linux-amd64.tar.gz
+</code></pre></div><p>这一步就要用到翻墙大法了，翻墙流量也会费钱的，所以给大家提供个网盘链接吧：</p>
+<h2 id="安装cni插件">安装cni插件</h2>
+<p>这里简化一下，使用标准的cni插件。</p>
+<p>参考： <a href="https://github.com/containernetworking/cni">https://github.com/containernetworking/cni</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git clone https://github.com/containernetworking/plugins
+$ <span class="nb">cd</span> plugins
+$ ./build.sh 
+$ mkdir -p /etc/cni/net.d
+$ cat &gt;/etc/cni/net.d/10-mynet.conf <span class="s">&lt;&lt;EOF
+</span><span class="s">{
+</span><span class="s">	&#34;cniVersion&#34;: &#34;0.2.0&#34;,
+</span><span class="s">	&#34;name&#34;: &#34;mynet&#34;,
+</span><span class="s">	&#34;type&#34;: &#34;bridge&#34;,
+</span><span class="s">	&#34;bridge&#34;: &#34;cni0&#34;,
+</span><span class="s">	&#34;isGateway&#34;: true,
+</span><span class="s">	&#34;ipMasq&#34;: true,
+</span><span class="s">	&#34;ipam&#34;: {
+</span><span class="s">		&#34;type&#34;: &#34;host-local&#34;,
+</span><span class="s">		&#34;subnet&#34;: &#34;10.22.0.0/16&#34;,
+</span><span class="s">		&#34;routes&#34;: [
+</span><span class="s">			{ &#34;dst&#34;: &#34;0.0.0.0/0&#34; }
+</span><span class="s">		]
+</span><span class="s">	}
+</span><span class="s">}
+</span><span class="s">EOF</span>
+$ cat &gt;/etc/cni/net.d/99-loopback.conf <span class="s">&lt;&lt;EOF
+</span><span class="s">{
+</span><span class="s">	&#34;cniVersion&#34;: &#34;0.2.0&#34;,
+</span><span class="s">	&#34;name&#34;: &#34;lo&#34;,
+</span><span class="s">	&#34;type&#34;: &#34;loopback&#34;
+</span><span class="s">}
+</span><span class="s">EOF</span>
+</code></pre></div></article>
+
+        </main><footer id="footer">
+    Copyright © 2021 Zhang Wei
+</footer>
+</body>
+</html>

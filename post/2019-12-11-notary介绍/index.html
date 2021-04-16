@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="张伟的小站">
+    
+    <link rel="shortcut icon" href="https://weizhang555.github.io/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>Notary介绍</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://weizhang555.github.io">Knock, knock</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li><li>
+                <a href="/about/" title="about">about</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Notary介绍</h1>
+            <div>
+                <time>December 11, 2018</time>
+                </div>
+    </header><p><a name="86c05371"></a></p>
+<h1 id="1-tuf">1. TUF</h1>
+<p><a name="dc7ef395"></a></p>
+<h2 id="11-背景">1.1 背景</h2>
+<p>TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。</p>
+<p><a name="48d6dd4d"></a></p>
+<h2 id="12-tuf的角色">1.2 TUF的角色</h2>
+<p>TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。</p>
+<p>TUF角色和密钥的理解与Notary介绍有重合，可以参考 &ldquo;2.3 Notary的密钥管理&rdquo;</p>
+<p><a name="6392582b"></a></p>
+<h2 id="12-tuf的工作流">1.2 TUF的工作流</h2>
+<p>TUF框架的定义在这里：<a href="https://github.com/theupdateframework/specification/blob/master/tuf-spec.md">https://github.com/theupdateframework/specification/blob/master/tuf-spec.md</a> 。</p>
+<p><a name="a06a3afc"></a></p>
+<h3 id="step-0-加载可信的root元数据文件">step 0: 加载可信的root元数据文件</h3>
+<p>这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。</p>
+<p><a name="297c8ad9"></a></p>
+<h3 id="step-1-更新root元数据文件">step 1: 更新root元数据文件</h3>
+<p>由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。</p>
+<p><a name="bc108cbc"></a></p>
+<h4 id="step-11-使用n代表可信root元数据文件的版本号">step 1.1: 使用N代表可信root元数据文件的版本号</h4>
+<p><a name="3a3bc15b"></a></p>
+<h4 id="step-12-下载root元数据文件的n1版本">step 1.2: 下载root元数据文件的N+1版本</h4>
+<p>文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。</p>
+<p><a name="af6407c8"></a></p>
+<h4 id="step-13-检查签名">step 1.3: 检查签名</h4>
+<p>N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。<br />
+如果N+1版本的root元数据没有被正确签名，退出并报错。</p>
+<p><a name="c82a2500"></a></p>
+<h4 id="step-14-检查回滚攻击rollback-attach">step 1.4: 检查回滚攻击(rollback attach)</h4>
+<p>当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。</p>
+<p><a name="499c370d"></a></p>
+<h4 id="step-15-新版本元数据文件的超时时间可以忽略18会检查">step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查</h4>
+<p><a name="772542a8"></a></p>
+<h4 id="step-16-设置受信任的root元数据文件为新的元数据文件">step 1.6: 设置受信任的root元数据文件为新的元数据文件</h4>
+<p><a name="4acd438c"></a></p>
+<h4 id="step-17-重复step-11到17直到root元数据为最新">step 1.7: 重复step 1.1到1.7直到root元数据为最新</h4>
+<p><a name="4307b20f"></a></p>
+<h4 id="step-18-检查冻结攻击freeze-attach">step 1.8: 检查冻结攻击(freeze attach)</h4>
+<p>检查当前的信任的root元数据文件是否过期，过期的报错退出。</p>
+<p><a name="6afb0c5e"></a></p>
+<h4 id="step-19-如果timestamp和或snapshot密钥已经改变删掉snapshot和timestamp元数据文件">step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件</h4>
+<p>这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。</p>
+<p><a name="9f0f7b4c"></a></p>
+<h3 id="step-2-下载timestamp元数据文件">step 2: 下载timestamp元数据文件</h3>
+<p>下载固定文件名timestamp.json</p>
+<p><a name="a95f255d"></a></p>
+<h4 id="step-21检查签名">step 2.1：检查签名</h4>
+<p>使用可信的root元数据文件里包含的timestamp公钥验证签名。</p>
+<p><a name="e1d7dbf4"></a></p>
+<h4 id="step-22检查回滚攻击">step 2.2：检查回滚攻击</h4>
+<p><a name="8f3bcb1b"></a></p>
+<h4 id="step-23检查冻结攻击">step 2.3：检查冻结攻击</h4>
+<p><a name="c360aa04"></a></p>
+<h3 id="step-3下载snapshot元数据文件">step 3：下载snapshot元数据文件</h3>
+<p>如果使能了一致性snapshot，那么文件名就是VERSION_NUMBER.FILENAME.EXT (e.g., 42.snapshot.json)格式，否则就是固定的snapshot.json。</p>
+<p><a name="a729d8f4"></a></p>
+<h4 id="step-31对照timestamp元数据检查">step 3.1：对照timestamp元数据检查</h4>
+<p>新的snapshot元数据文件的hash和版本号必须和timestamp元数据文件里的一致。否则报错并退出。</p>
+<p><a name="cec19cb8"></a></p>
+<h4 id="step-32检查签名">step 3.2：检查签名</h4>
+<p>snapshot元数据文件应该被root元数据文件里面指定的snapshot key正确签名。否则报错退出。</p>
+<p><a name="c4edc620"></a></p>
+<h4 id="step-33检查回滚攻击">step 3.3：检查回滚攻击</h4>
+<p><a name="1a5c6b5d"></a></p>
+<h4 id="step-34检查冻结攻击">step 3.4：检查冻结攻击</h4>
+<p><a name="689f097e"></a></p>
+<h3 id="step-4下载最顶层的targets元数据">step 4：下载最顶层的targets元数据</h3>
+<p>下载targets.json</p>
+<p><a name="891c54a0"></a></p>
+<h4 id="step-41对照snapshot元数据检查">step 4.1：对照snapshot元数据检查</h4>
+<p>新的targets元数据文件的hash和版本号必须与可信的snapshot元数据文件内保存的一致。</p>
+<p><a name="8205988c"></a></p>
+<h4 id="step-42检查任意软件攻击arbitrary-software-attack">step 4.2：检查“任意软件攻击”（arbitrary software attack）</h4>
+<p>新的targets元数据文件必须被root元数据文件里指定的targets密钥正确签名，否则报错退出。</p>
+<p><a name="160581ac"></a></p>
+<h4 id="step-43检查回滚攻击">step 4.3：检查回滚攻击</h4>
+<p><a name="4a53d610"></a></p>
+<h4 id="step-44检查冻结攻击">step 4.4：检查冻结攻击</h4>
+<p><a name="c6f818ad"></a></p>
+<h4 id="step-45前序遍历搜索对应的target以最顶层的target角色为起始">step 4.5：前序遍历搜索对应的target，以最顶层的target角色为起始</h4>
+<p><em>Note: 前序遍历：按根节点-左子树-右子树的顺序遍历。实际上指的是targets及相应delegation角色构成的数</em></p>
+<p><a name="5e4f71e7"></a></p>
+<h5 id="step-451-如果节点已经被访问过了那么跳过这个节点以避免访问环路如果角色包含了所需要的target元数据那么跳到step-5">step 4.5.1 如果节点已经被访问过了，那么跳过这个节点以避免访问环路。如果角色包含了所需要的target元数据，那么跳到step 5。</h5>
+<p><a name="9bdae3b6"></a></p>
+<h5 id="step-452-递归访问delegation列表直到找到相应的targets元数据">step 4.5.2 递归访问delegation列表，直到找到相应的targets元数据。</h5>
+<p><a name="fab2be30"></a></p>
+<h3 id="step-5对照target元数据验证target">step 5：对照target元数据验证target</h3>
+<p><a name="5080d61d"></a></p>
+<h4 id="step-51找到对应的target元数据报错退出">step 5.1：找到对应的target元数据，报错退出</h4>
+<p><a name="ca58b5a0"></a></p>
+<h4 id="step-52否则下载相应的target验证hash是否与target元数据里的匹配">step 5.2：否则下载相应的target，验证hash是否与target元数据里的匹配。</h4>
+<p><a name="d61a8569"></a></p>
+<h1 id="2-notary">2. Notary</h1>
+<p><a name="7e9e013a"></a></p>
+<h2 id="21-介绍">2.1 介绍</h2>
+<p>Notary一个client和一个server组件。<br />
+它意图为用户创建一个易用的内容分发和验证系统，TLS本身可以用于加密同web server的安全通道，但是当server沦陷的时候，恶意用户可以轻易的将合法内容替换成非法内容。<br />
+使用notary，用户可以用自己妥善保管的<strong>线下</strong>密钥签名他们的内容，然后发布它的签民的可信内容到他的notary server。<br />
+内容的使用者，通常事先获取了内容发布者的公钥，可以与Notary server通信来验证内容的合法性和完整性。</p>
+<p><a name="83de0e71"></a></p>
+<h2 id="22-目标">2.2 目标</h2>
+<p>Notary的实现基于TUF(The Update Framework)，TUF是软件安全发布与升级的通用设计。借助TUF，Notary可以获得一些关键优势：</p>
+<ol>
+<li>抗密钥泄漏。内容发布者必须使用密钥来签名内容，镜像签名系统必须保证密钥泄露之后系统可以恢复。TUF使用分层次的多把密钥，可以保证密钥泄漏不会影响。</li>
+<li>新鲜性保证。<strong>重放攻击</strong>是常见的攻击手段，攻击者可以将老的拥有合法签名的软件包伪装成最新的软件包发布给客户，这些旧软件包可能包含漏洞。Notary使用时间戳来保证内容使用者收到的是最新的内容。</li>
+<li>可配置的信任阈值。经常有一种情形是允许多个发布者发布同一份内容，比如某个项目的多个maintainers。使用信任阈值可以保证只有一定数量的发布者同时签名一份文件他才可以被信任，这样可以保证单独的一份密钥泄漏不会允许恶意内容被发布出去。（Q: 听上去很好，怎么用？一把用户key，一把ci key？）</li>
+<li>签名授权。内容发布者可以将自己的部分可信内容集合授权给另一个签名者。</li>
+<li>使用现有的发布渠道。Notary不需要和任何特殊的发布通道绑定。</li>
+<li>不信任的Mirrors和传输。Notary的元数据可以通过任意的镜像或者通道传输。</li>
+</ol>
+<p><a name="201b407d"></a></p>
+<h2 id="23-notary的密钥管理">2.3 Notary的密钥管理</h2>
+<p>TUF的密钥是分角色的，不同的密钥有不同的特性和功能。</p>
+<p><img src="https://camo.githubusercontent.com/c4166122f8b4e908ad9d59421072ea1f64074a9d/68747470733a2f2f63646e2e7261776769742e636f6d2f7468657570646174656672616d65776f726b2f6e6f746172792f303966383137313730383066353332373665363838316563653537636262626639316238653261372f646f63732f696d616765732f6b65792d6869657261726368792e737667#alt=TUF%E5%AF%86%E9%92%A5%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84" alt=""></p>
+<ul>
+<li><em>Root key</em>: 用来签名root元数据，root元数据存储了root，targets，snapshot和timestamp<strong>公钥</strong>的ID。客户可以用这些公钥来验证所有的元数据文件的签名。root key极其重要，建议离线存放，比如存在yubi key硬件里面。它的过期时间应该也是最长的，比如10年。</li>
+<li><em>Snapshot key</em>：用来签名snapshot元数据，snapshot元数据列举了<strong>集合</strong>[注1]的root，targets和delegation元数据文件的文件名大小和hash，它用于验证其他元数据文件的完整性。可以给<strong>集合</strong>的拥有者保存，也可以给notary service保存。</li>
+<li><em>timestamp key</em>: 签名timestamp元数据，timestamp元数据通过给元数据指定最小超时时间，以及指定最新的snapshot的文件名大小hash值等来保证时效性。它用来验证snapshot文件的完整性。timestamp密钥由notary service保存，它可以自动重新生成而不需要集合的拥有者参与。有效期应该最短，比如14天。</li>
+<li><em>target key</em>：签名target元数据，target元数据列举了集合内的文件名，大小及相应的hash，这个文件用来验证repository的实际内容的完整性。也用来给其他的合作者授权。这个key由拥有者持有。有效期中等，比如3年。</li>
+<li><em>Delegation key</em>：用于签名delegation元数据，delegation元数据列举了集合文件名，大小及hash。这个key与target key实际上是相似的，也可以授权给下一级合作者。</li>
+</ul>
+<p>注：<br />
+[1] .集合：docker content trust里面实际上是image名字，集合是tag的集合，</p>
+<p>加一张图方便理解：</p>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2019/png/215203/1559546664194-9306b7f5-5264-4fea-9539-34c6faf2de4f.png#alt=image.png" alt=""></p>
+<p><a name="0cf97d05"></a></p>
+<h1 id="3-docker-content-trust本地测试">3. Docker Content Trust本地测试</h1>
+<p><a name="9819535e"></a></p>
+<h2 id="31-环境准备">3.1 环境准备</h2>
+<ol>
+<li>启动本地registry</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker run -d -p 5000:5000 registry:2.4.1
+</code></pre></div><ol start="2">
+<li>启动notary</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">cd</span> notary-src-dir
+$ docker-compose up -d
+</code></pre></div><ol start="3">
+<li>导出环境变量</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">export</span> <span class="nv">REGISTRY</span><span class="o">=</span>localhost:5000
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">1</span>
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST_SERVER</span><span class="o">=</span>https://localhost:4443
+</code></pre></div><p><a name="7c41bc76"></a></p>
+<h2 id="32-push的镜像无签名的情况">3.2 push的镜像无签名的情况</h2>
+<p>先pull一个测试用的镜像：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker pull ubuntu:18.04
+$ docker images ubuntu:18.04
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+ubuntu              18.04               7698f282e524        <span class="m">12</span> days ago         69.9MB
+$ docker tag ubuntu:18.04 <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+</code></pre></div><p>先把不使用notary签名的版本搞上去。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">0</span>
+$ docker push <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+</code></pre></div><p>本地删除镜像，然后分别用支持Notary和不支持notary的方式pull一下试试：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker rmi -f 7698f282e524
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">1</span>
+$ docker pull <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+Error: remote trust data does not exist <span class="k">for</span> localhost:5000/test/ubuntu: localhost:4443 does not have trust data <span class="k">for</span> localhost:5000/test/ubuntu
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">0</span>
+$ docker pull <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+18.04: Pulling from test/ubuntu
+6abc03819f3e: Pull <span class="nb">complete</span> 
+05731e63f211: Pull <span class="nb">complete</span> 
+0bd67c50d6be: Pull <span class="nb">complete</span> 
+Digest: sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788e98dfe589a4b3e4
+Status: Downloaded newer image <span class="k">for</span> localhost:5000/test/ubuntu:18.04
+</code></pre></div><p>可以看到如果用户上次的image没有被notary签名过，那么当客户端指定enable了content trust之后，是无法pull不可信的image的。</p>
+<p><a name="dfe9a5b0"></a></p>
+<h2 id="33-push有签名的版本">3.3 push有签名的版本</h2>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">1</span>
+$ docker push <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+The push refers to repository <span class="o">[</span>localhost:5000/test/ubuntu<span class="o">]</span>
+8d267010480f: Layer already exists 
+270f934787ed: Layer already exists 
+02571d034293: Layer already exists 
+18.04: digest: sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788e98dfe589a4b3e4 size: <span class="m">943</span>
+Signing and pushing trust metadata
+You are about to create a new root signing key passphrase. This passphrase
+will be used to protect the most sensitive key in your signing system. Please
+choose a long, complex passphrase and be careful to keep the password and the
+key file itself secure and backed up. It is highly recommended that you use a
+password manager to generate the passphrase and keep it safe. There will be no
+way to recover this key. You can find the key in your config directory.
+Enter passphrase <span class="k">for</span> new root key with ID 74088e3: 
+Repeat passphrase <span class="k">for</span> new root key with ID 74088e3: 
+Enter passphrase <span class="k">for</span> new repository key with ID 5e28dca: 
+Repeat passphrase <span class="k">for</span> new repository key with ID 5e28dca: 
+Finished initializing <span class="s2">&#34;localhost:5000/test/ubuntu&#34;</span>
+Successfully signed localhost:5000/test/ubuntu:18.04
+</code></pre></div><p>可以看到push成功了之后会在给notary做一次签名。</p>
+<p>此时客户端可以成功pull，不论CONTENT_TRUST是否enble，签名检查对用户是透明的。</p>
+<p>使用以下命令可以撤销对image的签名：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker trust revoke <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+</code></pre></div><p><a name="b7518625"></a></p>
+<h2 id="34-恶意用户上传恶意镜像覆盖ubuntu1804">3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04</h2>
+<p>先使用如下Dockerfile制作一个恶意image：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">FROM localhost:5000/test/ubuntu:18.04
+
+MAINTAINER black-hat
+RUN apt update <span class="o">&amp;&amp;</span> apt install -y sl
+CMD <span class="o">[</span><span class="s2">&#34;/usr/games/sl&#34;</span><span class="o">]</span>
+</code></pre></div><p>制作image的命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker build -t ubuntu:evil .
+</code></pre></div><p>这个镜像run起来之后会有一个小火车跑过:-)</p>
+<p>我们切换一个账户，尝试用普通账户签名并且覆盖原先的ubuntu:18.04</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ su - <span class="nb">test</span>
+$ <span class="nb">export</span> <span class="nv">REGISTRY</span><span class="o">=</span>localhost:5000
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">1</span>
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST_SERVER</span><span class="o">=</span>https://localhost:4443
+$ docker tag ubuntu:evil <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+$ docker push <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+The push refers to repository <span class="o">[</span>localhost:5000/test/ubuntu<span class="o">]</span>
+0f5d6ef7110f: Pushed 
+8d267010480f: Layer already exists 
+270f934787ed: Layer already exists 
+02571d034293: Layer already exists 
+18.04: digest: sha256:8ff78797f8ce02027d187f3a0c27502e134aa18163c62e110001e11b1a95b36d size: <span class="m">1155</span>
+Signing and pushing trust metadata
+ERRO<span class="o">[</span>0002<span class="o">]</span> couldn<span class="err">&#39;</span>t add target to targets: could not find necessary signing keys, at least one of these keys must be available: 5e28dcaf218a140b6eeb8af239c2c44a2fbc7103d41759b5bc7aeaa3b7a5ec4e 
+failed to sign localhost:5000/test/ubuntu:18.04: could not find necessary signing keys, at least one of these keys must be available: 5e28dcaf218a140b6eeb8af239c2c44a2fbc7103d41759b5bc7aeaa3b7a5ec4e
+</code></pre></div><p>可以看到由于这个用户由于没有合法的密钥，是无法给image做签名的。但是镜像上传成功了。这部分理论上应该有registry的身份认证拦截。</p>
+<p>我们切换回root用户，把本地镜像删除了，禁用content trust之后再来试一次。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ sudo su
+$ docker rmi -f <span class="sb">`</span>docker images ubuntu:evil -q<span class="sb">`</span>
+$ docker rmi -f <span class="sb">`</span>docker images <span class="nv">$REGISTRY</span>/test/ubuntu -q<span class="sb">`</span>
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">0</span>
+$ docker run -ti <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+</code></pre></div><p>可以看到小火车跑过，证明本地的image下载的是恶意的。<br />
+重新删除，然后再带Content Trust试一下。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ docker rmi -f <span class="sb">`</span>docker images <span class="nv">$REGISTRY</span>/test/ubuntu -q<span class="sb">`</span>
+$ <span class="nb">export</span> <span class="nv">DOCKER_CONTENT_TRUST</span><span class="o">=</span><span class="m">1</span>
+$ docker pull <span class="nv">$REGISTRY</span>/test/ubuntu:18.04
+<span class="c1"># docker pull $REGISTRY/test/ubuntu:18.04</span>
+No valid trust data <span class="k">for</span> 18.04
+</code></pre></div><p>可见这个image已经不被信任了，无法pull和运行非法image。</p>
+<p><a name="a1628df4"></a></p>
+<h1 id="35-docker-content-trust的问题">3.5 docker content trust的问题</h1>
+<ol>
+<li>镜像是先与Registry打交道后存储签名，如果是恶意image覆盖的问题，回导致恶意image上传上去了，但是签名没有更新/被删除的问题，导致image和notary签名数据不一致。需要加事务来解决？</li>
+<li>密钥的存储必须与KMS结合起来，这样就不能直接使用docker+notary的解决方案了，预计要重新实现docker client的签名和验证功能?</li>
+</ol>
+</article>
+
+        </main><footer id="footer">
+    Copyright © 2021 Zhang Wei
+</footer>
+</body>
+</html>

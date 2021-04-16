@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="张伟的小站">
+    
+    <link rel="shortcut icon" href="https://weizhang555.github.io/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>containerd源码阅读(1)--框架篇</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://weizhang555.github.io">Knock, knock</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li><li>
+                <a href="/about/" title="about">about</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>containerd源码阅读(1)--框架篇</h1>
+            <div>
+                <time>September 12, 2017</time>
+                </div>
+    </header><h2 id="1-简介">1. 简介</h2>
+<p>containerd是与docker直接沟通的下属组件，详细是什么不说了。
+每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候，
+每个容器的init进程／exec进程都会对应一个containerd-shim进程，
+containerd-shim同样是containerd库里面单独的一个二进制程序，
+containerd-shim会调用runc最终启动容器。
+这些基本的知识一笔带过不详细展开。</p>
+<p>随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd，
+docker会越来越侧重于编排调度部分&ndash;swarm。</p>
+<p>简单分析下containerd的代码架构，作为官方containerd文档的一个补充。
+本篇以git commit <code>d700a9c35b09239c8c056cd5df73bc19a79db9a9</code> 为标准讲解。</p>
+<h2 id="2-grpc">2. grpc</h2>
+<p>containerd的架构极其依赖grpc协议。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># ls api/services/</span>
+containers  content  diff  events  images  namespaces  snapshot  tasks  version
+</code></pre></div><p><code>api/services</code>目录下存放着containerd提供的不同服务对应的grpc接口。
+以比较基础的content服务为例，</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># ls api/services/content/v1/</span>
+content.pb.go  content.proto
+</code></pre></div><p>下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件，
+而程序最终使用的content.pb.go则可以由grpc命令自动生成。
+containerd在Makefile中提供了生成<code>.pb.go</code>的指令</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">// 安装依赖的库
+<span class="c1"># cd containerd &amp;&amp; make setup </span>
+<span class="c1"># make protos</span>
+</code></pre></div><p>打开content.proto 来看，里面主要定义了一个service：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="m">13</span> service Content <span class="o">{</span>
+ <span class="m">14</span>     // Info returns information about a committed object.
+ <span class="m">15</span>     //
+ <span class="m">16</span>     // This call can be used <span class="k">for</span> getting the size of content and checking <span class="k">for</span>
+ <span class="m">17</span>     // existence.
+ <span class="m">18</span>     rpc Info<span class="o">(</span>InfoRequest<span class="o">)</span> returns <span class="o">(</span>InfoResponse<span class="o">)</span><span class="p">;</span>
+ <span class="m">19</span> 
+ <span class="m">20</span>     // Update updates content metadata.
+ <span class="m">21</span>     //
+ <span class="m">22</span>     // This call can be used to manage the mutable content labels. The
+ <span class="m">23</span>     // immutable metadata such as digest, size, and committed at cannot
+ <span class="m">24</span>     // be updated.
+ <span class="m">25</span>     rpc Update<span class="o">(</span>UpdateRequest<span class="o">)</span> returns <span class="o">(</span>UpdateResponse<span class="o">)</span><span class="p">;</span>
+ <span class="m">26</span> 
+ <span class="m">27</span>     // List streams the entire <span class="nb">set</span> of content as Info objects and closes the
+ <span class="m">28</span>     // stream.
+ <span class="m">29</span>     //
+ <span class="m">30</span>     // Typically, this will yield a large response, chunked into messages.
+ <span class="m">31</span>     // Clients should make provisions to ensure they can handle the entire data
+ <span class="m">32</span>     // set.
+ <span class="m">33</span>     rpc List<span class="o">(</span>ListContentRequest<span class="o">)</span> returns <span class="o">(</span>stream ListContentResponse<span class="o">)</span><span class="p">;</span>
+ <span class="m">34</span> 
+ <span class="m">35</span>     // Delete will delete the referenced object.
+ <span class="m">36</span>     rpc Delete<span class="o">(</span>DeleteContentRequest<span class="o">)</span> returns <span class="o">(</span>google.protobuf.Empty<span class="o">)</span><span class="p">;</span>
+...省略...
+
+</code></pre></div><p>以及很多message结构体，message可以理解成是service定义的接口使用到的结构体，是通信的结构化的数据流。</p>
+<p>使用protoc命令生成的.pb.go文件内同步包含server端和client端的接口实现。</p>
+<h2 id="3-containerd启动">3. containerd启动</h2>
+<p>以containerd启动过程来看。入口为cmd/containerd/main.go, 程序一启动首先就把信号处理函数准备好了。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">cmd/containerd/main.go:
+ <span class="m">85</span>         <span class="k">done</span> :<span class="o">=</span> handleSignals<span class="o">(</span>ctx, signals, serverC<span class="o">)</span>
+ <span class="m">86</span>         // start the signal handler as soon as we can to make sure that
+ <span class="m">87</span>         // we don<span class="err">&#39;</span>t miss any signals during boot
+ <span class="m">88</span>         signal.Notify<span class="o">(</span>signals, handledSignals...<span class="o">)</span>
+</code></pre></div><p>后面都是准备并启动grpc server。核心是准备server的这一句</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">cmd/containerd/main.go:
+106	server, err :<span class="o">=</span> server.New<span class="o">(</span>ctx, config<span class="o">)</span>
+</code></pre></div><p>进去来看server.New的实现。</p>
+<p>前面都是创建目录，主要看加载plugin的部分。</p>
+<ul>
+<li>3.1. load plugins</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">server/server.go:
+func New<span class="o">(</span>ctx context.Context, config *Config<span class="o">)</span> <span class="o">(</span>*Server, error<span class="o">)</span>:
+ 
+<span class="m">52</span>     plugins, err :<span class="o">=</span> loadPlugins<span class="o">(</span>config<span class="o">)</span>
+</code></pre></div><p>核心代码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="m">162</span> func loadPlugins<span class="o">(</span>config *Config<span class="o">)</span> <span class="o">([]</span>*plugin.Registration, error<span class="o">)</span> <span class="o">{</span>
+<span class="m">163</span>     // load all plugins into containerd
+<span class="m">164</span>     <span class="k">if</span> err :<span class="o">=</span> plugin.Load<span class="o">(</span>filepath.Join<span class="o">(</span>config.Root, <span class="s2">&#34;plugins&#34;</span><span class="o">))</span><span class="p">;</span> err !<span class="o">=</span> nil <span class="o">{</span>
+<span class="m">165</span>         <span class="k">return</span> nil, err
+<span class="m">166</span>     <span class="o">}</span>
+<span class="m">167</span>     // load additional plugins that don<span class="err">&#39;</span>t automatically register themselves
+<span class="m">168</span>     plugin.Register<span class="o">(</span><span class="p">&amp;</span>plugin.Registration<span class="o">{</span>
+<span class="m">169</span>         Type: plugin.ContentPlugin,  // <span class="s2">&#34;io.containerd.content.v1&#34;</span>
+<span class="m">170</span>         ID:   <span class="s2">&#34;content&#34;</span>,
+<span class="m">171</span>         Init: func<span class="o">(</span>ic *plugin.InitContext<span class="o">)</span> <span class="o">(</span>interface<span class="o">{}</span>, error<span class="o">)</span> <span class="o">{</span>
+<span class="m">172</span>             <span class="k">return</span> local.NewStore<span class="o">(</span>ic.Root<span class="o">)</span>
+<span class="m">173</span>         <span class="o">}</span>,
+<span class="m">174</span>     <span class="o">})</span>
+<span class="m">175</span>     plugin.Register<span class="o">(</span><span class="p">&amp;</span>plugin.Registration<span class="o">{</span>
+<span class="m">176</span>         Type: plugin.MetadataPlugin,  // <span class="s2">&#34;io.containerd.metadata.v1&#34;</span>
+<span class="m">177</span>         ID:   <span class="s2">&#34;bolt&#34;</span>,
+<span class="m">178</span>         Init: func<span class="o">(</span>ic *plugin.InitContext<span class="o">)</span> <span class="o">(</span>interface<span class="o">{}</span>, error<span class="o">)</span> <span class="o">{</span>
+<span class="m">179</span>             <span class="k">if</span> err :<span class="o">=</span> os.MkdirAll<span class="o">(</span>ic.Root, 0711<span class="o">)</span><span class="p">;</span> err !<span class="o">=</span> nil <span class="o">{</span>
+<span class="m">180</span>                 <span class="k">return</span> nil, err
+<span class="m">181</span>             <span class="o">}</span>
+<span class="m">182</span>             <span class="k">return</span> bolt.Open<span class="o">(</span>filepath.Join<span class="o">(</span>ic.Root, <span class="s2">&#34;meta.db&#34;</span><span class="o">)</span>, 0644, nil<span class="o">)</span>
+<span class="m">183</span>         <span class="o">}</span>,
+<span class="m">184</span>     <span class="o">})</span>
+<span class="m">185</span> 
+<span class="m">186</span>     // <span class="k">return</span> the ordered graph <span class="k">for</span> plugins
+<span class="m">187</span>     <span class="k">return</span> plugin.Graph<span class="o">()</span>, nil
+<span class="m">188</span> <span class="o">}</span>
+</code></pre></div><p>164行进入plugin包，内部实现是golang从1.8（？）开始支持的新特性&ndash;go语言自带的plugin支持，
+可以加载用户自定义的插件。</p>
+<p>168和175是注册了两个最基本的插件，一个是<code>content</code>插件，一个是<code>metadata</code>插件，这两个插件基本上是其他插件的基础。
+其中content插件主要是依赖content/local那个子package，metadata主要是操纵boltdb数据库meta.db</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">root@ubuntu:~/gocode/src/github.com/containerd/containerd# ls /var/lib/containerd/
+io.containerd.content.v1.content  io.containerd.runtime.v1.linux      io.containerd.snapshotter.v1.overlayfs
+io.containerd.metadata.v1.bolt    io.containerd.snapshotter.v1.btrfs
+root@ubuntu:~/gocode/src/github.com/containerd/containerd# ls /var/lib/containerd/io.containerd.metadata.v1.bolt/
+meta.db
+</code></pre></div><p><code>plugin.Register</code>函数其实很简单，就是把某个Registration结构体加入到plugin包的register全局结构体内：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"> <span class="m">59</span> var <span class="nv">register</span> <span class="o">=</span> struct <span class="o">{</span>
+ <span class="m">60</span>     sync.Mutex
+ <span class="m">61</span>     r <span class="o">[]</span>*Registration
+ <span class="m">62</span> <span class="o">}{}</span>
+</code></pre></div><p>上面的r即承载着所有的Registration结构体。</p>
+<p>上文中提到的loadPlugins最后<code>return plugin.Graph()</code>同样定义在plugin包里，
+里面根据Registration.Requires对所有Registration进行了排序，
+给出了一个按依赖关系排序的插件数组。比方说plugin a, b, c, 其中b定义了requires a, c定义了requires b,
+那么最终给出的排序的插件数组就是[a, b, c] 而不是[b, a, c]或其他。</p>
+<p>但是Registration难道只有两个吗？两个插件为什么需要这么复杂？
+答案是当然不是只有两个，还有其他的插件，只是他们初始化过程比较隐晦，不是那么直观。</p>
+<ul>
+<li>3.2. 其他插件在哪儿？</li>
+</ul>
+<p>答案是在以下两个文件中：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">cmd/containerd/builtins.go:
+  <span class="m">3</span> // register containerd builtins here
+  <span class="m">4</span> import <span class="o">(</span>
+  <span class="m">5</span>     _ <span class="s2">&#34;github.com/containerd/containerd/differ&#34;</span>
+  <span class="m">6</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/containers&#34;</span>
+  <span class="m">7</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/content&#34;</span>
+  <span class="m">8</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/diff&#34;</span>
+  <span class="m">9</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/events&#34;</span>
+ <span class="m">10</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/healthcheck&#34;</span>
+ <span class="m">11</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/images&#34;</span>
+ <span class="m">12</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/namespaces&#34;</span>
+ <span class="m">13</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/snapshot&#34;</span>
+ <span class="m">14</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/tasks&#34;</span>
+ <span class="m">15</span>     _ <span class="s2">&#34;github.com/containerd/containerd/services/version&#34;</span>
+ <span class="m">16</span> <span class="o">)</span>
+</code></pre></div><p>以及(以linux平台为例，其他平台的文件见其他后缀文件)：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">cmd/containerd/builtins_linux.go:
+  <span class="m">3</span> import <span class="o">(</span>
+  <span class="m">4</span>     _ <span class="s2">&#34;github.com/containerd/containerd/linux&#34;</span>
+  <span class="m">5</span>     _ <span class="s2">&#34;github.com/containerd/containerd/metrics/cgroups&#34;</span>
+  <span class="m">6</span>     _ <span class="s2">&#34;github.com/containerd/containerd/snapshot/overlay&#34;</span>
+  <span class="m">7</span> <span class="o">)</span>
+</code></pre></div><p>其中import _ &ldquo;xxx&rdquo; 就代表着只执行这个包的init函数，但是不使用这个包的任何函数。</p>
+<p>以<code>services/content</code>为例：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">services/content/service.go:
+ <span class="m">38</span> func init<span class="o">()</span> <span class="o">{</span>
+ <span class="m">39</span>     plugin.Register<span class="o">(</span><span class="p">&amp;</span>plugin.Registration<span class="o">{</span>
+ <span class="m">40</span>         Type: plugin.GRPCPlugin,  // <span class="s2">&#34;io.containerd.grpc.v1&#34;</span>
+ <span class="m">41</span>         ID:   <span class="s2">&#34;content&#34;</span>,
+ <span class="m">42</span>         Requires: <span class="o">[]</span>plugin.PluginType<span class="o">{</span>
+ <span class="m">43</span>             plugin.ContentPlugin,
+ <span class="m">44</span>             plugin.MetadataPlugin,
+ <span class="m">45</span>         <span class="o">}</span>,
+ <span class="m">46</span>         Init: NewService,
+ <span class="m">47</span>     <span class="o">})</span>
+ <span class="m">48</span> <span class="o">}</span>
+</code></pre></div><p><code>init()</code>函数是golang的基本用法，会在这个package被引用到的时候自动初始化执行。
+这里就是注册了另一个plugin.
+需要注意的是，<code>plugin.GRPCPlugin</code>这个类型的插件有不止一种，一般都是通过grpc service对外提供服务的。
+在上面提到的import的其他包里，你可以找到很多GRPCPlugin类型的插件。
+这个插件依赖于<code>plugin.ContentPlugin</code>和<code>plugin.MetadataPlugin</code>，
+也就是说初始化过程中，一定会先初始化它依赖的ContentPlugin和MetadataPlugin再初始化它。
+Init函数指向NewService这个函数。这个函数本文后面会继续打开来看，我们先暂停到这里。
+到此，我们知道了所有plugin都是在哪里找到的。</p>
+<ul>
+<li>3.3. 注册和启动service</li>
+</ul>
+<p>继续回到<code>server.New</code>的实现中，<code>loadPlugins</code>完成之后，所有的plugin都加入到<code>plugins</code>这个数组中了，
+下一步就是处理这个数组。下面是一段长长的代码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">server/server.go:
+func New<span class="o">(</span>ctx context.Context, config *Config<span class="o">)</span> <span class="o">(</span>*Server, error<span class="o">)</span>:
+ 
+ <span class="m">68</span>     <span class="k">for</span> _, p :<span class="o">=</span> range plugins <span class="o">{</span>
+ <span class="m">69</span>         id :<span class="o">=</span> p.URI<span class="o">()</span>  // fmt.Sprintf<span class="o">(</span><span class="s2">&#34;%s.%s&#34;</span>, r.Type, r.ID<span class="o">)</span>
+ <span class="m">70</span>         log.G<span class="o">(</span>ctx<span class="o">)</span>.WithField<span class="o">(</span><span class="s2">&#34;type&#34;</span>, p.Type<span class="o">)</span>.Infof<span class="o">(</span><span class="s2">&#34;loading plugin %q...&#34;</span>, id<span class="o">)</span>
+ <span class="m">71</span> 
+ <span class="m">72</span>         initContext :<span class="o">=</span> plugin.NewContext<span class="o">(</span>
+ <span class="m">73</span>             ctx,
+ <span class="m">74</span>             initialized,
+ <span class="m">75</span>             config.Root,  // 默认是<span class="s2">&#34;/var/lib/containerd&#34;</span>
+ <span class="m">76</span>             config.State, // 默认是<span class="s2">&#34;/run/containerd&#34;</span>
+ <span class="m">77</span>             id,
+ <span class="m">78</span>         <span class="o">)</span>
+ <span class="m">79</span>         initContext.Events <span class="o">=</span> s.events
+ <span class="m">80</span>         initContext.Address <span class="o">=</span> config.GRPC.Address // 默认是<span class="s2">&#34;/run/containerd/containerd.sock&#34;</span>
+ <span class="m">81</span> 
+ <span class="m">82</span>         // load the plugin specific configuration <span class="k">if</span> it is provided
+ <span class="m">83</span>         <span class="k">if</span> p.Config !<span class="o">=</span> nil <span class="o">{</span>
+ <span class="m">84</span>             pluginConfig, err :<span class="o">=</span> config.Decode<span class="o">(</span>p.ID, p.Config<span class="o">)</span>
+ <span class="m">85</span>             <span class="k">if</span> err !<span class="o">=</span> nil <span class="o">{</span>
+ <span class="m">86</span>                 <span class="k">return</span> nil, err
+ <span class="m">87</span>             <span class="o">}</span>
+ <span class="m">88</span>             initContext.Config <span class="o">=</span> pluginConfig
+ <span class="m">89</span>         <span class="o">}</span>
+ <span class="m">90</span>         instance, err :<span class="o">=</span> p.Init<span class="o">(</span>initContext<span class="o">)</span>
+ <span class="m">91</span>         <span class="k">if</span> err !<span class="o">=</span> nil <span class="o">{</span>
+ <span class="m">92</span>             <span class="k">if</span> plugin.IsSkipPlugin<span class="o">(</span>err<span class="o">)</span> <span class="o">{</span>
+ <span class="m">93</span>                 log.G<span class="o">(</span>ctx<span class="o">)</span>.WithField<span class="o">(</span><span class="s2">&#34;type&#34;</span>, p.Type<span class="o">)</span>.Infof<span class="o">(</span><span class="s2">&#34;skip loading plugin %q...&#34;</span>, id<span class="o">)</span>
+ <span class="m">94</span>             <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+ <span class="m">95</span>                 log.G<span class="o">(</span>ctx<span class="o">)</span>.WithError<span class="o">(</span>err<span class="o">)</span>.Warnf<span class="o">(</span><span class="s2">&#34;failed to load plugin %s&#34;</span>, id<span class="o">)</span>
+ <span class="m">96</span>             <span class="o">}</span>
+ <span class="m">97</span>             <span class="k">continue</span>
+ <span class="m">98</span>         <span class="o">}</span>
+ <span class="m">99</span> 
+<span class="m">100</span>         <span class="k">if</span> types, ok :<span class="o">=</span> initialized<span class="o">[</span>p.Type<span class="o">]</span><span class="p">;</span> ok <span class="o">{</span>
+<span class="m">101</span>             types<span class="o">[</span>p.ID<span class="o">]</span> <span class="o">=</span> instance
+<span class="m">102</span>         <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+<span class="m">103</span>             initialized<span class="o">[</span>p.Type<span class="o">]</span> <span class="o">=</span> map<span class="o">[</span>string<span class="o">]</span>interface<span class="o">{}{</span>
+<span class="m">104</span>                 p.ID: instance,
+<span class="m">105</span>             <span class="o">}</span>
+<span class="m">106</span>         <span class="o">}</span>
+<span class="m">107</span>         // check <span class="k">for</span> grpc services that should be registered with the server
+<span class="m">108</span>         <span class="k">if</span> service, ok :<span class="o">=</span> instance.<span class="o">(</span>plugin.Service<span class="o">)</span><span class="p">;</span> ok <span class="o">{</span>
+<span class="m">109</span>             <span class="nv">services</span> <span class="o">=</span> append<span class="o">(</span>services, service<span class="o">)</span>
+<span class="m">110</span>         <span class="o">}</span>
+<span class="m">111</span>     <span class="o">}</span>
+<span class="m">112</span>     // register services after all plugins have been initialized
+<span class="m">113</span>     <span class="k">for</span> _, service :<span class="o">=</span> range services <span class="o">{</span>
+<span class="m">114</span>         <span class="k">if</span> err :<span class="o">=</span> service.Register<span class="o">(</span>rpc<span class="o">)</span><span class="p">;</span> err !<span class="o">=</span> nil <span class="o">{</span>
+<span class="m">115</span>             <span class="k">return</span> nil, err
+<span class="m">116</span>         <span class="o">}</span>
+<span class="m">117</span>     <span class="o">}</span>
+
+</code></pre></div><p>90行之前都是准备initContext，这个initContext是会传递给每个plugin的Init函数使用的一个初始化数据。
+随后重点是90行，会调用每个plugin的Init函数，入参为刚才准备的initContext。
+<code>initialized</code>数组每一轮迭代都会把当前初始化完成的插件放进去，然后传递给下一个<code>plugin</code>的<code>initContext</code>作为初始化必须的数据，
+下一个插件就可以访问它所依赖的任何一个组件了。</p>
+<p>108行需要注意的是，每个插件执行完<code>Init</code>函数所返回的<code>instance</code> interface，都会尝试去转换成<code>plugin.Service</code>接口，
+如果它实现了<code>plugin.Service</code>这个接口，那么它就是一个service，需要加到<code>services</code>列表，
+等待最后在114行执行Register函数进行注册。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">plugin/plugin.go:
+ <span class="m">55</span> <span class="nb">type</span> Service interface <span class="o">{</span>                                               
+ <span class="m">56</span>     Register<span class="o">(</span>*grpc.Server<span class="o">)</span> error
+ <span class="m">57</span> <span class="o">}</span>   
+</code></pre></div><p>也即是说，只要<code>instance</code>实现了<code>Register</code>接口，就是一个服务。</p>
+<p>仍然以content service为例。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">services/content/service.go:
+ <span class="m">38</span> func init<span class="o">()</span> <span class="o">{</span>
+ <span class="m">39</span>     plugin.Register<span class="o">(</span><span class="p">&amp;</span>plugin.Registration<span class="o">{</span>
+ <span class="m">40</span>         Type: plugin.GRPCPlugin,
+ <span class="m">41</span>         ID:   <span class="s2">&#34;content&#34;</span>,
+ <span class="m">42</span>         Requires: <span class="o">[]</span>plugin.PluginType<span class="o">{</span>
+ <span class="m">43</span>             plugin.ContentPlugin,
+ <span class="m">44</span>             plugin.MetadataPlugin,
+ <span class="m">45</span>         <span class="o">}</span>,
+ <span class="m">46</span>         Init: NewService,
+ <span class="m">47</span>     <span class="o">})</span>
+ <span class="m">48</span> <span class="o">}</span>
+ <span class="m">49</span> 
+ <span class="m">50</span> func NewService<span class="o">(</span>ic *plugin.InitContext<span class="o">)</span> <span class="o">(</span>interface<span class="o">{}</span>, error<span class="o">)</span> <span class="o">{</span>
+ <span class="m">51</span>     c, err :<span class="o">=</span> ic.Get<span class="o">(</span>plugin.ContentPlugin<span class="o">)</span>
+ <span class="m">52</span>     <span class="k">if</span> err !<span class="o">=</span> nil <span class="o">{</span>
+ <span class="m">53</span>         <span class="k">return</span> nil, err
+ <span class="m">54</span>     <span class="o">}</span>
+ <span class="m">55</span>     m, err :<span class="o">=</span> ic.Get<span class="o">(</span>plugin.MetadataPlugin<span class="o">)</span>
+ <span class="m">56</span>     <span class="k">if</span> err !<span class="o">=</span> nil <span class="o">{</span>
+ <span class="m">57</span>         <span class="k">return</span> nil, err
+ <span class="m">58</span>     <span class="o">}</span>
+ <span class="m">59</span>     cs :<span class="o">=</span> metadata.NewContentStore<span class="o">(</span>m.<span class="o">(</span>*bolt.DB<span class="o">)</span>, c.<span class="o">(</span>content.Store<span class="o">))</span>
+ <span class="m">60</span>     <span class="k">return</span> <span class="p">&amp;</span>Service<span class="o">{</span>
+ <span class="m">61</span>         store:     cs,
+ <span class="m">62</span>         publisher: ic.Events,
+ <span class="m">63</span>     <span class="o">}</span>, nil
+ <span class="m">64</span> <span class="o">}</span>
+ <span class="m">65</span> 
+ <span class="m">66</span> func <span class="o">(</span>s *Service<span class="o">)</span> Register<span class="o">(</span>server *grpc.Server<span class="o">)</span> error <span class="o">{</span>
+ <span class="m">67</span>     api.RegisterContentServer<span class="o">(</span>server, s<span class="o">)</span>
+ <span class="m">68</span>     <span class="k">return</span> nil
+ <span class="m">69</span> <span class="o">}</span>
+</code></pre></div><p>可以看到content plugin的Init函数返回了<code>content.Service</code>结构体，这个结构体实现了<code>Register</code>函数，
+它是一个service。
+其中67行会跳转到以下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">api/services/content/v1/content.pb.go:
+ <span class="m">619</span> // Server API <span class="k">for</span> Content service
+ <span class="m">620</span> 
+ <span class="m">621</span> <span class="nb">type</span> ContentServer interface <span class="o">{</span>
+ <span class="m">622</span>     // Info returns information about a committed object.
+ <span class="m">623</span>     //
+ <span class="m">624</span>     // This call can be used <span class="k">for</span> getting the size of content and checking <span class="k">for</span>
+ <span class="m">625</span>     // existence.
+ <span class="m">626</span>     Info<span class="o">(</span>context.Context, *InfoRequest<span class="o">)</span> <span class="o">(</span>*InfoResponse, error<span class="o">)</span>
+ <span class="m">627</span>     // Update updates content metadata.
+ <span class="m">628</span>     //
+ <span class="m">629</span>     // This call can be used to manage the mutable content labels. The
+ <span class="m">630</span>     // immutable metadata such as digest, size, and committed at cannot
+ <span class="m">631</span>     // be updated.
+ <span class="m">632</span>     Update<span class="o">(</span>context.Context, *UpdateRequest<span class="o">)</span> <span class="o">(</span>*UpdateResponse, error<span class="o">)</span>
+ <span class="m">633</span>     // List streams the entire <span class="nb">set</span> of content as Info objects and closes the
+ <span class="m">634</span>     // stream.
+ <span class="m">635</span>     //
+ <span class="m">636</span>     // Typically, this will yield a large response, chunked into messages.
+ <span class="m">637</span>     // Clients should make provisions to ensure they can handle the entire data
+ <span class="m">638</span>     // set.
+ <span class="m">639</span>     List<span class="o">(</span>*ListContentRequest, Content_ListServer<span class="o">)</span> error
+ <span class="m">640</span>     // Delete will delete the referenced object.
+ <span class="m">641</span>     Delete<span class="o">(</span>context.Context, *DeleteContentRequest<span class="o">)</span> <span class="o">(</span>*google_protobuf3.Empty, error<span class="o">)</span>
+...省略...
+
+ <span class="m">677</span> func RegisterContentServer<span class="o">(</span>s *grpc.Server, srv ContentServer<span class="o">)</span> <span class="o">{</span>
+ <span class="m">678</span>     s.RegisterService<span class="o">(</span><span class="p">&amp;</span>_Content_serviceDesc, srv<span class="o">)</span>
+ <span class="m">679</span> <span class="o">}</span>
+</code></pre></div><p>也就是<code>content.Service</code>必须是<code>ContentServer</code>的一个实现。</p>
+<p>下面一句划重点：</p>
+<p><strong><code>api/services</code>包定义了所有用户自定义的grpc服务的接口，其中<code>.proto</code>文件包含了用户自定义的service接口，
+而<code>.pb.go</code>是protoc自动生成的service定义，包含server端和client端定义；<code>services/</code>包里实现了<code>api/services/</code>用户定义的接口</strong></p>
+<p><code>api/services</code>包含的是接口定义，<code>services</code>包是实现。</p>
+<p>在上文中<code>services/content/service.go</code>包含了content service的server端实现，而<code>services/content/store.go</code>对client端做了封装，
+更加便于使用。</p>
+<h2 id="4-总结">4. 总结</h2>
+<p>上文对containerd的启动流程做了总结，主要是围绕containerd如何启动多个grpc service给出分析的。grpc可以说是containerd的实现核心，
+与docker daemon的http restful API还是有较大不同。后续会针对部分单独的组件再来做分析。</p>
+<p><a href="/images/containerd%E9%98%85%E8%AF%BB.xmind">containerd源码分析xmind文件</a></p>
+</article>
+
+        </main><footer id="footer">
+    Copyright © 2021 Zhang Wei
+</footer>
+</body>
+</html>
