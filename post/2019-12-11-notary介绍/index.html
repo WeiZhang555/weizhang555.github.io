@@ -272,6 +272,23 @@ No valid trust data <span class="k">for</span> 18.04
 <li>镜像是先与Registry打交道后存储签名，如果是恶意image覆盖的问题，回导致恶意image上传上去了，但是签名没有更新/被删除的问题，导致image和notary签名数据不一致。需要加事务来解决？</li>
 <li>密钥的存储必须与KMS结合起来，这样就不能直接使用docker+notary的解决方案了，预计要重新实现docker client的签名和验证功能?</li>
 </ol>
+<div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '26371c480e85f4635b9d',
+  clientSecret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  repo: 'weizhang555.github.io',
+  owner: 'weizhang555',
+  admin: ['weizhang555'],
+  id: location.pathname,  
+  distractionFreeMode: false  
+})
+
+gitalk.render('gitalk-container')
+</script>
+
 </article>
 
         </main><footer id="footer">

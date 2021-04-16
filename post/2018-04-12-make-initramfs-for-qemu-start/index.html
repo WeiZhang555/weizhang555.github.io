@@ -97,7 +97,24 @@ find . -print0 <span class="p">|</span> cpio --null -ov --format<span class="o">
 <span class="nb">cd</span> <span class="si">${</span><span class="nv">CWD</span><span class="si">}</span>
 <span class="c1"># boot with qemu</span>
 <span class="c1"># sudo qemu-system-x86_64 -enable-kvm -kernel build/kernel -initrd initramfs.cpio.gz -nographic -append &#34;console=ttyS0&#34;</span>
-</code></pre></div></article>
+</code></pre></div><div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '26371c480e85f4635b9d',
+  clientSecret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  repo: 'weizhang555.github.io',
+  owner: 'weizhang555',
+  admin: ['weizhang555'],
+  id: location.pathname,  
+  distractionFreeMode: false  
+})
+
+gitalk.render('gitalk-container')
+</script>
+
+</article>
 
         </main><footer id="footer">
     Copyright © 2021 Zhang Wei

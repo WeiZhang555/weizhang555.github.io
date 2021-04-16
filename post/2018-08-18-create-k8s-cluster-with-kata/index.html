@@ -112,7 +112,24 @@ $ cat &gt;/etc/cni/net.d/99-loopback.conf <span class="s">&lt;&lt;EOF
 </span><span class="s">	&#34;type&#34;: &#34;loopback&#34;
 </span><span class="s">}
 </span><span class="s">EOF</span>
-</code></pre></div></article>
+</code></pre></div><div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '26371c480e85f4635b9d',
+  clientSecret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  repo: 'weizhang555.github.io',
+  owner: 'weizhang555',
+  admin: ['weizhang555'],
+  id: location.pathname,  
+  distractionFreeMode: false  
+})
+
+gitalk.render('gitalk-container')
+</script>
+
+</article>
 
         </main><footer id="footer">
     Copyright © 2021 Zhang Wei

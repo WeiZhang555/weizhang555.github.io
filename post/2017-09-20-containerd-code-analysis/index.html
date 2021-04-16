@@ -347,6 +347,23 @@ func New<span class="o">(</span>ctx context.Context, config *Config<span class="
 <p>上文对containerd的启动流程做了总结，主要是围绕containerd如何启动多个grpc service给出分析的。grpc可以说是containerd的实现核心，
 与docker daemon的http restful API还是有较大不同。后续会针对部分单独的组件再来做分析。</p>
 <p><a href="/images/containerd%E9%98%85%E8%AF%BB.xmind">containerd源码分析xmind文件</a></p>
+<div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '26371c480e85f4635b9d',
+  clientSecret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  repo: 'weizhang555.github.io',
+  owner: 'weizhang555',
+  admin: ['weizhang555'],
+  id: location.pathname,  
+  distractionFreeMode: false  
+})
+
+gitalk.render('gitalk-container')
+</script>
+
 </article>
 
         </main><footer id="footer">

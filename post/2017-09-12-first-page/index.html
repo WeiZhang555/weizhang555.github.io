@@ -34,6 +34,23 @@
 <p>从今天开始，尽量腾点时间，多写点技术文章，不在乎长度，不必刻意追求深度，尽量多留下点东西。</p>
 <p>目前在研究容器领域的东西，就多写点docker容器相关的文章吧。</p>
 <p>共勉。</p>
+<div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '26371c480e85f4635b9d',
+  clientSecret: 'c9f41d9cdc3f387061a16f1a7f2d85004ea8e092',
+  repo: 'weizhang555.github.io',
+  owner: 'weizhang555',
+  admin: ['weizhang555'],
+  id: location.pathname,  
+  distractionFreeMode: false  
+})
+
+gitalk.render('gitalk-container')
+</script>
+
 </article>
 
         </main><footer id="footer">
