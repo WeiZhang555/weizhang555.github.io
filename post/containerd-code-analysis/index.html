@@ -21,14 +21,14 @@
 <meta property="og:locale" content="en" />
 
 <meta property="og:type" content="article">
-<meta name="description" content="1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样 …" />
+<meta name="description" content="1. 简介 2. grpc 3. containerd启动 4. 总结 1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一 …" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="">
 <meta name="twitter:title" content="containerd源码阅读(1)--框架篇" />
 <meta name="twitter:image" content="https://weizhang555.github.io/images/thumbnail.png"/>
 <meta property="og:url" content="https://weizhang555.github.io/post/containerd-code-analysis/" />
 <meta property="og:title" content="containerd源码阅读(1)--框架篇" />
-<meta property="og:description" content="1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样 …" />
+<meta property="og:description" content="1. 简介 2. grpc 3. containerd启动 4. 总结 1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一 …" />
 <meta property="og:image" content="https://weizhang555.github.io/images/thumbnail.png" />
 
 <link rel="apple-touch-icon" sizes="180x180" href="https://weizhang555.github.io/icons/apple-touch-icon.png">
@@ -43,8 +43,8 @@
 
 
 
-<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" as="script" integrity=
-"sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous">
+<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" as="script" integrity=
+"sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous">
 
 
 <link rel="stylesheet" type="text/css" href="https://weizhang555.github.io/css/styles.42e2c5f6d8cf9c52872666f8d8b2678ad0c426978b9d78aff3c33b7a1e7f6f97f54bcdaf0518a25fb0fe26367d04f8b07c683b3b38b331cb098daadee06b1f3e.css" integrity="sha512-QuLF9tjPnFKHJmb42LJnitDEJpeLnXiv88M7eh5/b5f1S82vBRiiX7D&#43;JjZ9BPiwfGg7OzizMcsJjare4GsfPg==" crossorigin="anonymous">
@@ -58,7 +58,7 @@
   >
 
 <header class="nav_header" >
-  <nav class="nav"><a href='https://weizhang555.github.io' class="nav_brand nav_item" title="长弓二十九">长弓二十九
+  <nav class="nav"><a href='https://weizhang555.github.io/' class="nav_brand nav_item" title="长弓二十九">长弓二十九
   <div class="nav_close">
     <div><svg class="icon">
   <title>open-menu</title>
@@ -116,7 +116,7 @@
 </span>
     <span class="post_date">
       Sep 12, 2017</span>
-    <span class="post_time"> · 6 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
+    <span class="post_time"> · 7 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
         </a>
     </span>
     <span class="page_only">&nbsp;·
@@ -154,7 +154,13 @@
   </span>
   </div>
 
-    <div class="post_body"><h2 id="1-简介">1. 简介</h2>
+    <div class="post_body"><ul>
+<li><a href="#1-%E7%AE%80%E4%BB%8B">1. 简介</a></li>
+<li><a href="#2-grpc">2. grpc</a></li>
+<li><a href="#3-containerd%E5%90%AF%E5%8A%A8">3. containerd启动</a></li>
+<li><a href="#4-%E6%80%BB%E7%BB%93">4. 总结</a></li>
+</ul>
+<h2 id="1-简介">1. 简介</h2>
 <p>containerd是与docker直接沟通的下属组件，详细是什么不说了。
 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候，
 每个容器的init进程／exec进程都会对应一个containerd-shim进程，
@@ -523,16 +529,16 @@ Init函数指向NewService这个函数。这个函数本文后面会继续打开
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
-        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="论软件质量的不同形态：椰子vs苹果">论软件质量的不同形态：椰子vs苹果</a>
+        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="你的软件是“椰子”还是“苹果”？">你的软件是“椰子”还是“苹果”？</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/runc-host-escape-cve/" class="nav-link" title="docker-runc主机逃逸漏洞复现：CVE-2019-5736">docker-runc主机逃逸漏洞复现：CVE-2019-5736</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/kubrenetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
+        <a href="https://weizhang555.github.io/post/kubernetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Notary介绍">Notary介绍</a>
+        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Docker官方镜像签名方案：Notary">Docker官方镜像签名方案：Notary</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/create-k8s-cluster-with-kata/" class="nav-link" title="创建kata的K8s集群">创建kata的K8s集群</a>
@@ -683,7 +689,7 @@ Init函数指向NewService这个函数。这个函数本文后面会继续打开
   </div>
 </footer>
 
-<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" integrity="sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
 
   <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
 

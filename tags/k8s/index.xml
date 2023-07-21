@@ -10,15 +10,15 @@
     <lastBuildDate>Wed, 11 Dec 2019 11:11:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>kubernetes安装指南</title>
-      <link>https://weizhang555.github.io/post/kubrenetes-setup/</link>
+      <link>https://weizhang555.github.io/post/kubernetes-setup/</link>
       <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/kubrenetes-setup/</guid>
+      <guid>https://weizhang555.github.io/post/kubernetes-setup/</guid>
       <description>
         
           
-            kubeadm安装三节点集群
-测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+            本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
+测试环境 下载 配置kubelet 拉起master节点 增加worker 测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
 下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
 具体的安装步骤暂时略过。
 配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
@@ -41,8 +41,7 @@
           
             本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
 本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
-言归正传。
-安装环境 Virtual Machine:
+安装环境 安装kata-containers 安装docker 安装cri-containerd step 0: 安装依赖 step 1: 下载containerd的tar包： 安装cni插件 安装环境 Virtual Machine:
 OS: Ubuntu 18.04
 CPU: 4
 Memory: 8G

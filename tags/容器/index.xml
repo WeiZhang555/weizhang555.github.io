@@ -17,7 +17,9 @@
       <description>
         
           
-            尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC 复现成功。
+            CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。
+我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。
+尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC ， 这里对源码做了一些修改，在下面分享一下。
 注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
 复现方式：
 在一个terminal里面：
@@ -26,7 +28,6 @@
 1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 2root@5b28d7ab5083:/# /exploit 3[+] Overwritten /bin/sh successfully 4[+] Found the PID: 17 5[+] Successfully got the file handle 6[-]Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy 7[+] Successfully got write handle &amp;amp;{0xc0000501e0} 8root@5b28d7ab5083:/# /tmp/下多了一个passwd文件。
 Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。
 修改过的源码：
-1package main 2 3// Implementation of CVE-2019-5736 4// Created with help from @singe, @_cablethief, and @feexd.
           
           
         
@@ -35,15 +36,15 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
     
     <item>
       <title>kubernetes安装指南</title>
-      <link>https://weizhang555.github.io/post/kubrenetes-setup/</link>
+      <link>https://weizhang555.github.io/post/kubernetes-setup/</link>
       <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/kubrenetes-setup/</guid>
+      <guid>https://weizhang555.github.io/post/kubernetes-setup/</guid>
       <description>
         
           
-            kubeadm安装三节点集群
-测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+            本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
+测试环境 下载 配置kubelet 拉起master节点 增加worker 测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
 下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
 具体的安装步骤暂时略过。
 配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
@@ -56,7 +57,7 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
     </item>
     
     <item>
-      <title>Notary介绍</title>
+      <title>Docker官方镜像签名方案：Notary</title>
       <link>https://weizhang555.github.io/post/notary-intro/</link>
       <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
       
@@ -64,18 +65,10 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
       <description>
         
           
-            1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
+            1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对照target元数据验证target 2. Notary 2.1 介绍 2.2 目标 2.3 Notary的密钥管理 3. Docker Content Trust本地测试 3.1 环境准备 3.2 push的镜像无签名的情况 3.3 push有签名的版本 3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04 3.5 docker content trust的问题 1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
 1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
 TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;
 1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
-step 0: 加载可信的root元数据文件 这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。
-step 1: 更新root元数据文件 由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。
-step 1.1: 使用N代表可信root元数据文件的版本号 step 1.2: 下载root元数据文件的N+1版本 文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。
-step 1.3: 检查签名 N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。
-如果N+1版本的root元数据没有被正确签名，退出并报错。
-step 1.4: 检查回滚攻击(rollback attach) 当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。
-step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查 step 1.6: 设置受信任的root元数据文件为新的元数据文件 step 1.7: 重复step 1.1到1.7直到root元数据为最新 step 1.8: 检查冻结攻击(freeze attach) 检查当前的信任的root元数据文件是否过期，过期的报错退出。
-step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件 这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。
           
           
         
@@ -93,8 +86,7 @@ step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和ti
           
             本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
 本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
-言归正传。
-安装环境 Virtual Machine:
+安装环境 安装kata-containers 安装docker 安装cri-containerd step 0: 安装依赖 step 1: 下载containerd的tar包： 安装cni插件 安装环境 Virtual Machine:
 OS: Ubuntu 18.04
 CPU: 4
 Memory: 8G
@@ -139,14 +131,14 @@ https://github.com/kata-containers/documentation/blob/master/install/ubuntu-inst
       <description>
         
           
-            1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
+            1. 简介 2. grpc 3. containerd启动 4. 总结 1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
 随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分--swarm。
 简单分析下containerd的代码架构，作为官方containerd文档的一个补充。 本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9 为标准讲解。
 2. grpc containerd的架构极其依赖grpc协议。
 1# ls api/services/ 2containers content diff events images namespaces snapshot tasks version api/services目录下存放着containerd提供的不同服务对应的grpc接口。 以比较基础的content服务为例，
 1# ls api/services/content/v1/ 2content.pb.go content.proto 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件， 而程序最终使用的content.pb.go则可以由grpc命令自动生成。 containerd在Makefile中提供了生成.pb.go的指令
 1// 安装依赖的库 2# cd containerd &amp;amp;&amp;amp; make setup 3# make protos 打开content.proto 来看，里面主要定义了一个service：
-113 service Content { 2 14 // Info returns information about a committed object. 3 15 // 4 16 // This call can be used for getting the size of content and checking for 5 17 // existence.
+113 service Content { 2 14 // Info returns information about a committed object.
           
           
         

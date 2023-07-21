@@ -42,8 +42,8 @@
 
 
 
-<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" as="script" integrity=
-"sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous">
+<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" as="script" integrity=
+"sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous">
 
 
 <link rel="stylesheet" type="text/css" href="https://weizhang555.github.io/css/styles.42e2c5f6d8cf9c52872666f8d8b2678ad0c426978b9d78aff3c33b7a1e7f6f97f54bcdaf0518a25fb0fe26367d04f8b07c683b3b38b331cb098daadee06b1f3e.css" integrity="sha512-QuLF9tjPnFKHJmb42LJnitDEJpeLnXiv88M7eh5/b5f1S82vBRiiX7D&#43;JjZ9BPiwfGg7OzizMcsJjare4GsfPg==" crossorigin="anonymous">
@@ -57,7 +57,7 @@
   >
 
 <header class="nav_header" >
-  <nav class="nav"><a href='https://weizhang555.github.io' class="nav_brand nav_item" title="长弓二十九">长弓二十九
+  <nav class="nav"><a href='https://weizhang555.github.io/' class="nav_brand nav_item" title="长弓二十九">长弓二十九
   <div class="nav_close">
     <div><svg class="icon">
   <title>open-menu</title>
@@ -168,11 +168,12 @@
       <div class="excerpt_footer">
         <div class="pale">
           
-            <p>尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC 复现成功。
+            <p>CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。
+我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。
+尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC ， 这里对源码做了一些修改，在下面分享一下。
 注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
 复现方式：
-在一个terminal里面：
-1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 另一个terminal内执行： …</p>
+在一个terminal里面： …</p>
           
           <br>
           <a href="https://weizhang555.github.io/post/runc-host-escape-cve/" title="Read More" class="excerpt_more button">Read More</a>
@@ -185,7 +186,7 @@
   <div class="excerpt">
     <div class="excerpt_header">
       <h3 class="post_link">
-        <a href="https://weizhang555.github.io/post/kubrenetes-setup/" title="kubernetes安装指南">kubernetes安装指南</a>
+        <a href="https://weizhang555.github.io/post/kubernetes-setup/" title="kubernetes安装指南">kubernetes安装指南</a>
       </h3>
       
   <div class="post_meta">
@@ -203,14 +204,14 @@
     <span class="page_only">&nbsp;·
   <div class="post_share">
     Share on:
-    <a href="https://twitter.com/intent/tweet?text=kubernetes%e5%ae%89%e8%a3%85%e6%8c%87%e5%8d%97&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fkubrenetes-setup%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
+    <a href="https://twitter.com/intent/tweet?text=kubernetes%e5%ae%89%e8%a3%85%e6%8c%87%e5%8d%97&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fkubernetes-setup%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>twitter</title>
   <use xlink:href="#twitter"></use>
 </svg>
 
     </a>
-    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fkubrenetes-setup%2f&t=kubernetes%e5%ae%89%e8%a3%85%e6%8c%87%e5%8d%97" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
+    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fkubernetes-setup%2f&t=kubernetes%e5%ae%89%e8%a3%85%e6%8c%87%e5%8d%97" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>facebook</title>
   <use xlink:href="#facebook"></use>
@@ -224,7 +225,7 @@
 </svg>
 
     </a>
-    <a href="https://weizhang555.github.io/post/kubrenetes-setup/" title="Copy Link" class="link link_yank">
+    <a href="https://weizhang555.github.io/post/kubernetes-setup/" title="Copy Link" class="link link_yank">
       <svg class="icon">
   <title>copy</title>
   <use xlink:href="#copy"></use>
@@ -239,15 +240,15 @@
       <div class="excerpt_footer">
         <div class="pale">
           
-            <p>kubeadm安装三节点集群
-测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+            <p>本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
+测试环境 下载 配置kubelet 拉起master节点 增加worker 测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
 下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
 具体的安装步骤暂时略过。
 配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
-1# cat &gt; /lib/systemd/system/kubelet.service &lt;&lt; EOF 2[Unit] …</p>
+1# cat &gt; …</p>
           
           <br>
-          <a href="https://weizhang555.github.io/post/kubrenetes-setup/" title="Read More" class="excerpt_more button">Read More</a>
+          <a href="https://weizhang555.github.io/post/kubernetes-setup/" title="Read More" class="excerpt_more button">Read More</a>
         </div>
       </div>
     </div>
@@ -257,7 +258,7 @@
   <div class="excerpt">
     <div class="excerpt_header">
       <h3 class="post_link">
-        <a href="https://weizhang555.github.io/post/notary-intro/" title="Notary介绍">Notary介绍</a>
+        <a href="https://weizhang555.github.io/post/notary-intro/" title="Docker官方镜像签名方案：Notary">Docker官方镜像签名方案：Notary</a>
       </h3>
       
   <div class="post_meta">
@@ -275,14 +276,14 @@
     <span class="page_only">&nbsp;·
   <div class="post_share">
     Share on:
-    <a href="https://twitter.com/intent/tweet?text=Notary%e4%bb%8b%e7%bb%8d&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
+    <a href="https://twitter.com/intent/tweet?text=Docker%e5%ae%98%e6%96%b9%e9%95%9c%e5%83%8f%e7%ad%be%e5%90%8d%e6%96%b9%e6%a1%88%ef%bc%9aNotary&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>twitter</title>
   <use xlink:href="#twitter"></use>
 </svg>
 
     </a>
-    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&t=Notary%e4%bb%8b%e7%bb%8d" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
+    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&t=Docker%e5%ae%98%e6%96%b9%e9%95%9c%e5%83%8f%e7%ad%be%e5%90%8d%e6%96%b9%e6%a1%88%ef%bc%9aNotary" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>facebook</title>
   <use xlink:href="#facebook"></use>
@@ -312,10 +313,7 @@
         <div class="pale">
           
             <p><ol>
-<li>TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
-1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
-TUF角色和密钥的理解与Notary介绍有重合，可以参考 &quot;2.3 Notary的密钥管理&quot;
-1.2 TUF的工作流 TUF框架的定义在这 …</li>
+<li>TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对照target元数据验证target 2. Notary 2.1 介绍 2.2 目标 2.3 Notary的密钥管理 3. Docker Content Trust本地测试 3.1 环境准备 3.2 push的镜像无签名的情况 3.3 push有签名的版本 3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04 …</li>
 </ol>
 </p>
           
@@ -341,7 +339,7 @@ TUF角色和密钥的理解与Notary介绍有重合，可以参考 &quot;2.3 Not
 </span>
     <span class="post_date">
       Aug 18, 2018</span>
-    <span class="post_time"> · 1 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
+    <span class="post_time"> · 2 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
         </a><a href='https://weizhang555.github.io/tags/k8s/' title="K8s" class="post_tag button button_translucent">K8s
         </a>
     </span>
@@ -386,9 +384,7 @@ TUF角色和密钥的理解与Notary介绍有重合，可以参考 &quot;2.3 Not
           
             <p>本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
 本文参考了官方的安装说明： <a href="https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md">https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md</a> 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
-言归正传。
-安装环境 Virtual Machine:
-OS: Ubuntu …</p>
+安装环境 安装kata-containers 安装docker 安 …</p>
           
           <br>
           <a href="https://weizhang555.github.io/post/create-k8s-cluster-with-kata/" title="Read More" class="excerpt_more button">Read More</a>
@@ -483,7 +479,7 @@ OS: Ubuntu …</p>
 </span>
     <span class="post_date">
       Sep 12, 2017</span>
-    <span class="post_time"> · 6 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
+    <span class="post_time"> · 7 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
         </a>
     </span>
     <span class="page_only">&nbsp;·
@@ -526,9 +522,8 @@ OS: Ubuntu …</p>
         <div class="pale">
           
             <p><ol>
-<li>简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
-随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分--swarm。
-简 …</li>
+<li>简介 2. grpc 3. containerd启动 4. 总结 1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
+随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉 …</li>
 </ol>
 </p>
           
@@ -639,16 +634,16 @@ runc源码分析xmind文件</p>
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
-        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="论软件质量的不同形态：椰子vs苹果">论软件质量的不同形态：椰子vs苹果</a>
+        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="你的软件是“椰子”还是“苹果”？">你的软件是“椰子”还是“苹果”？</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/runc-host-escape-cve/" class="nav-link" title="docker-runc主机逃逸漏洞复现：CVE-2019-5736">docker-runc主机逃逸漏洞复现：CVE-2019-5736</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/kubrenetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
+        <a href="https://weizhang555.github.io/post/kubernetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Notary介绍">Notary介绍</a>
+        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Docker官方镜像签名方案：Notary">Docker官方镜像签名方案：Notary</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/create-k8s-cluster-with-kata/" class="nav-link" title="创建kata的K8s集群">创建kata的K8s集群</a>
@@ -800,7 +795,7 @@ runc源码分析xmind文件</p>
   </div>
 </footer>
 
-<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" integrity="sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
 
   <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
 

@@ -17,7 +17,9 @@
       <description>
         
           
-            尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC 复现成功。
+            CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。
+我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。
+尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC ， 这里对源码做了一些修改，在下面分享一下。
 注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
 复现方式：
 在一个terminal里面：
@@ -26,7 +28,6 @@
 1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 2root@5b28d7ab5083:/# /exploit 3[+] Overwritten /bin/sh successfully 4[+] Found the PID: 17 5[+] Successfully got the file handle 6[-]Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy 7[+] Successfully got write handle &amp;amp;{0xc0000501e0} 8root@5b28d7ab5083:/# /tmp/下多了一个passwd文件。
 Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。
 修改过的源码：
-1package main 2 3// Implementation of CVE-2019-5736 4// Created with help from @singe, @_cablethief, and @feexd.
           
           
         
@@ -34,7 +35,7 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
     </item>
     
     <item>
-      <title>Notary介绍</title>
+      <title>Docker官方镜像签名方案：Notary</title>
       <link>https://weizhang555.github.io/post/notary-intro/</link>
       <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
       
@@ -42,18 +43,10 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
       <description>
         
           
-            1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
+            1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对照target元数据验证target 2. Notary 2.1 介绍 2.2 目标 2.3 Notary的密钥管理 3. Docker Content Trust本地测试 3.1 环境准备 3.2 push的镜像无签名的情况 3.3 push有签名的版本 3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04 3.5 docker content trust的问题 1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
 1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
 TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;
 1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
-step 0: 加载可信的root元数据文件 这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。
-step 1: 更新root元数据文件 由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。
-step 1.1: 使用N代表可信root元数据文件的版本号 step 1.2: 下载root元数据文件的N+1版本 文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。
-step 1.3: 检查签名 N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。
-如果N+1版本的root元数据没有被正确签名，退出并报错。
-step 1.4: 检查回滚攻击(rollback attach) 当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。
-step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查 step 1.6: 设置受信任的root元数据文件为新的元数据文件 step 1.7: 重复step 1.1到1.7直到root元数据为最新 step 1.8: 检查冻结攻击(freeze attach) 检查当前的信任的root元数据文件是否过期，过期的报错退出。
-step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件 这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。
           
           
         

@@ -9,7 +9,7 @@
   
   >
   <head>
-<title>Notary介绍 | 长弓二十九</title>
+<title>Docker官方镜像签名方案：Notary | 长弓二十九</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,16 +21,14 @@
 <meta property="og:locale" content="en" />
 
 <meta property="og:type" content="article">
-<meta name="description" content="1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
-1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, …" />
+<meta name="description" content="1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对 …" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="">
-<meta name="twitter:title" content="Notary介绍" />
+<meta name="twitter:title" content="Docker官方镜像签名方案：Notary" />
 <meta name="twitter:image" content="https://weizhang555.github.io/images/thumbnail.png"/>
 <meta property="og:url" content="https://weizhang555.github.io/post/notary-intro/" />
-<meta property="og:title" content="Notary介绍" />
-<meta property="og:description" content="1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
-1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, …" />
+<meta property="og:title" content="Docker官方镜像签名方案：Notary" />
+<meta property="og:description" content="1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对 …" />
 <meta property="og:image" content="https://weizhang555.github.io/images/thumbnail.png" />
 
 <link rel="apple-touch-icon" sizes="180x180" href="https://weizhang555.github.io/icons/apple-touch-icon.png">
@@ -45,8 +43,8 @@
 
 
 
-<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" as="script" integrity=
-"sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous">
+<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" as="script" integrity=
+"sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous">
 
 
 <link rel="stylesheet" type="text/css" href="https://weizhang555.github.io/css/styles.42e2c5f6d8cf9c52872666f8d8b2678ad0c426978b9d78aff3c33b7a1e7f6f97f54bcdaf0518a25fb0fe26367d04f8b07c683b3b38b331cb098daadee06b1f3e.css" integrity="sha512-QuLF9tjPnFKHJmb42LJnitDEJpeLnXiv88M7eh5/b5f1S82vBRiiX7D&#43;JjZ9BPiwfGg7OzizMcsJjare4GsfPg==" crossorigin="anonymous">
@@ -60,7 +58,7 @@
   >
 
 <header class="nav_header" >
-  <nav class="nav"><a href='https://weizhang555.github.io' class="nav_brand nav_item" title="长弓二十九">长弓二十九
+  <nav class="nav"><a href='https://weizhang555.github.io/' class="nav_brand nav_item" title="长弓二十九">长弓二十九
   <div class="nav_close">
     <div><svg class="icon">
   <title>open-menu</title>
@@ -109,7 +107,7 @@
   
 <div class="grid-inverse wrap content">
   <article class="post_content">
-    <h1 class="post_title">Notary介绍</h1>
+    <h1 class="post_title">Docker官方镜像签名方案：Notary</h1>
   <div class="post_meta">
     <span><svg class="icon">
   <title>calendar</title>
@@ -125,14 +123,14 @@
     <span class="page_only">&nbsp;·
   <div class="post_share">
     Share on:
-    <a href="https://twitter.com/intent/tweet?text=Notary%e4%bb%8b%e7%bb%8d&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
+    <a href="https://twitter.com/intent/tweet?text=Docker%e5%ae%98%e6%96%b9%e9%95%9c%e5%83%8f%e7%ad%be%e5%90%8d%e6%96%b9%e6%a1%88%ef%bc%9aNotary&url=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>twitter</title>
   <use xlink:href="#twitter"></use>
 </svg>
 
     </a>
-    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&t=Notary%e4%bb%8b%e7%bb%8d" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
+    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2fpost%2fnotary-intro%2f&t=Docker%e5%ae%98%e6%96%b9%e9%95%9c%e5%83%8f%e7%ad%be%e5%90%8d%e6%96%b9%e6%a1%88%ef%bc%9aNotary" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
       <svg class="icon">
   <title>facebook</title>
   <use xlink:href="#facebook"></use>
@@ -157,7 +155,41 @@
   </span>
   </div>
 
-    <div class="post_body"><p><a name="86c05371"></a></p>
+    <div class="post_body"><ul>
+<li><a href="#1-tuf">1. TUF</a>
+<ul>
+<li><a href="#11-%E8%83%8C%E6%99%AF">1.1 背景</a></li>
+<li><a href="#12-tuf%E7%9A%84%E8%A7%92%E8%89%B2">1.2 TUF的角色</a></li>
+<li><a href="#12-tuf%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81">1.2 TUF的工作流</a>
+<ul>
+<li><a href="#step-0-%E5%8A%A0%E8%BD%BD%E5%8F%AF%E4%BF%A1%E7%9A%84root%E5%85%83%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6">step 0: 加载可信的root元数据文件</a></li>
+<li><a href="#step-1-%E6%9B%B4%E6%96%B0root%E5%85%83%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6">step 1: 更新root元数据文件</a></li>
+<li><a href="#step-2-%E4%B8%8B%E8%BD%BDtimestamp%E5%85%83%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6">step 2: 下载timestamp元数据文件</a></li>
+<li><a href="#step-3%E4%B8%8B%E8%BD%BDsnapshot%E5%85%83%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6">step 3：下载snapshot元数据文件</a></li>
+<li><a href="#step-4%E4%B8%8B%E8%BD%BD%E6%9C%80%E9%A1%B6%E5%B1%82%E7%9A%84targets%E5%85%83%E6%95%B0%E6%8D%AE">step 4：下载最顶层的targets元数据</a></li>
+<li><a href="#step-5%E5%AF%B9%E7%85%A7target%E5%85%83%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81target">step 5：对照target元数据验证target</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-notary">2. Notary</a>
+<ul>
+<li><a href="#21-%E4%BB%8B%E7%BB%8D">2.1 介绍</a></li>
+<li><a href="#22-%E7%9B%AE%E6%A0%87">2.2 目标</a></li>
+<li><a href="#23-notary%E7%9A%84%E5%AF%86%E9%92%A5%E7%AE%A1%E7%90%86">2.3 Notary的密钥管理</a></li>
+</ul>
+</li>
+<li><a href="#3-docker-content-trust%E6%9C%AC%E5%9C%B0%E6%B5%8B%E8%AF%95">3. Docker Content Trust本地测试</a>
+<ul>
+<li><a href="#31-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87">3.1 环境准备</a></li>
+<li><a href="#32-push%E7%9A%84%E9%95%9C%E5%83%8F%E6%97%A0%E7%AD%BE%E5%90%8D%E7%9A%84%E6%83%85%E5%86%B5">3.2 push的镜像无签名的情况</a></li>
+<li><a href="#33-push%E6%9C%89%E7%AD%BE%E5%90%8D%E7%9A%84%E7%89%88%E6%9C%AC">3.3 push有签名的版本</a></li>
+<li><a href="#34-%E6%81%B6%E6%84%8F%E7%94%A8%E6%88%B7%E4%B8%8A%E4%BC%A0%E6%81%B6%E6%84%8F%E9%95%9C%E5%83%8F%E8%A6%86%E7%9B%96ubuntu1804">3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04</a></li>
+</ul>
+</li>
+<li><a href="#35-docker-content-trust%E7%9A%84%E9%97%AE%E9%A2%98">3.5 docker content trust的问题</a></li>
+</ul>
+<p><a name="86c05371"></a></p>
 <h1 id="1-tuf">1. TUF</h1>
 <p><a name="dc7ef395"></a></p>
 <h2 id="11-背景">1.1 背景</h2>
@@ -447,7 +479,7 @@
 <p><a name="a1628df4"></a></p>
 <h1 id="35-docker-content-trust的问题">3.5 docker content trust的问题</h1>
 <ol>
-<li>镜像是先与Registry打交道后存储签名，如果是恶意image覆盖的问题，回导致恶意image上传上去了，但是签名没有更新/被删除的问题，导致image和notary签名数据不一致。需要加事务来解决？</li>
+<li>镜像是先与Registry打交道后存储签名，如果是恶意image覆盖的问题，会导致恶意image上传上去了，但是签名没有更新/被删除的问题，导致image和notary签名数据不一致。需要加事务来解决？</li>
 <li>密钥的存储必须与KMS结合起来，这样就不能直接使用docker+notary的解决方案了，预计要重新实现docker client的签名和验证功能?</li>
 </ol>
 
@@ -503,16 +535,16 @@
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
-        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="论软件质量的不同形态：椰子vs苹果">论软件质量的不同形态：椰子vs苹果</a>
+        <a href="https://weizhang555.github.io/post/different-software-types/" class="nav-link" title="你的软件是“椰子”还是“苹果”？">你的软件是“椰子”还是“苹果”？</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/runc-host-escape-cve/" class="nav-link" title="docker-runc主机逃逸漏洞复现：CVE-2019-5736">docker-runc主机逃逸漏洞复现：CVE-2019-5736</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/kubrenetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
+        <a href="https://weizhang555.github.io/post/kubernetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Notary介绍">Notary介绍</a>
+        <a href="https://weizhang555.github.io/post/notary-intro/" class="nav-link" title="Docker官方镜像签名方案：Notary">Docker官方镜像签名方案：Notary</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/post/create-k8s-cluster-with-kata/" class="nav-link" title="创建kata的K8s集群">创建kata的K8s集群</a>
@@ -663,7 +695,7 @@
   </div>
 </footer>
 
-<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.1b596a1ac2fc429c46aa79f40bb0619133e8704bb6534434751654c88bb6e3bf7c5e1764cb038e05ea66740f2dd0d325cded39cd85d1692dc5f40016d4fa44de.js" integrity="sha512-G1lqGsL8QpxGqnn0C7BhkTPocEu2U0Q0dRZUyIu24798XhdkywOOBepmdA8t0NMlze05zYXRaS3F9AAW1PpE3g==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
 
   <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
 
