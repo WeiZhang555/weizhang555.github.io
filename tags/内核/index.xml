@@ -10,10 +10,10 @@
     <lastBuildDate>Thu, 12 Apr 2018 19:10:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Kernel调试基础--制作initramfs</title>
-      <link>https://weizhang555.github.io/post/make-initramfs-for-qemu-start/</link>
+      <link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link>
       <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/make-initramfs-for-qemu-start/</guid>
+      <guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid>
       <description>
         
           

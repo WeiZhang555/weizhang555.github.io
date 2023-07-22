@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>译文 on 长弓二十九</title>
+    <link>https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/</link>
+    <description>Recent content in 译文 on 长弓二十九</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © 2021 Zhang Wei</copyright>
+    <lastBuildDate>Fri, 21 Jul 2023 00:10:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>BPF的设计原则Q&amp;A</title>
+      <link>https://weizhang555.github.io/translate/bpf-design-qa/</link>
+      <pubDate>Fri, 21 Jul 2023 00:10:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/bpf-design-qa/</guid>
+      <description>
+        
+          
+            原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules
+声明：
+本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。
+以下是正文。
+问：BPF是一种类似x86和arm64的通用指令集吗？ 答: NO.
+问：BPF是通用的虚拟机吗？ 答：NO。
+BPF是遵循C语言调用约定的一种通用指令集。
+BPF is generic instruction set with C calling convention.
+问：为什么选择了C语言调用约定？ 答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集，同时也考虑到了其他架构的一些重要“怪癖”，也定义了与那些平台上的linux kernel上C调用约定兼容的调用约定。
+问：未来会支持多个返回值吗？ 答：NO。BPF仅支持使用R0寄存器作为函数返回值。
+问：未来会支持超过5个函数入参吗？ 答：NO。BPF函数调用方式仅支持寄存器R1-R5作为参数。BPF不是一个独立的指令集。（不像x64 ISA允许msft, cdecl和其他约定）
+(unlike x64 ISA that allows msft, cdecl and other conventions)
+问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？ 答：NO
+问：BPF程序可以访问栈指针(stack pointer)吗？ 答：NO。
+只有帧指针(frame pointer)(寄存器R10)可以被访问。从编译器角度看，拥有栈指针是有必要的。例如，LLVM定义了寄存器R11作为BPF后端的栈指针，但是它确保了生成的代码永远不会使用它。
+问：C调用惯例减少了可能的使用案例吗？ 答：YES。
+BPF的设计强制大的功能要以内核helper函数和内核对象（像BPF maps）的形式添加，并且互相之间可以无缝互操作。它允许kernel调用BPF程序，和BPF程序调用kernel helpers，这个过程完全零开销，因为他们都是原生C代码。特别是对于JITed BPF程序场景，他们本来就是与原生的kernel C代码完全一致无法区分。
+That is particularly the case for JITed BPF programs that are indistinguishable from native kernel C code.
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

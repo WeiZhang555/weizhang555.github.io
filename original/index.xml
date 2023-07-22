@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Originals on 长弓二十九</title>
+    <link>https://weizhang555.github.io/original/</link>
+    <description>Recent content in Originals on 长弓二十九</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © 2021 Zhang Wei</copyright>
+    <lastBuildDate>Wed, 21 Apr 2021 14:14:13 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/original/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>你的软件是“椰子”还是“苹果”？</title>
+      <link>https://weizhang555.github.io/original/different-software-types/</link>
+      <pubDate>Wed, 21 Apr 2021 14:14:13 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/different-software-types/</guid>
+      <description>
+        
+          
+            我至今在两家公司工作过，第一家是华为，第二家是蚂蚁金服。在两家待的时间都足够长了，谈谈对两家公司软件质量控制的一点感悟。
+用一句话来对比两家的软件质量的话，我称为“椰子型”和“苹果型”。两家公司基本可以代表传统软件公司与互联网公司的不同的质量管理标准。
+椰子型 苹果型 选哪个？ 椰子型 华为擅长做“椰子型”软件，外壳坚硬无比，内部一包水。
+华为的研发流程是很早就花大价钱从IBM引入的IPD研发流程，大致分为几个流程(参考)：
+Charter(立项) --&amp;gt; TR1/2/3 --&amp;gt; PDCP(中期) --&amp;gt; TR4/5 --&amp;gt; EDCP(结项)
+一个项目周期基本上是一年，PDCP之前是项目的设计和PoC阶段，可以改方案和设计，PDCP之后就不允许修改设计了，TR5要达到验收标准， 验收不过等同于项目延期，会对项目的Manager和团队的考评有重大影响，所以TR5的验收是极其重要且严肃的。
+整个开发模型沿用了很多年，基本上是个大的软件开发瀑布模型，周期长，与现在倡导的敏捷开发模式完全背道而驰。 这套开发模式引入之后一直在使用，使得华为一直对软件质量有着极其优秀的掌控，帮助华为站稳了ICT和企业市场，但过于笨重也遭到了很多内部人员的吐槽。 所以在云BU成立以后，也做了局部的敏捷开发的尝试。
+华为的整个研发体系和流程都是很笨重的，也很严肃。研发人员和测试人员的比例可以达到2:1左右（各个部门有不同），由于大量的测试人员的存在，对外出口的软件质量是极好的，不会出现太明显的Bug和崩溃等现象。
+所以在我看来，对外表现的是“椰子型”的外壳。
+但是我比较受不了的一点是，内部的人员质量参差不齐，差的真的是太差了。在我参加“三营”培训时，10个人一组做敏捷开发的培训，全组竟然只有我一个人能写程序，其他9个人给我做测试，也是很搞笑。更可笑的是我们组最后做出来的软件评分是第一名，可能是由于开发：测试达到了1:9吧。
+大量的低水平开发造就了垃圾一般的代码质量，所以华为的软件只能黑盒来用，要是你看到了实现的代码，怕是要战战兢兢吐一口老血了。
+“水”代码其实也不能完全怪垃圾程序员，我自己也写过很多自己不屑的垃圾代码，让我来告诉你原因。
+在最后的突击测试阶段，管理者是要看测试的漏洞数据的，要求随时间的推进测试人员发现的代码bug数应该递减，最后趋近于0，这很合理对吧？ 还有两项要求，要看bug的解决时长，这个关乎manager的考核指标，所以要求每日的bug要日清；并且TR5时系统内的bug必须清0，我不管是多么难解或者重大的bug，一定要修复。
+这两项要求给我造成了巨大的麻烦，设想一下下午6点的时候，测试给你提了5个bug，你挨个看了一下，有1个几乎不可能在短时间解决，于是你跟领导反馈，领导说必须严格按照质量标准，今天一定要解决。 这个情况就多次发生在了我的身上，于是在通宵都仍然无法解决的情况下，只能用大量的workaround去想办法从cmdline和api调用层面屏蔽掉这个bug，于是我亲手给这座代码屎山贡献了更多。最终这包屎山变成了“椰子”来到了用户手里。
+内部的整套研发流程，在我看来是有好有坏的，确实严格的管理流程给了华为对产品的严密把控。华为就是有30%的一流人才带着70%的庸才做出来世界一流软件的质量，但是对我这种有点轻微代码洁癖的人来说，是无法忍受的。 我也迫切的希望能与更多优秀的人合作，而不是浪费时间教笨人做事，所以离开华为，加入了互联网公司，希望能找到更多志同道合的人。
+苹果型 互联网公司就是完全的另一个极端了，我来介绍下蚂蚁的研发流程：
+[流程加载失败...]
+你没看错，没有研发流程，质量把控流程完全没有，测试工程师也很少。 据我所知，这种模式在互联网公司比较流行，即使是Google，Facebook这种大厂也是如此，Facebook是全栈工程师，每个人开发的组件直接上线运行和实测，所以听闻Google的工程师经常嘲讽Facebook是“踩着香蕉皮滑行”，滑到哪儿算哪儿。
+这种模式之所以并没有引起大的问题，在我看来主要是两点原因：
+1.人员平均水平较高
+每个人的主观能动性比较高，代码平均质量较高，会主动写单元测试和集成测试，习惯于敏捷开发，CI/CD。靠着优秀程序员的自我修养，代码质量仍然获得了一定的保证。
+2.面向消费者业务较多，bug不敏感
+ToC的业务对产品的质量要求并没有企业级或CT级要求高，Web形态的产品完全可以先推一个公测版的产品出去试试效果，对于Bug的存在是有一定容忍度的。本身互联网产品迭代快，对速度的要求胜过对质量的要求。
+所以好的互联网公司的产品质量通常是“苹果型”的，外表摸起来有一点点硬，打开来看，内部代码质量也不错。 由于测试人员缺失以及快速迭代的需求，很难将外表做的像椰子一样。
+互联网的开发流程较敏捷，留给工程师的自由发挥空间比较大，所以从我个人来说，是更喜欢互联网这种模式的。二八效应决定着一套80分的软件做到100分需要额外耗费巨大的人力，在不成正比的投入产出面前，有必要衡量下是否要继续优化下去？
+没有流程其实造成了更大的问题，项目立项随意，周期随意，没有验收标准，为了KPI每个人都在努力的造轮子却不管重复不重复。所以我看到的是，对外我们是有无数的黑科技呈现出来，从外部看我们的软件研发能力是无比强大的，但是很多黑科技只能偏居一隅没有机会获得大规模推广，大规模推广的项目也有很多致命的缺陷导致寿命不长。
+由此，阿里巴巴已经开始沦落为“geek的自留地”，自己内部玩的嗨，更多的却是“内卷”而不是创造实际价值。
+选哪个？ 二八效应对应着中国的一句成语“行百里者半九十”，所以在继续提升产品质量的时候，我们都要掂量一下是否值得如此大的投入？
+不同的企业会有不同的选择，ToB or ToC的选择会有大的不同。在我还在华为的时候，我痛恨70%的庸才拉低了华为的档次，拉低了我对外的credit，但是华为的80分到90分恰恰需要70%的庸才作为一颗颗螺丝钉消耗自身的精力来完成，而Google，Facebook的优秀人才们只愿意做软件开发的前一部分创造性的工作做到85分，而非整天无休止的消耗自己。由此造就了“椰子型”与“苹果型”软件的不同。
+选哪个？从政治正确的角度考虑，我们要做“石头型”的软件，从公司层面，“椰子型”是不错的选择，从工程师个人角度，还是“苹果型”更加友好。
+我现在要承认，自己还是很怀念IPD研发流程的，它可恨却又很有用，帮助产品找到正确的方向以及一直运行在正确的轨道上。蚂蚁相比华为，还是有小作坊vs大厂的既视感的，但是我无意贬低任意一家，对前东家和现东家我内心都是喜欢的。
+Respect to everything!
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
+      <link>https://weizhang555.github.io/original/runc-host-escape-cve/</link>
+      <pubDate>Wed, 11 Dec 2019 11:30:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/runc-host-escape-cve/</guid>
+      <description>
+        
+          
+            CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。
+我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。
+尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC ， 这里对源码做了一些修改，在下面分享一下。
+注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
+复现方式：
+在一个terminal里面：
+1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 另一个terminal内执行：
+1$ docker exec -ti 5b28d7ab5083 /bin/sh 此时第一个terminal的打印：
+1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 2root@5b28d7ab5083:/# /exploit 3[+] Overwritten /bin/sh successfully 4[+] Found the PID: 17 5[+] Successfully got the file handle 6[-]Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy 7[+] Successfully got write handle &amp;amp;{0xc0000501e0} 8root@5b28d7ab5083:/# /tmp/下多了一个passwd文件。
+Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。
+修改过的源码：
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>kubernetes安装指南</title>
+      <link>https://weizhang555.github.io/original/kubernetes-setup/</link>
+      <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/kubernetes-setup/</guid>
+      <description>
+        
+          
+            本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
+测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
+具体的安装步骤暂时略过。
+配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
+1# cat &amp;gt; /lib/systemd/system/kubelet.service &amp;lt;&amp;lt; EOF 2[Unit] 3Description=kubelet: The Kubernetes Node Agent 4Documentation=http://kubernetes.io/docs/ 5 6[Service] 7ExecStart=/usr/bin/kubelet 8Restart=always 9StartLimitInterval=0 10RestartSec=10 11 12[Install] 13WantedBy=multi-user.target 14EOF 上面就是简单的调用了下kubelet命令，实际上还有很多参数，这个不着急。因为我们是用kubeadm配置的，所以实际上生效的是kubeadm为kubelet设置的参数，kubelet的启动将依赖kubeadm设置的bootstrap配置：
+1# mkdir -p /etc/systemd/system/kubelet.service.d/ 2# cat &amp;gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &amp;lt;&amp;lt; EOF 3[Service] 4Environment=&amp;#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&amp;#34; 5Environment=&amp;#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&amp;#34; 6# This is a file that &amp;#34;kubeadm init&amp;#34; and &amp;#34;kubeadm join&amp;#34; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically 7EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Docker官方镜像签名方案：Notary</title>
+      <link>https://weizhang555.github.io/original/notary-intro/</link>
+      <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/notary-intro/</guid>
+      <description>
+        
+          
+            1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对照target元数据验证target 2. Notary 2.1 介绍 2.2 目标 2.3 Notary的密钥管理 3. Docker Content Trust本地测试 3.1 环境准备 3.2 push的镜像无签名的情况 3.3 push有签名的版本 3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04 3.5 docker content trust的问题 1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
+1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
+TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;
+1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>创建kata的K8s集群</title>
+      <link>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</link>
+      <pubDate>Sat, 18 Aug 2018 19:10:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</guid>
+      <description>
+        
+          
+            本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
+本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
+以下为正文。
+安装环境 Virtual Machine:
+OS: Ubuntu 18.04
+CPU: 4
+Memory: 8G
+在虚拟化环境中，务必保证嵌套虚拟化打开。
+虚拟化软件必须要支持 可以在guest OS里面通过以下命令检查：
+1$ sudo grep -E &amp;#34;(vmx|svm)&amp;#34; --color=always /proc/cpuinfo 如果没有显示则不支持硬件虚拟化。需要打开相应的虚拟化选项，如果是物理机则需要bios里面启用虚拟化支持。
+启动kvm_intel的嵌套虚拟化支持 1# modprobe -r kvm_intel 2# modprobe kvm_intel nested=1 安装kata-containers 参考：
+https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md
+运行以下命令：
+1$ sudo sh -c &amp;#34;echo &amp;#39;deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/ /&amp;#39; &amp;gt; /etc/apt/sources.list.d/kata-containers.list&amp;#34; 2$ curl -sL http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/Release.key | sudo apt-key add - 3$ sudo -E apt-get update 4$ sudo -E apt-get -y install kata-runtime kata-proxy kata-shim 安装docker 参考：
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Kernel调试基础--制作initramfs</title>
+      <link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link>
+      <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid>
+      <description>
+        
+          
+            通过自己制作initramfs可以使用qemu启动自定义的内核， 可以用于调试或测试。这里记录一下制作简单的initramfs的脚本， 方便后续使用。
+本文参考了链接：Building a minimal Linux / Busybox OS for Qemu
+完整脚本如下：
+1#!/bin/bash 2set -e 3 4CWD=`pwd` 5BUSYBOX_FILE=busybox-1.28.1 6BUSYBOX_SRC=/tmp/busybox 7BUSYBOX_BUILD=/tmp/busybox-build 8INITRAMFS_DIR=/tmp/initramfs 9 10mkdir -p $BUSYBOX_SRC $BUSYBOX_BUILD $INITRAMFS_DIR 11if [ ! -e $BUSYBOX_FILE ]; then 12 wget http://busybox.net/downloads/${BUSYBOX_FILE}.tar.bz2 13fi 14tar -C $BUSYBOX_SRC -xvf ${BUSYBOX_FILE}.tar.bz2 15 16cd ${BUSYBOX_SRC}/${BUSYBOX_FILE} &amp;amp;&amp;amp; make O=${BUSYBOX_BUILD} defconfig 17# enable busybox static build 18cd ${BUSYBOX_BUILD} &amp;amp;&amp;amp; sed -i &amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34; .config \ 19 &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make install 20 21cd $INITRAMFS_DIR &amp;amp;&amp;amp; rm -rfv * &amp;amp;&amp;amp; mkdir -p bin sbin etc proc sys usr/bin usr/sbin \ 22 &amp;amp;&amp;amp; cp -a $BUSYBOX_BUILD/_install/* .
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Kata Containers介绍，附上演讲ppt</title>
+      <link>https://weizhang555.github.io/original/kata-containers-introduction/</link>
+      <pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid>
+      <description>
+        
+          
+            最近在51cto举办的meetup上做了关于Kata Containers的演讲， KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv， 融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。
+详细可以直接参观Kata Containers的github主页： https://github.com/kata-containers/runtime
+演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html
+完整的演讲ppt可以在此处下载： Kata介绍与Huawei_iSula安全容器-张伟.ppt
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>containerd源码阅读(1)--框架篇</title>
+      <link>https://weizhang555.github.io/original/containerd-code-analysis/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/containerd-code-analysis/</guid>
+      <description>
+        
+          
+            1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
+随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分--swarm。
+简单分析下containerd的代码架构，作为官方containerd文档的一个补充。 本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9 为标准讲解。
+2. grpc containerd的架构极其依赖grpc协议。
+1# ls api/services/ 2containers content diff events images namespaces snapshot tasks version api/services目录下存放着containerd提供的不同服务对应的grpc接口。 以比较基础的content服务为例，
+1# ls api/services/content/v1/ 2content.pb.go content.proto 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件， 而程序最终使用的content.pb.go则可以由grpc命令自动生成。 containerd在Makefile中提供了生成.pb.go的指令
+1// 安装依赖的库 2# cd containerd &amp;amp;&amp;amp; make setup 3# make protos 打开content.proto 来看，里面主要定义了一个service：
+113 service Content { 2 14 // Info returns information about a committed object. 3 15 // 4 16 // This call can be used for getting the size of content and checking for 5 17 // existence.
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>runc源码阅读</title>
+      <link>https://weizhang555.github.io/original/runc-code-analysis/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/runc-code-analysis/</guid>
+      <description>
+        
+          
+            runc是docker的核心底层依赖，是容器运行的runtime，目前所属的仓库是opencontainers/runc, 是docker将原先的libcontainer模块独立出来，并贡献给oci社区的产物。
+一直想写一下runc的源码分析，但是一直没有时间。暂时先把自己阅读runc过程中画得xmind思维脑图放出来吧， 里面的内容是runc的代码流程分析。有时间再回来补齐源码分析。
+runc源码分析xmind文件
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>起个头</title>
+      <link>https://weizhang555.github.io/original/start/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/start/</guid>
+      <description>
+        
+          
+            之前也在其他地方开过博客，每次都坚持不了多久，零零散散写一些，回头看一下没多少有价值的东西。 这次搬家到github pages上面，算是个新的开始，旧的东西就随风而去吧，不带过来了。
+从今天开始，尽量腾点时间，多写点技术文章，不在乎长度，不必刻意追求深度，尽量多留下点东西。
+目前在研究容器领域的东西，就多写点docker容器相关的文章吧。
+共勉。
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

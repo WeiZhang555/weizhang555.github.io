@@ -2,22 +2,40 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://weizhang555.github.io/post/</loc>
-    <lastmod>2021-04-21T14:14:13+08:00</lastmod>
+    <loc>https://weizhang555.github.io/tags/bpf/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/different-software-types/</loc>
-    <lastmod>2021-04-21T14:14:13+08:00</lastmod>
+    <loc>https://weizhang555.github.io/translate/bpf-design-qa/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/categories/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/linux-kernel/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/translate/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/</loc>
+    <lastmod>2023-07-21T00:10:46+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/original/</loc>
     <lastmod>2021-04-21T14:14:13+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/runc-host-escape-cve/</loc>
+    <loc>https://weizhang555.github.io/original/different-software-types/</loc>
+    <lastmod>2021-04-21T14:14:13+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/original/runc-host-escape-cve/</loc>
     <lastmod>2019-12-11T11:30:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/runc/</loc>
-    <lastmod>2019-12-11T11:30:46+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/tags/</loc>
     <lastmod>2019-12-11T11:30:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/</loc>
@@ -29,16 +47,16 @@
     <loc>https://weizhang555.github.io/tags/k8s/</loc>
     <lastmod>2019-12-11T11:11:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/kubernetes-setup/</loc>
+    <loc>https://weizhang555.github.io/original/kubernetes-setup/</loc>
     <lastmod>2019-12-11T11:11:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/notary-intro/</loc>
+    <loc>https://weizhang555.github.io/original/notary-intro/</loc>
     <lastmod>2018-12-11T11:20:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/create-k8s-cluster-with-kata/</loc>
+    <loc>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</loc>
     <lastmod>2018-08-18T19:10:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/make-initramfs-for-qemu-start/</loc>
+    <loc>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</loc>
     <lastmod>2018-04-12T19:10:00+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/</loc>
@@ -47,25 +65,23 @@
     <loc>https://weizhang555.github.io/tags/kata/</loc>
     <lastmod>2018-04-08T22:00:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/kata-containers-introduction/</loc>
+    <loc>https://weizhang555.github.io/original/kata-containers-introduction/</loc>
     <lastmod>2018-04-08T22:00:00+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/containerd-code-analysis/</loc>
+    <loc>https://weizhang555.github.io/original/containerd-code-analysis/</loc>
     <lastmod>2017-09-12T22:40:46+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/runc-code-analysis/</loc>
+    <loc>https://weizhang555.github.io/original/runc-code-analysis/</loc>
     <lastmod>2017-09-12T22:40:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/about/</loc>
     <lastmod>2017-09-12T22:40:46+08:00</lastmod>
   </url><url>
-    <loc>https://weizhang555.github.io/post/start/</loc>
+    <loc>https://weizhang555.github.io/original/start/</loc>
     <lastmod>2017-09-12T22:40:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/%E9%9A%8F%E6%89%8B/</loc>
     <lastmod>2017-09-12T22:40:46+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/categories/</loc>
   </url><url>
     <loc>https://weizhang555.github.io/series/</loc>
   </url>

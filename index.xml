@@ -7,13 +7,46 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2021 Zhang Wei</copyright>
-    <lastBuildDate>Wed, 21 Apr 2021 14:14:13 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 21 Jul 2023 00:10:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>BPF的设计原则Q&amp;A</title>
+      <link>https://weizhang555.github.io/translate/bpf-design-qa/</link>
+      <pubDate>Fri, 21 Jul 2023 00:10:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/bpf-design-qa/</guid>
+      <description>
+        
+          
+            原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules
+声明：
+本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。
+以下是正文。
+问：BPF是一种类似x86和arm64的通用指令集吗？ 答: NO.
+问：BPF是通用的虚拟机吗？ 答：NO。
+BPF是遵循C语言调用约定的一种通用指令集。
+BPF is generic instruction set with C calling convention.
+问：为什么选择了C语言调用约定？ 答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集，同时也考虑到了其他架构的一些重要“怪癖”，也定义了与那些平台上的linux kernel上C调用约定兼容的调用约定。
+问：未来会支持多个返回值吗？ 答：NO。BPF仅支持使用R0寄存器作为函数返回值。
+问：未来会支持超过5个函数入参吗？ 答：NO。BPF函数调用方式仅支持寄存器R1-R5作为参数。BPF不是一个独立的指令集。（不像x64 ISA允许msft, cdecl和其他约定）
+(unlike x64 ISA that allows msft, cdecl and other conventions)
+问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？ 答：NO
+问：BPF程序可以访问栈指针(stack pointer)吗？ 答：NO。
+只有帧指针(frame pointer)(寄存器R10)可以被访问。从编译器角度看，拥有栈指针是有必要的。例如，LLVM定义了寄存器R11作为BPF后端的栈指针，但是它确保了生成的代码永远不会使用它。
+问：C调用惯例减少了可能的使用案例吗？ 答：YES。
+BPF的设计强制大的功能要以内核helper函数和内核对象（像BPF maps）的形式添加，并且互相之间可以无缝互操作。它允许kernel调用BPF程序，和BPF程序调用kernel helpers，这个过程完全零开销，因为他们都是原生C代码。特别是对于JITed BPF程序场景，他们本来就是与原生的kernel C代码完全一致无法区分。
+That is particularly the case for JITed BPF programs that are indistinguishable from native kernel C code.
+          
+          
+        
+      </description>
+    </item>
+    
     <item>
       <title>你的软件是“椰子”还是“苹果”？</title>
-      <link>https://weizhang555.github.io/post/different-software-types/</link>
+      <link>https://weizhang555.github.io/original/different-software-types/</link>
       <pubDate>Wed, 21 Apr 2021 14:14:13 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/different-software-types/</guid>
+      <guid>https://weizhang555.github.io/original/different-software-types/</guid>
       <description>
         
           
@@ -57,10 +90,10 @@ Respect to everything!
     
     <item>
       <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
-      <link>https://weizhang555.github.io/post/runc-host-escape-cve/</link>
+      <link>https://weizhang555.github.io/original/runc-host-escape-cve/</link>
       <pubDate>Wed, 11 Dec 2019 11:30:46 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/runc-host-escape-cve/</guid>
+      <guid>https://weizhang555.github.io/original/runc-host-escape-cve/</guid>
       <description>
         
           
@@ -83,15 +116,15 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
     
     <item>
       <title>kubernetes安装指南</title>
-      <link>https://weizhang555.github.io/post/kubernetes-setup/</link>
+      <link>https://weizhang555.github.io/original/kubernetes-setup/</link>
       <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/kubernetes-setup/</guid>
+      <guid>https://weizhang555.github.io/original/kubernetes-setup/</guid>
       <description>
         
           
             本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
-测试环境 下载 配置kubelet 拉起master节点 增加worker 测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
+测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
 下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
 具体的安装步骤暂时略过。
 配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
@@ -105,10 +138,10 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
     
     <item>
       <title>Docker官方镜像签名方案：Notary</title>
-      <link>https://weizhang555.github.io/post/notary-intro/</link>
+      <link>https://weizhang555.github.io/original/notary-intro/</link>
       <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/notary-intro/</guid>
+      <guid>https://weizhang555.github.io/original/notary-intro/</guid>
       <description>
         
           
@@ -124,16 +157,17 @@ TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3
     
     <item>
       <title>创建kata的K8s集群</title>
-      <link>https://weizhang555.github.io/post/create-k8s-cluster-with-kata/</link>
+      <link>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</link>
       <pubDate>Sat, 18 Aug 2018 19:10:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/create-k8s-cluster-with-kata/</guid>
+      <guid>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</guid>
       <description>
         
           
             本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
 本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
-安装环境 安装kata-containers 安装docker 安装cri-containerd step 0: 安装依赖 step 1: 下载containerd的tar包： 安装cni插件 安装环境 Virtual Machine:
+以下为正文。
+安装环境 Virtual Machine:
 OS: Ubuntu 18.04
 CPU: 4
 Memory: 8G
@@ -152,10 +186,10 @@ https://github.com/kata-containers/documentation/blob/master/install/ubuntu-inst
     
     <item>
       <title>Kernel调试基础--制作initramfs</title>
-      <link>https://weizhang555.github.io/post/make-initramfs-for-qemu-start/</link>
+      <link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link>
       <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/make-initramfs-for-qemu-start/</guid>
+      <guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid>
       <description>
         
           
@@ -171,10 +205,10 @@ https://github.com/kata-containers/documentation/blob/master/install/ubuntu-inst
     
     <item>
       <title>Kata Containers介绍，附上演讲ppt</title>
-      <link>https://weizhang555.github.io/post/kata-containers-introduction/</link>
+      <link>https://weizhang555.github.io/original/kata-containers-introduction/</link>
       <pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/kata-containers-introduction/</guid>
+      <guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid>
       <description>
         
           
@@ -190,21 +224,21 @@ https://github.com/kata-containers/documentation/blob/master/install/ubuntu-inst
     
     <item>
       <title>containerd源码阅读(1)--框架篇</title>
-      <link>https://weizhang555.github.io/post/containerd-code-analysis/</link>
+      <link>https://weizhang555.github.io/original/containerd-code-analysis/</link>
       <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/containerd-code-analysis/</guid>
+      <guid>https://weizhang555.github.io/original/containerd-code-analysis/</guid>
       <description>
         
           
-            1. 简介 2. grpc 3. containerd启动 4. 总结 1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
+            1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
 随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分--swarm。
 简单分析下containerd的代码架构，作为官方containerd文档的一个补充。 本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9 为标准讲解。
 2. grpc containerd的架构极其依赖grpc协议。
 1# ls api/services/ 2containers content diff events images namespaces snapshot tasks version api/services目录下存放着containerd提供的不同服务对应的grpc接口。 以比较基础的content服务为例，
 1# ls api/services/content/v1/ 2content.pb.go content.proto 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件， 而程序最终使用的content.pb.go则可以由grpc命令自动生成。 containerd在Makefile中提供了生成.pb.go的指令
 1// 安装依赖的库 2# cd containerd &amp;amp;&amp;amp; make setup 3# make protos 打开content.proto 来看，里面主要定义了一个service：
-113 service Content { 2 14 // Info returns information about a committed object.
+113 service Content { 2 14 // Info returns information about a committed object. 3 15 // 4 16 // This call can be used for getting the size of content and checking for 5 17 // existence.
           
           
         
@@ -213,10 +247,10 @@ https://github.com/kata-containers/documentation/blob/master/install/ubuntu-inst
     
     <item>
       <title>runc源码阅读</title>
-      <link>https://weizhang555.github.io/post/runc-code-analysis/</link>
+      <link>https://weizhang555.github.io/original/runc-code-analysis/</link>
       <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/runc-code-analysis/</guid>
+      <guid>https://weizhang555.github.io/original/runc-code-analysis/</guid>
       <description>
         
           
@@ -231,10 +265,10 @@ runc源码分析xmind文件
     
     <item>
       <title>起个头</title>
-      <link>https://weizhang555.github.io/post/start/</link>
+      <link>https://weizhang555.github.io/original/start/</link>
       <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
       
-      <guid>https://weizhang555.github.io/post/start/</guid>
+      <guid>https://weizhang555.github.io/original/start/</guid>
       <description>
         
           
