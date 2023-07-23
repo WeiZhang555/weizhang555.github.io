@@ -176,12 +176,14 @@
       <div class="excerpt_footer">
         <div class="pale">
           
-            <p>原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules
+            <p>原文链接：BPF Design Q&amp;A
 声明：
 本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。
 以下是正文。
 问：BPF是一种类似x86和arm64的通用指令集吗？ 答: NO.
-问：BPF是通用的虚拟机吗？ 答：NO。 …</p>
+问：BPF是通用的虚拟机吗？ 答：NO。
+BPF是遵循C语言调用约定(C calling convention)的一种通用指令集。
+问：为什么选择了C语言调用约定？ 答：因为BPF程序是为在Linux …</p>
           
           <br>
           <a href="https://weizhang555.github.io/translate/bpf-design-qa/" title="Read More" class="excerpt_more button">Read More</a>

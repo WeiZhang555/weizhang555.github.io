@@ -21,18 +21,18 @@
 <meta property="og:locale" content="en" />
 
 <meta property="og:type" content="article">
-<meta name="description" content="原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules
+<meta name="description" content="原文链接：BPF Design Q&amp;A
 声明：
-本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限， …" />
+本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单 …" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="">
 <meta name="twitter:title" content="BPF的设计原则Q&amp;A" />
 <meta name="twitter:image" content="https://weizhang555.github.io/images/thumbnail.png"/>
 <meta property="og:url" content="https://weizhang555.github.io/translate/bpf-design-qa/" />
 <meta property="og:title" content="BPF的设计原则Q&amp;A" />
-<meta property="og:description" content="原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules
+<meta property="og:description" content="原文链接：BPF Design Q&amp;A
 声明：
-本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限， …" />
+本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单 …" />
 <meta property="og:image" content="https://weizhang555.github.io/images/thumbnail.png" />
 
 <link rel="apple-touch-icon" sizes="180x180" href="https://weizhang555.github.io/icons/apple-touch-icon.png">
@@ -162,7 +162,7 @@
   </span>
   </div>
 
-    <div class="post_body"><p>原文链接：https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules</p>
+    <div class="post_body"><p>原文链接：<a href="https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules">BPF Design Q&amp;A</a></p>
 <p>声明：</p>
 <ul>
 <li>本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。</li>
@@ -171,109 +171,166 @@
 <p>这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。</p>
 <p>以下是正文。</p>
 <hr>
-<h3 id="问bpf是一种类似x86和arm64的通用指令集吗">问：BPF是一种类似x86和arm64的通用指令集吗？</h3>
+<ul>
+<li><u>问：BPF是一种类似x86和arm64的通用指令集吗？</u></li>
+</ul>
 <p>答: NO.</p>
-<h3 id="问bpf是通用的虚拟机吗">问：BPF是通用的虚拟机吗？</h3>
+<ul>
+<li><u>问：BPF是通用的虚拟机吗？</u></li>
+</ul>
 <p>答：NO。</p>
-<p>BPF是遵循C语言调用约定的一种通用指令集。</p>
-<blockquote>
-<p>BPF is generic instruction set with C calling convention.</p>
-</blockquote>
-<h3 id="问为什么选择了c语言调用约定">问：为什么选择了C语言调用约定？</h3>
-<p>答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集，同时也考虑到了其他架构的一些重要“怪癖”，也定义了与那些平台上的linux kernel上C调用约定兼容的调用约定。</p>
-<h3 id="问未来会支持多个返回值吗">问：未来会支持多个返回值吗？</h3>
+<p>BPF是遵循C语言调用约定(C calling convention)的一种通用指令集。</p>
+<ul>
+<li><u>问：为什么选择了C语言调用约定？</u></li>
+</ul>
+<p>答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集(同时也考虑到了其他架构的一些重要“怪癖”)，也定义了与那些架构上的linux kernel的C调用约定兼容的调用约定。</p>
+<ul>
+<li><u>问：未来会支持多个返回值吗？</u></li>
+</ul>
 <p>答：NO。BPF仅支持使用R0寄存器作为函数返回值。</p>
-<h3 id="问未来会支持超过5个函数入参吗">问：未来会支持超过5个函数入参吗？</h3>
-<p>答：NO。BPF函数调用方式仅支持寄存器R1-R5作为参数。BPF不是一个独立的指令集。（不像x64 ISA允许msft, cdecl和其他约定）</p>
-<blockquote>
-<p>(unlike x64 ISA that allows msft, cdecl and other conventions)</p>
-</blockquote>
-<h3 id="问bpf程序可以访问指令指针instruction-pointer或返回地址吗">问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？</h3>
+<ul>
+<li><u>问：未来会支持超过5个函数参数吗？</u></li>
+</ul>
+<p>答：NO。BPF 调用约定仅允许寄存器 R1-R5 用作参数。 BPF 不是一个独立的指令集。 （与允许 msft、cdecl 和其他约定的 x64 ISA 不同）</p>
+<ul>
+<li><u>问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？ </u></li>
+</ul>
 <p>答：NO</p>
-<h3 id="问bpf程序可以访问栈指针stack-pointer吗">问：BPF程序可以访问栈指针(stack pointer)吗？</h3>
+<ul>
+<li><u>问：BPF程序可以访问栈指针(stack pointer)吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>只有帧指针(frame pointer)(寄存器R10)可以被访问。从编译器角度看，拥有栈指针是有必要的。例如，LLVM定义了寄存器R11作为BPF后端的栈指针，但是它确保了生成的代码永远不会使用它。</p>
-<h3 id="问c调用惯例减少了可能的使用案例吗">问：C调用惯例减少了可能的使用案例吗？</h3>
+<ul>
+<li><u>问：C 调用约定是否会减少可能的用例？</u></li>
+</ul>
 <p>答：YES。</p>
-<p>BPF的设计强制大的功能要以内核helper函数和内核对象（像BPF maps）的形式添加，并且互相之间可以无缝互操作。它允许kernel调用BPF程序，和BPF程序调用kernel helpers，这个过程完全零开销，因为他们都是原生C代码。特别是对于JITed BPF程序场景，他们本来就是与原生的kernel C代码完全一致无法区分。</p>
-<blockquote>
-<p>That is particularly the case for JITed BPF programs that are indistinguishable from native kernel C code.</p>
-</blockquote>
-<h3 id="问这是否意味着对bpf代码进行创新的扩展是不允许的">问：这是否意味着对BPF代码进行‘创新的’扩展是不允许的？</h3>
+<p>BPF的设计强制以内核helper函数和内核对象（像BPF maps）的形式添加主要功能，并且他们之间可以无缝互操作。它允许kernel调用BPF程序，并且BPF程序可以零开销调用kernel helpers，因为他们都是原生C代码。对于与本机内核 C 代码无法区分的 JIT 化 BPF 程序尤其如此。</p>
+<ul>
+<li><u>问：这是否意味着对BPF代码进行‘创新’扩展是不允许的？</u></li>
+</ul>
 <p>答：算对吧（Soft yes）。</p>
-<p>至少到目前为止成立，直到BPF代码支持了bpf-to-bpf calls, indirect calls, loops, global variables, jump tables, read-only sections, 和其他所有C代码可以产生的构造。</p>
-<h3 id="问循环loops可以以安全的方式支持吗">问：循环（loops）可以以安全的方式支持吗？</h3>
+<p>至少到目前为止成立，直到BPF代码支持了bpf-to-bpf calls, indirect calls, loops, global variables, jump tables, read-only sections, 和其他所有C代码可以产生的结构。</p>
+<ul>
+<li><u>问：循环（loops）可以以安全的方式支持吗？</u></li>
+</ul>
 <p>答：目前还不清楚。</p>
 <p>BPF开发者正在尝试找到一种方式实现有界的循环（bounded loops）。</p>
-<h3 id="问verifier的限制是什么">问：verifier的限制是什么？</h3>
+<ul>
+<li><u>问：verifier的限制是什么？</u></li>
+</ul>
 <p>答：用户空间已知的唯一限制是BPF_MAXINSNS(4096)，这是非特权bpf程序可以拥有的最大指令数。verifier有各种内部限制，像是程序分析过程中可以探索的最大指令数，目前，该限制设置为100万。 这实质上意味着最大的程序可以包含 100 万条 NOP 指令。 还有一些限制，包括后续分支的最大数量，嵌套 bpf 到 bpf 调用的数量，每条指令的verifier状态数量，程序使用的maps数量，所有这些限制都可能被足够复杂的程序触碰到。 还有一些非数字限制可能会导致程序被拒绝。 verifier过去仅识别指针+常量表达式，而现在它已经可以识别指针+bounded_register了； bpf_lookup_map_elem(key) 过去要求“key”必须是指向堆栈的指针，而现在，“key”可以是指向maps值的指针了。 verifier正在逐渐变得“更聪明”，一些限制正在被取消。 想知道程序能否被verifier接受的唯一方法是尝试加载它。 bpf 开发过程保证未来的内核版本一定能接受早期版本所接受的所有 bpf 程序。</p>
 <h2 id="指令级别的问题">指令级别的问题</h2>
 <hr>
-<h3 id="问ld_abs和ld_ind指令-vs-c-代码">问：LD_ABS和LD_IND指令 vs C 代码</h3>
-<h3 id="问为什么bpf中存在ld_abs-和-ld_ind指令然而c代码并不能表达他们而不得不使用builtin-intrinsics译者注编译器内建函数">问：为什么BPF中存在LD_ABS 和 LD_IND指令，然而C代码并不能表达他们，而不得不使用builtin intrinsics（译者注：编译器内建函数）？</h3>
-<p>答：这是兼容classic BPF（译者注：cBPF）的产物。没有它们，现代的BPF网络代码性能更高。参见 'direct packet access'。</p>
-<h3 id="问bpf指令与原生cpu指令不能一一映射">问：BPF指令与原生CPU指令不能一一映射</h3>
-<h3 id="问看起来不是所有的bpf指令都能与cpu指令一一对应例如为什么bpf_jne和其他比较和跳转指令与cpu的不一样">问：看起来不是所有的BPF指令都能与CPU指令一一对应。例如，为什么BPF_JNE和其他比较和跳转指令与CPU的不一样？</h3>
+<ul>
+<li><u>问：LD_ABS和LD_IND指令 与 C 代码比较</u></li>
+<li><u>问：为什么BPF中存在LD_ABS 和 LD_IND指令，然而C代码并不能表达他们，而不得不使用内置内在函数（builtin intrinsics。译者注：编译器内建函数）？</u></li>
+</ul>
+<p>答：这是兼容classic BPF（译者注：cBPF）的神器。没有它们，现代的BPF网络代码性能更高。参见 'direct packet access'。</p>
+<ul>
+<li><u>问：BPF指令与原生CPU指令不能一一对应</u></li>
+<li><u>问：看起来不是所有的BPF指令都能与CPU指令一一对应。例如，为什么BPF_JNE和其他比较和跳转指令与CPU的不一样？</u></li>
+</ul>
 <p>答：这是必要的，以避免将flags引入到 ISA 中，而这些flags不可能在跨CPU架构时实现的通用和高效。</p>
-<h3 id="问为什么bpf_div指令不映射到x64-div">问：为什么BPF_DIV指令不映射到x64 div？</h3>
-<p>答：因为如果我们选择一对一映射到x64，那么在arm64和其他架构上的支持将更复杂。同时它需要在runtime检查除0异常（div-by-zero runtime check）。</p>
-<h3 id="问为什么没有针对有符号除法操作的bpf_sdiv指令">问：为什么没有针对有符号除法操作的BPF_SDIV指令？</h3>
+<ul>
+<li><u>问：为什么BPF_DIV指令不映射到x64 div？</u></li>
+</ul>
+<p>答：因为如果我们选择一对一映射到x64，那么在arm64和其他架构上的支持将更复杂。同时它需要在运行时(runtime)检查除0异常（div-by-zero runtime check）。</p>
+<ul>
+<li><u>问：为什么没有针对有符号除法操作的BPF_SDIV指令？</u></li>
+</ul>
 <p>答：因为它很少用。llvm在这个案例下会打印错误，并且会建议使用无符号除法来取代。</p>
-<h3 id="问为什么bpf有隐式的prologue序言和-epilogue尾声">问：为什么BPF有隐式的prologue（序言）和 epilogue（尾声）？</h3>
+<ul>
+<li><u>问：为什么BPF有隐式的prologue（序言）和 epilogue（尾声）？</u></li>
+</ul>
 <p>答：因为像 sparc 这样的体系结构具有寄存器窗口，并且通常体系结构之间存在足够细微的差异，因此将返回地址简单地存储到堆栈中是行不通的。 另一个原因是 BPF 必须避免被零除（以及 LD_ABS insn 的遗留异常路径）。 这些指令需要调用epilogue（尾声）并隐式返回。</p>
-<h3 id="问为什么bpf_jlt和bpf_jle没有在最开始的时候引入">问：为什么BPF_JLT和BPF_JLE没有在最开始的时候引入？</h3>
-<p>答：因为经典BPF（cBPF）没有它们，而且BPF作者们认为编译器的workaround是可以接受的。结果由于缺乏这些“比较”指令程序的性能变差，所以它们又被加进来了。这两个指令是一个完美的例子，展示了何种新的BPF指令可以被接受以及有可能在未来被加进来。这两个已经有在原生CPU里等同的指令了，没有和硬件指令一一对应的新指令不会被接受。</p>
-<h3 id="问bpf-32位字寄存器需求">问：BPF 32位字寄存器需求</h3>
-<h3 id="问bpf-32位子寄存器需要将bpf寄存器的高32位清零这使得bpf虚拟机对于-32-位-cpu-架构和-32-位硬件加速器来说效率低下-未来bpf中可能添加真正的32位寄存器吗">问：BPF 32位子寄存器需要将BPF寄存器的高32位清零，这使得BPF虚拟机对于 32 位 CPU 架构和 32 位硬件加速器来说效率低下。 未来BPF中可能添加真正的32位寄存器吗？</h3>
+<ul>
+<li><u>问：为什么BPF_JLT和BPF_JLE没有在最开始的时候引入？</u></li>
+</ul>
+<p>答：因为经典BPF（cBPF）没有它们，而且BPF作者们认为编译器的workaround是可以接受的。事实证明，由于缺少这些比较指令，程序会损失性能，所以它们又被加进来了。这两个指令是一个完美的例子，展示了何种新的BPF指令可以被接受以及有可能在未来被加进来。这两个已经有在原生CPU里等效的指令了，没有和硬件指令一一对应的新指令不会被接受。</p>
+<ul>
+<li><u>问：BPF 32位字寄存器需求</u></li>
+<li><u>问：BPF 32位子寄存器需要将BPF寄存器的高32位清零，这使得BPF虚拟机对于 32 位 CPU 架构和 32 位硬件加速器来说效率低下。 未来BPF中可能添加真正的32位寄存器吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>但已经有一些针对BPF寄存器高32位清零的优化，可用于改善JITed BPF程序在32位架构上的性能。</p>
 <p>从版本 7 开始，LLVM 能够生成在 32 位子寄存器上操作的指令，前提是传递选项 -mattr=+alu32 来编译程序。 此外，verifier现在可以标记需要将目标寄存器的高位清零的指令，并插入显式零扩展 (zext) 指令（mov32 变体）。 这意味着对于没有 zext 硬件支持的架构，JIT 后端不需要清除 alu32 指令或窄加载（narrow loads）写入的子寄存器的高位。 相反，后端只需要支持该 mov32 变体的代码生成，并覆盖 bpf_jit_needs_zext() 以使其返回“true”（以便在verifier中启用 zext 插入）。</p>
 <p>请注意，JIT 后端可能对 zext 提供部分硬件支持。 在这种情况下，如果启用了verifier zext 插入，则可能会导致插入不必要的 zext 指令。 可以通过在 JIT 后端内创建一个简单的窥视孔来删除此类指令：如果一条指令具有对 zext 的硬件支持，并且如果下一条指令是显式 zext，则在进行代码生成时可以跳过后者。</p>
-<h3 id="问bpf有稳定的abi吗">问：BPF有稳定的ABI吗？</h3>
+<ul>
+<li><u>问：BPF有稳定的ABI吗？</u></li>
+</ul>
 <p>答：YES。 BPF 指令、BPF 程序的参数、helper函数及其参数集、识别的返回码都是 ABI 的一部分。 然而，tracing程序有一个特定的例外，这些程序使用 bpf_probe_read() 等helpers来遍历内核内部数据结构和使用内核内部头文件进行编译。 这两个内核内部结构都可能发生变化，并且可能会与较新的内核发生冲突，因此程序需要进行相应的调整。</p>
 <p>新的 BPF 功能通常是通过使用 kfuncs 而不是新的helpers来添加的。 Kfunc 不被视为稳定 API 的一部分，并且具有自己的生命周期期望，如 “3. kfunc 生命周期期望”中所述。</p>
-<h3 id="问tracepoints是稳定的abi的一部分吗">问：tracepoints是稳定的ABI的一部分吗？</h3>
+<ul>
+<li><u>问：tracepoints是稳定的ABI的一部分吗？</u></li>
+</ul>
 <p>答：NO。 Tracepoints与内部实现细节相关，因此它们可能会发生变化，并且可能会与较新的内核发生冲突。 当这种情况发生时，BPF 程序需要做出相应的改变。</p>
-<h3 id="问kprobes可以attach的位置属于稳定的abi的一部分吗">问：kprobes可以attach的位置属于稳定的ABI的一部分吗？</h3>
+<ul>
+<li><u>问：kprobes可以attach的位置属于稳定的ABI的一部分吗？</u></li>
+</ul>
 <p>答：NO。kprobes 可以attach的位置是内部实现细节，这意味着它们可能会发生变化，并且可能会与较新的内核发生冲突。 当这种情况发生时，BPF 程序需要做出相应的改变。</p>
-<h3 id="问一个bpf程序可以使用多少栈空间stack-space">问：一个BPF程序可以使用多少栈空间（stack space）？</h3>
+<ul>
+<li><u>问：一个BPF程序可以使用多少栈空间（stack space）？</u></li>
+</ul>
 <p>答：目前，所有程序类型都限制为 512 字节的栈空间，但verifier会计算实际使用的栈空间，并且解释器和大多数 JITed 代码都会消耗必要的数量。</p>
-<h3 id="问bpf程序可以卸载到硬件上吗">问：BPF程序可以卸载到硬件上吗？</h3>
+<ul>
+<li><u>问：BPF程序可以卸载到硬件上吗？</u></li>
+</ul>
 <p>答：YES。NFP 驱动程序支持BPF硬件卸载。</p>
-<h3 id="问经典bpfcbpf解释器还存在吗">问：经典BPF（cBPF）解释器还存在吗？</h3>
+<ul>
+<li><u>问：经典BPF（cBPF）解释器还存在吗？</u></li>
+</ul>
 <p>答：NO。cBPF程序会被转换为eBPF（extend BPF）指令。</p>
-<h3 id="问bpf可以调用任意的内核函数吗">问：BPF可以调用任意的内核函数吗？</h3>
+<ul>
+<li><u>问：BPF可以调用任意的内核函数吗？</u></li>
+</ul>
 <p>答：NO。BPF 程序只能调用以 BPF helpers函数或 kfunc 形式暴露的特定函数。 每种程序类型都定义了可用的函数集合。</p>
-<h3 id="问bpf可以覆盖任何的内核内存吗">问：BPF可以覆盖任何的内核内存吗？</h3>
+<ul>
+<li><u>问：BPF可以覆盖任何的内核内存吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>Tracing bpf 程序可以使用 bpf_probe_read() 和 bpf_probe_read_str() helper程序读取任意内存。 网络程序无法读取任意内存，因为它们无权访问这些helper函数。 程序永远不能直接读取或写入任意内存。</p>
-<h3 id="问bpf程序可以覆盖任意的用户态内存吗">问：BPF程序可以覆盖任意的用户态内存吗？</h3>
+<ul>
+<li><u>问：BPF程序可以覆盖任意的用户态内存吗？</u></li>
+</ul>
 <p>答：算是吧(Sort-of).</p>
 <p>Tracing BPF程序可以使用bpf_probe_write_user()覆盖当前任务的用户内存。 每次加载此类程序时，内核都会打印警告消息，因此该helper程序仅对实验和原型是有用的。 Tracing BPF 程序仅限 root 用户可以使用。</p>
-<h3 id="问通过内核模块提供新功能">问：通过内核模块提供新功能</h3>
-<h3 id="问bpf-功能例如新的程序或map类型新helper程序等是否可以从内核模块代码中添加">问：BPF 功能（例如新的程序或map类型、新helper程序等）是否可以从内核模块代码中添加？</h3>
+<ul>
+<li><u>问：通过内核模块提供新功能</u></li>
+<li><u>问：BPF 功能（例如新的程序或map类型、新helper程序等）是否可以从内核模块代码中添加？</u></li>
+</ul>
 <p>答：YES，通过kfuncs和kptrs。</p>
 <p>核心 BPF 功能（例如程序类型、maps和helper程序）无法通过模块添加。 然而，模块可以通过导出 kfuncs（它可能返回指向模块内部数据结构的指针作为 kptrs）来向 BPF 程序暴露功能。</p>
-<h3 id="问直接调用内核函数是abi吗">问：直接调用内核函数是ABI吗？</h3>
-<h3 id="问一些内核函数如tcp_slow_start可以被bpf程序调用这些内核函数成为了abi吗">问：一些内核函数（如tcp_slow_start）可以被BPF程序调用。这些内核函数成为了ABI吗？</h3>
+<ul>
+<li><u>问：直接调用内核函数是ABI吗？</u></li>
+<li><u>问：一些内核函数（如tcp_slow_start）可以被BPF程序调用。这些内核函数成为了ABI吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>内核函数原型会发生变化，bpf程序将被verifier拒绝。 另外，例如，一些 bpf 可调用的内核函数已经被其他内核 tcp cc（拥塞控制）实现所使用。 如果这些内核函数中的任何一个发生了更改，则树内和树外（译者注：git tree）内核 tcp cc 实现都必须更改。 bpf 程序也是如此，必须进行相应调整。 有关详细信息，请参阅 “3. kfunc 生命周期期望”。</p>
-<h3 id="问attach到任意的内核函数是abi吗">问：attach到任意的内核函数是ABI吗？</h3>
-<h3 id="问bpf程序可以attach到很多内核函数上这些内核函数成为了abi的一部分吗">问：BPF程序可以attach到很多内核函数上。这些内核函数成为了ABI的一部分吗？</h3>
+<ul>
+<li><u>问：attach到任意的内核函数是ABI吗？</u></li>
+<li><u>问：BPF程序可以attach到很多内核函数上。这些内核函数成为了ABI的一部分吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>内核函数原型会改变，attach到它们的 BPF 程序也需要改变。 应使用 BPF 一次编译、到处运行 (CO-RE)，以便更轻松地让 BPF 程序适应不同版本的内核。</p>
-<h3 id="问用-btf_id-标记函数会使该函数成为-abi">问：用 BTF_ID 标记函数会使该函数成为 ABI？</h3>
+<ul>
+<li><u>问：用 BTF_ID 标记函数会使该函数成为 ABI？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>与 EXPORT_SYMBOL_GPL 宏一样，BTF_ID 宏不会导致函数成为 ABI 的一部分。</p>
-<h3 id="问map值中特殊-bpf-类型的兼容性是什么">问：map值中特殊 BPF 类型的兼容性是什么？</h3>
-<h3 id="问用户被允许在其-bpf-map值中嵌入-bpf_spin_lockbpf_timer-字段当使用-bpf-maps的-btf-支持时-这允许在map值内的这些字段上使用此类对象的helper程序-用户还可以嵌入指向某些内核类型的指针带有-__kptr_untrusted-和-__kptr-btf-标记-内核会保证这些功能的向后兼容性吗">问：用户被允许在其 BPF map值中嵌入 bpf_spin_lock、bpf_timer 字段（当使用 BPF maps的 BTF 支持时）。 这允许在map值内的这些字段上使用此类对象的helper程序。 用户还可以嵌入指向某些内核类型的指针（带有 __kptr_untrusted 和 __kptr BTF 标记）。 内核会保证这些功能的向后兼容性吗？</h3>
+<ul>
+<li><u>问：map值中特殊 BPF 类型的兼容性是什么？</u></li>
+<li><u>问：用户被允许在其 BPF map值中嵌入 bpf_spin_lock、bpf_timer 字段（当使用 BPF maps的 BTF 支持时）。 这允许在map值内的这些字段上使用此类对象的helper程序。 用户还可以嵌入指向某些内核类型的指针（带有 __kptr_untrusted 和 __kptr BTF 标记）。 内核会保证这些功能的向后兼容性吗？</u></li>
+</ul>
 <p>答：这要看情况。 对于 bpf_spin_lock、bpf_timer：YES，对于 kptr 和其他所有内容：NO，但请参见下文。</p>
 <p>对于已经添加的结构类型，例如 bpf_spin_lock 和 bpf_timer，内核将保证向后兼容性，因为它们是 UAPI 的一部分。</p>
-<p>对于kptr来说，它们也是UAPI的一部分，但只是相对于kptr机制而言。 您可以在结构中与 __kptr_untrusted 和 __kptr 标记指针一起使用的类型**不是*### 问：UAPI 合约的一部分。 支持的类型可以并且将会随着内核版本的不同而改变。 但是，针对支持的类型，诸如访问 kptr 字段和 bpf_kptr_xchg() helper程序之类的操作将继续在不同内核版本中得到支持。</p>
+<p>对于kptr来说，它们也是UAPI的一部分，但只是相对于kptr机制而言。 您可以在结构中与 __kptr_untrusted 和 __kptr 标记指针一起使用的类型<strong>不是</strong>UAPI 合约的一部分。 支持的类型可以并且将会随着内核版本的不同而改变。 但是，针对支持的类型，诸如访问 kptr 字段和 bpf_kptr_xchg() helper程序之类的操作将继续在不同内核版本中得到支持。</p>
 <p>对于任何其他受支持的结构类型，除非在本文档中明确说明并添加到 bpf.h UAPI 标头中，否则此类类型在跨内核版本时“可以”并且“将会”任意更改其大小、类型和对齐方式，或任何其他用户可见的 API 或 ABI 详细信息。 用户必须调整他们的 BPF 程序以适应新的变化并更新它们，以确保他们的程序继续正确工作。</p>
 <p>注意：BPF 子系统专门为类型名称保留了“bpf_”前缀，以便将来引入更多特殊字段。 因此，用户程序必须避免定义带有“bpf_”前缀的类型，以免在将来的版本中被破坏。 换句话说，如果在 BTF 中使用带有“bpf_”前缀的类型，则无法保证向后兼容性。</p>
-<h3 id="问分配对象中特殊-bpf-类型的兼容性是什么">问：分配对象中特殊 BPF 类型的兼容性是什么？</h3>
-<h3 id="问与上面相同但对于分配的对象即使用-bpf_obj_new-为用户定义类型分配的对象-内核会保证这些功能的向后兼容性吗">问：与上面相同，但对于分配的对象（即使用 bpf_obj_new 为用户定义类型分配的对象）。 内核会保证这些功能的向后兼容性吗？</h3>
+<ul>
+<li><u>问：分配对象中特殊 BPF 类型的兼容性是什么？</u></li>
+<li><u>问：与上面相同，但对于分配的对象（即使用 bpf_obj_new 为用户定义类型分配的对象）。 内核会保证这些功能的向后兼容性吗？</u></li>
+</ul>
 <p>答：NO。</p>
 <p>与map值类型不同，用于处理分配对象的 API 以及对其中特殊字段的任何支持都是通过 kfunc 公开的，因此具有与 kfunc 本身相同的生命周期期望。 有关详细信息，请参阅 “3. kfunc 生命周期期望”。</p>
 
