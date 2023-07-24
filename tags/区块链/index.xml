@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>区块链 on WeiZhang555</title>
+    <link>https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</link>
+    <description>Recent content in 区块链 on WeiZhang555</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright> © Zhang Wei(weizhang555)</copyright>
+    <lastBuildDate>Fri, 03 Jun 2022 22:08:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solidity入门系列(1)：基于Truffle搭建本地开发环境</title>
+      <link>https://weizhang555.github.io/original/learn-solidity/</link>
+      <pubDate>Fri, 03 Jun 2022 22:08:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/learn-solidity/</guid>
+      <description>
+        
+          
+            怎样开始Solidity的学习 最近在学习区块链、智能合约相关知识，发现Solidity权威的学习资料很匮乏，很奇怪Solidity这么火竟然没有官方的详细学习资料，比如《Solidity Cookbook》这类书籍。
+这篇文章是Solidity入门的入门文档，介绍如何搭建本地环境搭建。我个人也是新手，多年的语言学习体验还是习惯先有个本地的开发环境，Ethereum官方推荐的学习工具列举在下面：https://ethereum.org/zh/developers/learning-tools/ ，其中Remix我看到很多人在推荐，如果喜欢在线编码的话可以直接使用。
+另外，Solidity的入门学习材料推荐以下两个：
+CryptoZombie 讲的很泛但是方方面面都介绍到了，很适合建立初步的体感。 Solidity By Example 我正在看，例子很多，但是貌似也没有介绍的很深入。 需要更加Advanced的学习资料。 Solidity本地环境我个人选择Truffle，我也是新手，如果大家有更好的推荐可以在评论区推荐给我，谢谢~
+Truffle环境搭建 主要参考Truffle官方Quick Start：https://trufflesuite.com/docs/truffle/quickstart/
+安装很简单：
+1$ npm install -g truffle 强烈推荐安装Ganache，Ganache可以在本地启动一个带UI的eth链，带10个测试账号，每个账号有100个eth供测试用。
+虽然Truffle也会启动本地的eth测试链，但是有个UI界面的Ganache还是很直观的，方便学习。
+Ganache建议安装支持Filecoin的最新版本，虽然我们还没用到Filecoin，但是提前准备总是没错的。
+参考：https://trufflesuite.com/docs/ganache/quickstart/#1-install-ganache
+所有可用的版本列表：https://github.com/trufflesuite/ganache-ui/releases
+手动安装最新版本，我用的版本是2.6.0-beta.3.1390，下载地址
+Truffle一些操作技巧及常用命令 参考：https://trufflesuite.com/docs/truffle/quickstart/
+Truffle Quick Start里面的例子使用的MetaCoin，我们这里从truffle init开始建一个新的truffle工程。
+1. 创建工程 1$ mkdir test 2$ cd test 3$ truffle init 查看目录树：
+1$ tree . 2. 3├── contracts 4│ └── Migrations.sol 5├── migrations 6│ └── 1_initial_migration.js 7├── test 8└── truffle-config.js 9\ 10 113 directories, 3 files 2.
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

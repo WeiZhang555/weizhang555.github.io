@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>go on WeiZhang555</title>
+    <link>https://weizhang555.github.io/tags/go/</link>
+    <description>Recent content in go on WeiZhang555</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright> © Zhang Wei(weizhang555)</copyright>
+    <lastBuildDate>Fri, 18 Mar 2022 11:24:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>最准确的Go语言运算符优先级介绍</title>
+      <link>https://weizhang555.github.io/original/go-operators-priority/</link>
+      <pubDate>Fri, 18 Mar 2022 11:24:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/go-operators-priority/</guid>
+      <description>
+        
+          
+            前言 写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：
+https://haicoder.net/golang/golang-operator-precedence.html http://c.biancheng.net/view/5559.html http://gitbook.net/go/go_operators_precedence.html 这几个基本上是互相抄的，没有验证，很容易反驳。比如，上面说&amp;quot;+&amp;quot;, &amp;quot;-&amp;quot;的优先级大于“|”，那么以下代码
+1a := 2 | 4 - 1 的结果应该等同于
+1a := 2 | (4 - 1) 但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。
+验证链接： https://go.dev/play/p/fPFNO8r6bJ3
+简单分享下正确的运算符优先级，避免后人踩坑。
+正确的运算符优先级 Google找到了官方的说明：
+https://go.dev/ref/spec 可以参考其中Operator Precedence一节，介绍的非常清楚。
+单目运算符优先级最高。 单目运算符包括：
+1&amp;#34;+&amp;#34; | &amp;#34;-&amp;#34; | &amp;#34;!&amp;#34; | &amp;#34;^&amp;#34; | &amp;#34;*&amp;#34; | &amp;#34;&amp;amp;&amp;#34; | &amp;#34;&amp;lt;-&amp;#34; 双目运算符分5个优先级，从高到低为 1Precedence Operator 2 5 * / % &amp;lt;&amp;lt; &amp;gt;&amp;gt; &amp;amp; &amp;amp;^ 3 4 + - | ^ 4 3 == != &amp;lt; &amp;lt;= &amp;gt; &amp;gt;= 5 2 &amp;amp;&amp;amp; 6 1 || 分别是： “乘法类”，“加法类”，“比较类”，“逻辑与”，“逻辑或”，优先级最低的是“逻辑或”。
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

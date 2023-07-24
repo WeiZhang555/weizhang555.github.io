@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>runc on 长弓二十九</title>
+    <title>runc on WeiZhang555</title>
     <link>https://weizhang555.github.io/tags/runc/</link>
-    <description>Recent content in runc on 长弓二十九</description>
+    <description>Recent content in runc on WeiZhang555</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <copyright>Copyright © 2021 Zhang Wei</copyright>
+    <copyright> © Zhang Wei(weizhang555)</copyright>
     <lastBuildDate>Wed, 11 Dec 2019 11:30:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/runc/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
