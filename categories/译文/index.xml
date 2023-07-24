@@ -7,7 +7,26 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Fri, 21 Jul 2023 00:10:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 24 Jul 2023 23:36:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用BPF ring buffer</title>
+      <link>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</link>
+      <pubDate>Mon, 24 Jul 2023 23:36:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</guid>
+      <description>
+        
+          
+            本文介绍如何使用BPF ring buffer。
+原文链接
+介绍 写这篇文章的动机 关于helpers的注意事项 使用 libbpf 使用 BCC 结论 Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
+2021 年 3 月 30 日更新：如果您正在寻找有关如何使用 BPF 环形缓冲区的实际示例，本文仍然具有相关性。 如果您想深入了解其工作原理，我建议访问此功能主要作者 Andrii 的博客。 享受学习的乐趣吧！ :)
+          
+          
+        
+      </description>
+    </item>
+    
     <item>
       <title>BPF的设计原则Q&amp;A</title>
       <link>https://weizhang555.github.io/translate/bpf-design-qa/</link>
