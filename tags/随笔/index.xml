@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>随笔 on WeiZhang555</title>
+    <link>https://weizhang555.github.io/tags/%E9%9A%8F%E7%AC%94/</link>
+    <description>Recent content in 随笔 on WeiZhang555</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright> © Zhang Wei(weizhang555)</copyright>
+    <lastBuildDate>Wed, 26 Jul 2023 19:10:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>防火不如救火，治未病不如治已病，好代码不如好吆喝</title>
+      <link>https://weizhang555.github.io/translate/whats-good-engineer/</link>
+      <pubDate>Wed, 26 Jul 2023 19:10:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/whats-good-engineer/</guid>
+      <description>
+        
+          
+            1. 古代版 暖曰：“王独不闻魏文王之问扁鹊耶？
+曰：‘子昆弟三人其孰最善为医？’
+扁鹊曰：‘长兄最善，中兄次之，扁鹊最为下。’
+魏文侯曰：‘可得闻邪？’
+扁鹊曰：‘长兄于病视神，未有形而除之，故名不出于家。中兄治病，其在毫毛，故名不出于闾。
+若扁鹊者，镵血脉，投毒药，副肌肤，闲而名出闻于诸侯。’
+-- 《鹖冠子·世贤第十六》
+2. 现代版 王问：“你们兄弟三人谁的代码写的最好？”
+小明答：“大哥写的最好，二哥其次，我写的最差”。
+王问：“可是为什么你的绩效最好呢？”
+小明答：“大哥写代码都是一蹴而就，写的又快又好，跑十年都不出一个故障，写完了就喝茶聊天，因而领导觉得他工作量不饱和不给好绩效，所以只有我们圈子里的人知道他厉害；
+二哥写代码也写的很好，虽然bug多，但测试同学提出bug很快就修好，不会遗留到线上，因而绩效马马虎虎；
+我写的最差，上线了还时不时出故障，但是我天天熬夜写代码，加班修复线上问题，懂得拉会议，能摇人。客户说我活儿好态度好，领导说我善于协调同时团队协作能力强，因而我绩效最好”
+3. 评 防火不如救火，治未病不如治已病，好代码不如好吆喝。
+不知道从何评起，只有一点感悟和一声叹息，与君共勉。
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>起个头</title>
+      <link>https://weizhang555.github.io/original/start/</link>
+      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/start/</guid>
+      <description>
+        
+          
+            之前也在其他地方开过博客，每次都坚持不了多久，零零散散写一些，回头看一下没多少有价值的东西。 这次搬家到github pages上面，算是个新的开始，旧的东西就随风而去吧，不带过来了。
+从今天开始，尽量腾点时间，多写点技术文章，不在乎长度，不必刻意追求深度，尽量多留下点东西。
+目前在研究容器领域的东西，就多写点docker容器相关的文章吧。
+共勉。
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

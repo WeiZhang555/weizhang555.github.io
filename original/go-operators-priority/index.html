@@ -162,7 +162,17 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
   </span>
   </div>
 
-    <div class="post_body"><h1 id="前言">前言</h1>
+      <div class="post_toc">
+        <h2>Overview</h2>
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#正确的运算符优先级">正确的运算符优先级</a></li>
+  </ul>
+</nav>
+      </div>
+    
+    <div class="post_body"><h2 id="前言">前言</h2>
 <p>写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：</p>
 <ul>
 <li><a href="https://haicoder.net/golang/golang-operator-precedence.html">https://haicoder.net/golang/golang-operator-precedence.html</a></li>
@@ -176,7 +186,7 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
 </span></span></code></pre></div><p>但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。</p>
 <p>验证链接： <a href="https://go.dev/play/p/fPFNO8r6bJ3">https://go.dev/play/p/fPFNO8r6bJ3</a></p>
 <p>简单分享下正确的运算符优先级，避免后人踩坑。</p>
-<h1 id="正确的运算符优先级">正确的运算符优先级</h1>
+<h2 id="正确的运算符优先级">正确的运算符优先级</h2>
 <p>Google找到了官方的说明：</p>
 <ul>
 <li><a href="https://go.dev/ref/spec">https://go.dev/ref/spec</a></li>
@@ -251,6 +261,9 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
+        <a href="https://weizhang555.github.io/translate/whats-good-engineer/" class="nav-link" title="防火不如救火，治未病不如治已病，好代码不如好吆喝">防火不如救火，治未病不如治已病，好代码不如好吆喝</a>
+      </li>
+      <li>
         <a href="https://weizhang555.github.io/translate/using-bpf-ringbuffer/" class="nav-link" title="使用BPF ring buffer">使用BPF ring buffer</a>
       </li>
       <li>
@@ -260,7 +273,7 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
         <a href="https://weizhang555.github.io/republish/pnp-problem/" class="nav-link" title="转载：著名的 P=NP 问题到底是什么">转载：著名的 P=NP 问题到底是什么</a>
       </li>
       <li>
-        <a href="https://weizhang555.github.io/original/learn-solidity/" class="nav-link" title="Solidity入门系列(1)：基于Truffle搭建本地开发环境">Solidity入门系列(1)：基于Truffle搭建本地开发环境</a>
+        <a href="https://weizhang555.github.io/original/learn-solidity/" class="nav-link" title="Solidity入门：基于Truffle搭建本地开发环境">Solidity入门：基于Truffle搭建本地开发环境</a>
       </li>
       <li>
         <a href="https://weizhang555.github.io/original/go-operators-priority/" class="nav-link" title="最准确的Go语言运算符优先级介绍">最准确的Go语言运算符优先级介绍</a>
@@ -270,9 +283,6 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
       </li>
       <li>
         <a href="https://weizhang555.github.io/original/runc-host-escape-cve/" class="nav-link" title="docker-runc主机逃逸漏洞复现：CVE-2019-5736">docker-runc主机逃逸漏洞复现：CVE-2019-5736</a>
-      </li>
-      <li>
-        <a href="https://weizhang555.github.io/original/kubernetes-setup/" class="nav-link" title="kubernetes安装指南">kubernetes安装指南</a>
       </li>
     </ul>
     <div>
@@ -285,7 +295,7 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
         
         <a href='https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/' class="post_tag button button_translucent" title="译文">
           译文
-          <span class="button_tally">2</span>
+          <span class="button_tally">3</span>
         </a>
         
         <a href='https://weizhang555.github.io/categories/%E8%BD%AC%E8%BD%BD/' class="post_tag button button_translucent" title="转载">
@@ -324,6 +334,11 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
           <span class="button_tally">2</span>
         </a>
         
+        <a href='https://weizhang555.github.io/tags/%E9%9A%8F%E7%AC%94/' class="post_tag button button_translucent" title="随笔">
+          随笔
+          <span class="button_tally">2</span>
+        </a>
+        
         <a href='https://weizhang555.github.io/tags/go/' class="post_tag button button_translucent" title="go">
           GO
           <span class="button_tally">1</span>
@@ -346,11 +361,6 @@ https://haicoder.net/golang/golang-operator-precedence.html …" />
         
         <a href='https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/' class="post_tag button button_translucent" title="区块链">
           区块链
-          <span class="button_tally">1</span>
-        </a>
-        
-        <a href='https://weizhang555.github.io/tags/%E9%9A%8F%E6%89%8B/' class="post_tag button button_translucent" title="随手">
-          随手
           <span class="button_tally">1</span>
         </a>
         

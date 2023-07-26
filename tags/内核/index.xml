@@ -17,9 +17,10 @@
       <description>
         
           
-            本文介绍如何使用BPF ring buffer。
-原文链接
-介绍 写这篇文章的动机 关于helpers的注意事项 使用 libbpf 使用 BCC 结论 Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
+            本文介绍如何使用BPF ring buffer，原文来自这里。
+在学习ring buffer的使用时，我翻阅了很多文档，筛选过后发现这篇文章是很不错的学习材料，即便它最后一次更新停留在2021年3月，内容也依旧可靠。
+以下为正文。
+Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
 2021 年 3 月 30 日更新：如果您正在寻找有关如何使用 BPF 环形缓冲区的实际示例，本文仍然具有相关性。 如果您想深入了解其工作原理，我建议访问此功能主要作者 Andrii 的博客。 享受学习的乐趣吧！ :)
           
           

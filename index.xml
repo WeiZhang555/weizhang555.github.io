@@ -7,7 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Mon, 24 Jul 2023 23:36:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 26 Jul 2023 19:10:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>防火不如救火，治未病不如治已病，好代码不如好吆喝</title>
+      <link>https://weizhang555.github.io/translate/whats-good-engineer/</link>
+      <pubDate>Wed, 26 Jul 2023 19:10:46 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/whats-good-engineer/</guid>
+      <description>
+        
+          
+            1. 古代版 暖曰：“王独不闻魏文王之问扁鹊耶？
+曰：‘子昆弟三人其孰最善为医？’
+扁鹊曰：‘长兄最善，中兄次之，扁鹊最为下。’
+魏文侯曰：‘可得闻邪？’
+扁鹊曰：‘长兄于病视神，未有形而除之，故名不出于家。中兄治病，其在毫毛，故名不出于闾。
+若扁鹊者，镵血脉，投毒药，副肌肤，闲而名出闻于诸侯。’
+-- 《鹖冠子·世贤第十六》
+2. 现代版 王问：“你们兄弟三人谁的代码写的最好？”
+小明答：“大哥写的最好，二哥其次，我写的最差”。
+王问：“可是为什么你的绩效最好呢？”
+小明答：“大哥写代码都是一蹴而就，写的又快又好，跑十年都不出一个故障，写完了就喝茶聊天，因而领导觉得他工作量不饱和不给好绩效，所以只有我们圈子里的人知道他厉害；
+二哥写代码也写的很好，虽然bug多，但测试同学提出bug很快就修好，不会遗留到线上，因而绩效马马虎虎；
+我写的最差，上线了还时不时出故障，但是我天天熬夜写代码，加班修复线上问题，懂得拉会议，能摇人。客户说我活儿好态度好，领导说我善于协调同时团队协作能力强，因而我绩效最好”
+3. 评 防火不如救火，治未病不如治已病，好代码不如好吆喝。
+不知道从何评起，只有一点感悟和一声叹息，与君共勉。
+          
+          
+        
+      </description>
+    </item>
+    
     <item>
       <title>使用BPF ring buffer</title>
       <link>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</link>
@@ -17,9 +47,10 @@
       <description>
         
           
-            本文介绍如何使用BPF ring buffer。
-原文链接
-介绍 写这篇文章的动机 关于helpers的注意事项 使用 libbpf 使用 BCC 结论 Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
+            本文介绍如何使用BPF ring buffer，原文来自这里。
+在学习ring buffer的使用时，我翻阅了很多文档，筛选过后发现这篇文章是很不错的学习材料，即便它最后一次更新停留在2021年3月，内容也依旧可靠。
+以下为正文。
+Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
 2021 年 3 月 30 日更新：如果您正在寻找有关如何使用 BPF 环形缓冲区的实际示例，本文仍然具有相关性。 如果您想深入了解其工作原理，我建议访问此功能主要作者 Andrii 的博客。 享受学习的乐趣吧！ :)
           
           
@@ -126,7 +157,7 @@ NPC问题的定义非常简单。同时满足下面两个条件的问题就是NP
     </item>
     
     <item>
-      <title>Solidity入门系列(1)：基于Truffle搭建本地开发环境</title>
+      <title>Solidity入门：基于Truffle搭建本地开发环境</title>
       <link>https://weizhang555.github.io/original/learn-solidity/</link>
       <pubDate>Fri, 03 Jun 2022 22:08:00 +0800</pubDate>
       
@@ -192,7 +223,7 @@ https://go.dev/ref/spec 可以参考其中Operator Precedence一节，介绍的�
           
             我至今在两家公司工作过，第一家是华为，第二家是蚂蚁金服。在两家待的时间都足够长了，谈谈对两家公司软件质量控制的一点感悟。
 用一句话来对比两家的软件质量的话，我称为“椰子型”和“苹果型”。两家公司基本可以代表传统软件公司与互联网公司的不同的质量管理标准。
-椰子型 苹果型 选哪个？ 椰子型 华为擅长做“椰子型”软件，外壳坚硬无比，内部一包水。
+椰子型 华为擅长做“椰子型”软件，外壳坚硬无比，内部一包水。
 华为的研发流程是很早就花大价钱从IBM引入的IPD研发流程，大致分为几个流程(参考)：
 Charter(立项) --&amp;gt; TR1/2/3 --&amp;gt; PDCP(中期) --&amp;gt; TR4/5 --&amp;gt; EDCP(结项)
 一个项目周期基本上是一年，PDCP之前是项目的设计和PoC阶段，可以改方案和设计，PDCP之后就不允许修改设计了，TR5要达到验收标准， 验收不过等同于项目延期，会对项目的Manager和团队的考评有重大影响，所以TR5的验收是极其重要且严肃的。
@@ -285,10 +316,18 @@ Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/e
       <description>
         
           
-            1. TUF 1.1 背景 1.2 TUF的角色 1.2 TUF的工作流 step 0: 加载可信的root元数据文件 step 1: 更新root元数据文件 step 2: 下载timestamp元数据文件 step 3：下载snapshot元数据文件 step 4：下载最顶层的targets元数据 step 5：对照target元数据验证target 2. Notary 2.1 介绍 2.2 目标 2.3 Notary的密钥管理 3. Docker Content Trust本地测试 3.1 环境准备 3.2 push的镜像无签名的情况 3.3 push有签名的版本 3.4 恶意用户上传恶意镜像，覆盖ubuntu:18.04 3.5 docker content trust的问题 1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
+            1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
 1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
 TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;
 1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
+step 0: 加载可信的root元数据文件 这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。
+step 1: 更新root元数据文件 由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。
+step 1.1: 使用N代表可信root元数据文件的版本号 step 1.2: 下载root元数据文件的N+1版本 文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。
+step 1.3: 检查签名 N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。
+如果N+1版本的root元数据没有被正确签名，退出并报错。
+step 1.4: 检查回滚攻击(rollback attach) 当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。
+step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查 step 1.6: 设置受信任的root元数据文件为新的元数据文件 step 1.7: 重复step 1.1到1.7直到root元数据为最新 step 1.8: 检查冻结攻击(freeze attach) 检查当前的信任的root元数据文件是否过期，过期的报错退出。
+step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件 这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。
           
           
         
