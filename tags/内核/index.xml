@@ -7,7 +7,27 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Mon, 24 Jul 2023 23:36:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 16 Aug 2023 16:10:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[内核文档翻译] Overlay文件系统</title>
+      <link>https://weizhang555.github.io/translate/linux-overlayfs/</link>
+      <pubDate>Wed, 16 Aug 2023 16:10:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/translate/linux-overlayfs/</guid>
+      <description>
+        
+          
+            本文原文来自内核源码文档，源码链接。
+官方网站：https://docs.kernel.org
+Overlay文件系统（Overlay Filesystem） This document describes a prototype for a new approach to providing overlay-filesystem functionality in Linux (sometimes referred to as union-filesystems). An overlay-filesystem tries to present a filesystem which is the result over overlaying one filesystem on top of the other.
+本文档描述了在 Linux 中提供Overlay(覆盖)文件系统功能（有时称为联合文件系统）的新方法的原型。 Overlay文件系统尝试呈现一种文件系统，该文件系统是将一个文件系统覆盖在另一个文件系统之上的结果。
+Overlay对象 （Overlay objects） The overlay filesystem approach is &#39;hybrid&#39;, because the objects that appear in the filesystem do not always appear to belong to that filesystem.
+          
+          
+        
+      </description>
+    </item>
+    
     <item>
       <title>使用BPF ring buffer</title>
       <link>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</link>
