@@ -119,6 +119,78 @@
   <div class="excerpt">
     <div class="excerpt_header">
       <h3 class="post_link">
+        <a href="https://weizhang555.github.io/original/k8s-setup-2/" title="kubeadm拉起单节点K8s(新版)">kubeadm拉起单节点K8s(新版)</a>
+      </h3>
+      
+  <div class="post_meta">
+    <span><svg class="icon">
+  <title>calendar</title>
+  <use xlink:href="#calendar"></use>
+</svg>
+</span>
+    <span class="post_date">
+      Oct 17, 2023</span>
+    <span class="post_time"> · 11 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
+        </a><a href='https://weizhang555.github.io/tags/k8s/' title="K8s" class="post_tag button button_translucent">K8s
+        </a>
+    </span>
+    <span class="page_only">&nbsp;·
+  <div class="post_share">
+    Share on:
+    <a href="https://twitter.com/intent/tweet?text=kubeadm%e6%8b%89%e8%b5%b7%e5%8d%95%e8%8a%82%e7%82%b9K8s%28%e6%96%b0%e7%89%88%29&url=https%3a%2f%2fweizhang555.github.io%2foriginal%2fk8s-setup-2%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
+      <svg class="icon">
+  <title>twitter</title>
+  <use xlink:href="#twitter"></use>
+</svg>
+
+    </a>
+    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2foriginal%2fk8s-setup-2%2f&t=kubeadm%e6%8b%89%e8%b5%b7%e5%8d%95%e8%8a%82%e7%82%b9K8s%28%e6%96%b0%e7%89%88%29" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
+      <svg class="icon">
+  <title>facebook</title>
+  <use xlink:href="#facebook"></use>
+</svg>
+
+    </a>
+    <a href="#linkedinshare" id = "linkedinshare" class="linkedin" title="Share on LinkedIn" rel="nofollow">
+      <svg class="icon">
+  <title>linkedin</title>
+  <use xlink:href="#linkedin"></use>
+</svg>
+
+    </a>
+    <a href="https://weizhang555.github.io/original/k8s-setup-2/" title="Copy Link" class="link link_yank">
+      <svg class="icon">
+  <title>copy</title>
+  <use xlink:href="#copy"></use>
+</svg>
+
+    </a>
+  </div>
+  </span>
+  </div>
+
+    </div>
+      <div class="excerpt_footer">
+        <div class="pale">
+          
+            <p>由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。
+本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。
+主要还是参考官网：https://kubernetes.io/docs/setup/
+1.安装容器运行时 参考
+容器运行时：https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/ 结论：此处我们选用containerd，cgroup驱动选择systemd，cgroup v2/v1我们不做偏好设置。
+1.1 设置Docker repo source 1sudo apt-get …</p>
+          
+          <br>
+          <a href="https://weizhang555.github.io/original/k8s-setup-2/" title="Read More" class="excerpt_more button">Read More</a>
+        </div>
+      </div>
+    </div>
+  </li>
+
+        <li class="post_item">
+  <div class="excerpt">
+    <div class="excerpt_header">
+      <h3 class="post_link">
         <a href="https://weizhang555.github.io/original/runc-host-escape-cve/" title="docker-runc主机逃逸漏洞复现：CVE-2019-5736">docker-runc主机逃逸漏洞复现：CVE-2019-5736</a>
       </h3>
       
@@ -646,6 +718,9 @@ runc源码分析xmind文件</p>
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
+        <a href="https://weizhang555.github.io/original/k8s-setup-2/" class="nav-link" title="kubeadm拉起单节点K8s(新版)">kubeadm拉起单节点K8s(新版)</a>
+      </li>
+      <li>
         <a href="https://weizhang555.github.io/translate/linux-overlayfs/" class="nav-link" title="[内核文档翻译] Overlay文件系统">[内核文档翻译] Overlay文件系统</a>
       </li>
       <li>
@@ -666,16 +741,13 @@ runc源码分析xmind文件</p>
       <li>
         <a href="https://weizhang555.github.io/original/go-operators-priority/" class="nav-link" title="最准确的Go语言运算符优先级介绍">最准确的Go语言运算符优先级介绍</a>
       </li>
-      <li>
-        <a href="https://weizhang555.github.io/original/different-software-types/" class="nav-link" title="你的软件是“椰子”还是“苹果”？">你的软件是“椰子”还是“苹果”？</a>
-      </li>
     </ul>
     <div>
       <h2 class="mt-4 taxonomy" id="categories-section">Categories</h2>
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/' class="post_tag button button_translucent" title="原创">
           原创
-          <span class="button_tally">11</span>
+          <span class="button_tally">12</span>
         </a>
         
         <a href='https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/' class="post_tag button button_translucent" title="译文">
@@ -696,12 +768,17 @@ runc源码分析xmind文件</p>
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' class="post_tag button button_translucent" title="容器">
           容器
-          <span class="button_tally">7</span>
+          <span class="button_tally">8</span>
         </a>
         
         <a href='https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/' class="post_tag button button_translucent" title="内核">
           内核
           <span class="button_tally">4</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
+          K8S
+          <span class="button_tally">3</span>
         </a>
         
         <a href='https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/' class="post_tag button button_translucent" title="安全">
@@ -711,11 +788,6 @@ runc源码分析xmind文件</p>
         
         <a href='https://weizhang555.github.io/tags/bpf/' class="post_tag button button_translucent" title="bpf">
           BPF
-          <span class="button_tally">2</span>
-        </a>
-        
-        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
-          K8S
           <span class="button_tally">2</span>
         </a>
         

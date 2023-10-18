@@ -7,7 +7,30 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Wed, 11 Dec 2019 11:30:46 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 17 Oct 2023 20:18:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubeadm拉起单节点K8s(新版)</title>
+      <link>https://weizhang555.github.io/original/k8s-setup-2/</link>
+      <pubDate>Tue, 17 Oct 2023 20:18:00 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/k8s-setup-2/</guid>
+      <description>
+        
+          
+            由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。
+本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。
+主要还是参考官网：https://kubernetes.io/docs/setup/
+1.安装容器运行时 参考
+容器运行时：https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/ 结论：此处我们选用containerd，cgroup驱动选择systemd，cgroup v2/v1我们不做偏好设置。
+1.1 设置Docker repo source 1sudo apt-get update &amp;amp;&amp;amp; apt-get install \ 2 ca-certificates \ 3 curl \ 4 gnupg \ 5 lsb-release 6curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg 7echo &amp;#34;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&amp;#34; | sudo tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null 8sudo apt-update 1.2 安装containerd 查看containerd可用版本（可选）。
+1apt-cache madison containerd.io 2apt-mark hold containerd.io 安装containerd。
+1sudo apt install -y containerd.
+          
+          
+        
+      </description>
+    </item>
+    
     <item>
       <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
       <link>https://weizhang555.github.io/original/runc-host-escape-cve/</link>

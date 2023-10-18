@@ -1,0 +1,1087 @@
+
+<!DOCTYPE html>
+<html
+  lang="en"
+  data-figures=""
+  
+    class="page"
+  
+  
+  >
+  <head>
+<title>kubeadm拉起单节点K8s(新版) | WeiZhang555</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+
+
+
+<meta property="og:locale" content="en" />
+
+<meta property="og:type" content="article">
+<meta name="description" content="由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。
+本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。
+主要还是参考官网：https://kubernetes.io/docs/setup/
+1.安装容器运行时 参考
+容器运行 …" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="">
+<meta name="twitter:title" content="kubeadm拉起单节点K8s(新版)" />
+<meta name="twitter:image" content="https://weizhang555.github.io/images/thumbnail.png"/>
+<meta property="og:url" content="https://weizhang555.github.io/original/k8s-setup-2/" />
+<meta property="og:title" content="kubeadm拉起单节点K8s(新版)" />
+<meta property="og:description" content="由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。
+本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。
+主要还是参考官网：https://kubernetes.io/docs/setup/
+1.安装容器运行时 参考
+容器运行 …" />
+<meta property="og:image" content="https://weizhang555.github.io/images/thumbnail.png" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="https://weizhang555.github.io/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://weizhang555.github.io/icons/favicon-32x32.png">
+<link rel="manifest" href="https://weizhang555.github.io/icons/site.webmanifest">
+
+<link rel="canonical" href="https://weizhang555.github.io/original/k8s-setup-2/">
+
+
+
+<link rel="preload" href="https://weizhang555.github.io/css/styles.42e2c5f6d8cf9c52872666f8d8b2678ad0c426978b9d78aff3c33b7a1e7f6f97f54bcdaf0518a25fb0fe26367d04f8b07c683b3b38b331cb098daadee06b1f3e.css" integrity = "sha512-QuLF9tjPnFKHJmb42LJnitDEJpeLnXiv88M7eh5/b5f1S82vBRiiX7D&#43;JjZ9BPiwfGg7OzizMcsJjare4GsfPg==" as="style" crossorigin="anonymous">
+
+
+
+<link rel="preload" href="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" as="script" integrity=
+"sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous">
+
+
+<link rel="stylesheet" type="text/css" href="https://weizhang555.github.io/css/styles.42e2c5f6d8cf9c52872666f8d8b2678ad0c426978b9d78aff3c33b7a1e7f6f97f54bcdaf0518a25fb0fe26367d04f8b07c683b3b38b331cb098daadee06b1f3e.css" integrity="sha512-QuLF9tjPnFKHJmb42LJnitDEJpeLnXiv88M7eh5/b5f1S82vBRiiX7D&#43;JjZ9BPiwfGg7OzizMcsJjare4GsfPg==" crossorigin="anonymous">
+
+  </head>
+  <body
+    data-code="10"
+    data-lines="false"
+    id="documentTop"
+    data-lang="en"
+  >
+
+<header class="nav_header" >
+  <nav class="nav"><a href='https://weizhang555.github.io/' class="nav_brand nav_item" title="WeiZhang555">WeiZhang555
+  <div class="nav_close">
+    <div><svg class="icon">
+  <title>open-menu</title>
+  <use xlink:href="#open-menu"></use>
+</svg>
+<svg class="icon">
+  <title>closeme</title>
+  <use xlink:href="#closeme"></use>
+</svg>
+</div>
+  </div>
+</a>
+
+    <div class='nav_body nav_body_left'>
+      
+      
+      
+        
+
+  <div class="nav_parent">
+    <a href="https://weizhang555.github.io/original" class="nav_item" title="原创">原创 </a>
+  </div>
+  <div class="nav_parent">
+    <a href="https://weizhang555.github.io/translate" class="nav_item" title="译文">译文 </a>
+  </div>
+  <div class="nav_parent">
+    <a href="https://weizhang555.github.io/republish" class="nav_item" title="转载">转载 </a>
+  </div>
+  <div class="nav_parent">
+    <a href="https://weizhang555.github.io/about/" class="nav_item" title="关于">关于 </a>
+  </div>
+      
+<div class='follow'>
+  <a href="https://github.com/weizhang555">
+    <svg class="icon">
+  <title>github</title>
+  <use xlink:href="#github"></use>
+</svg>
+
+  </a>
+<div class="color_mode">
+  <input type="checkbox" class="color_choice" id="mode">
+</div>
+
+</div>
+
+    </div>
+  </nav>
+</header>
+
+    <main>
+  
+<div class="grid-inverse wrap content">
+  <article class="post_content">
+    <h1 class="post_title">kubeadm拉起单节点K8s(新版)</h1>
+  <div class="post_meta">
+    <span><svg class="icon">
+  <title>calendar</title>
+  <use xlink:href="#calendar"></use>
+</svg>
+</span>
+    <span class="post_date">
+      Oct 17, 2023</span>
+    <span class="post_time"> · 11 min read</span><span>&nbsp;· <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' title="容器" class="post_tag button button_translucent">容器
+        </a><a href='https://weizhang555.github.io/tags/k8s/' title="K8s" class="post_tag button button_translucent">K8s
+        </a>
+    </span>
+    <span class="page_only">&nbsp;·
+  <div class="post_share">
+    Share on:
+    <a href="https://twitter.com/intent/tweet?text=kubeadm%e6%8b%89%e8%b5%b7%e5%8d%95%e8%8a%82%e7%82%b9K8s%28%e6%96%b0%e7%89%88%29&url=https%3a%2f%2fweizhang555.github.io%2foriginal%2fk8s-setup-2%2f&tw_p=tweetbutton" class="twitter" title="Share on Twitter" target="_blank" rel="nofollow">
+      <svg class="icon">
+  <title>twitter</title>
+  <use xlink:href="#twitter"></use>
+</svg>
+
+    </a>
+    <a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fweizhang555.github.io%2foriginal%2fk8s-setup-2%2f&t=kubeadm%e6%8b%89%e8%b5%b7%e5%8d%95%e8%8a%82%e7%82%b9K8s%28%e6%96%b0%e7%89%88%29" class="facebook" title="Share on Facebook" target="_blank" rel="nofollow">
+      <svg class="icon">
+  <title>facebook</title>
+  <use xlink:href="#facebook"></use>
+</svg>
+
+    </a>
+    <a href="#linkedinshare" id = "linkedinshare" class="linkedin" title="Share on LinkedIn" rel="nofollow">
+      <svg class="icon">
+  <title>linkedin</title>
+  <use xlink:href="#linkedin"></use>
+</svg>
+
+    </a>
+    <a href="https://weizhang555.github.io/original/k8s-setup-2/" title="Copy Link" class="link link_yank">
+      <svg class="icon">
+  <title>copy</title>
+  <use xlink:href="#copy"></use>
+</svg>
+
+    </a>
+  </div>
+  </span>
+  </div>
+
+      <div class="post_toc">
+        <h2>Overview</h2>
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1安装容器运行时">1.安装容器运行时</a>
+      <ul>
+        <li><a href="#11-设置docker-repo-source">1.1 设置Docker repo source</a></li>
+        <li><a href="#12-安装containerd">1.2 安装containerd</a></li>
+        <li><a href="#13-为对接k8s做必要的配置">1.3 为对接K8s做必要的配置</a></li>
+      </ul>
+    </li>
+    <li><a href="#2安装kubectl">2.安装kubectl</a></li>
+    <li><a href="#3生产环境安装k8s">3.生产环境安装K8s</a>
+      <ul>
+        <li><a href="#31-安装kubeadmkubelet">3.1 安装kubeadm/kubelet</a></li>
+        <li><a href="#32-准备离线镜像">3.2 准备离线镜像</a></li>
+        <li><a href="#33-选择网络方案及设置kubeadm子网">3.3 选择网络方案及设置kubeadm子网</a></li>
+        <li><a href="#34-配置kubelet使用systemd-cgroup驱动">3.4 配置kubelet使用systemd cgroup驱动</a></li>
+        <li><a href="#35-kubeadm-init拉起集群">3.5 kubeadm init拉起集群</a></li>
+        <li><a href="#36-把网络给拉起来">3.6 把网络给拉起来</a></li>
+        <li><a href="#37-允许在master节点调度pod可选">3.7 允许在master节点调度pod（可选）</a></li>
+        <li><a href="#38-启动个简单的pod测试一下">3.8 启动个简单的pod测试一下</a></li>
+      </ul>
+    </li>
+    <li><a href="#4附录">4.附录</a>
+      <ul>
+        <li><a href="#41-完整的kubeadm-init-config">4.1 完整的kubeadm init config</a></li>
+        <li><a href="#42-完整的contaienrd-config">4.2 完整的contaienrd config</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+      </div>
+    
+    <div class="post_body"><p>由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。</p>
+<p>本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。</p>
+<p>主要还是参考官网：https://kubernetes.io/docs/setup/</p>
+<hr>
+<h2 id="1安装容器运行时">1.安装容器运行时</h2>
+<p>参考</p>
+<ul>
+<li>容器运行时：https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/</li>
+</ul>
+<p>结论：此处我们选用containerd，cgroup驱动选择systemd，cgroup v2/v1我们不做偏好设置。</p>
+<h3 id="11-设置docker-repo-source">1.1 设置Docker repo source</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo apt-get update &amp;&amp; apt-get install \
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    ca-certificates \
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    curl \
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    gnupg \
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    lsb-release
+</span></span><span class="line"><span class="ln">6</span><span class="cl">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg 
+</span></span><span class="line"><span class="ln">7</span><span class="cl">echo &#34;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&#34; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+</span></span><span class="line"><span class="ln">8</span><span class="cl">sudo apt-update
+</span></span></code></pre></div><h3 id="12-安装containerd">1.2 安装containerd</h3>
+<p>查看containerd可用版本（可选）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">apt-cache madison containerd.io
+</span></span><span class="line"><span class="ln">2</span><span class="cl">apt-mark hold containerd.io
+</span></span></code></pre></div><p>安装containerd。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo apt install -y containerd.io=1.4.11-1
+</span></span></code></pre></div><p>测试下是否能下载镜像且运行。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo ctr image pull docker.io/library/alpine:latest
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo ctr run -t docker.io/library/alpine:latest test sh
+</span></span></code></pre></div><h3 id="13-为对接k8s做必要的配置">1.3 为对接K8s做必要的配置</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">cat &lt;&lt;EOF | sudo tee /etc/modules-load.d/containerd.conf
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">overlay
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">br_netfilter
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">EOF
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">sudo modprobe overlay
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">sudo modprobe br_netfilter
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"># 设置必需的 sysctl 参数，这些参数在重新启动后仍然存在。
+</span></span><span class="line"><span class="ln">10</span><span class="cl">cat &lt;&lt;EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+</span></span><span class="line"><span class="ln">11</span><span class="cl">net.bridge.bridge-nf-call-iptables  = 1
+</span></span><span class="line"><span class="ln">12</span><span class="cl">net.ipv4.ip_forward                 = 1
+</span></span><span class="line"><span class="ln">13</span><span class="cl">net.bridge.bridge-nf-call-ip6tables = 1
+</span></span><span class="line"><span class="ln">14</span><span class="cl">EOF
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl"># 应用 sysctl 参数而无需重新启动
+</span></span><span class="line"><span class="ln">17</span><span class="cl">sudo sysctl --system
+</span></span></code></pre></div><p>配置containerd并重启</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">containerd config default | sudo tee /etc/containerd/config.toml
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo systemctl restart containerd 
+</span></span></code></pre></div><p>手动配置kubelet使用systemd cgroup驱动</p>
+<p>在 <code>/etc/containerd/config.toml</code> 中设置</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">[plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.runtimes.runc]
+</span></span><span class="line"><span class="ln">2</span><span class="cl">  ...
+</span></span><span class="line"><span class="ln">3</span><span class="cl">  [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.runtimes.runc.options]
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    SystemdCgroup = true
+</span></span><span class="line"><span class="ln">5</span><span class="cl">
+</span></span><span class="line"><span class="ln">6</span><span class="cl">[plugins]
+</span></span><span class="line"><span class="ln">7</span><span class="cl">  [plugins.&#34;io.containerd.grpc.v1.cri&#34;]
+</span></span><span class="line"><span class="ln">8</span><span class="cl">    sandbox_image = &#34;registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6&#34;
+</span></span></code></pre></div><p>注意同时配置了containerd不使用k8s.gcr.io/pause容器：</p>
+<p><code>sandbox_image = &quot;registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6&quot;</code></p>
+<p>重启containerd即可。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo systemctl restart containerd
+</span></span></code></pre></div><blockquote>
+<p><b><i>Note:
+当使用 kubeadm 时，请手动配置 kubelet 的 cgroup 驱动.在kubeadm一节会讲。
+</i></b></p>
+</blockquote>
+<h2 id="2安装kubectl">2.安装kubectl</h2>
+<p>参考：https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/</p>
+<ol>
+<li>下载kubectl</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">curl -LO &#34;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&#34;
+</span></span></code></pre></div><ol start="2">
+<li>安装二进制</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+</span></span></code></pre></div><ol start="3">
+<li>测试下kubectl是否工作</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubectl version --client
+</span></span></code></pre></div><ol start="4">
+<li>Enable kubectl的bash补全</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">echo &#39;source &lt;(kubectl completion bash)&#39; &gt;&gt;~/.bashrc
+</span></span><span class="line"><span class="ln">2</span><span class="cl">echo &#39;complete -F __start_kubectl k&#39; &gt;&gt;~/.bashrc
+</span></span></code></pre></div><p>5.安装kubectl convert插件(可选)</p>
+<p>kubectl convert插件可以将废弃的API的元数据转换成目前支持的API，目测会很有用。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl-convert
+</span></span><span class="line"><span class="ln">2</span><span class="cl">curl -LO &#34;https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl-convert.sha256&#34;
+</span></span><span class="line"><span class="ln">3</span><span class="cl">echo &#34;$(&lt;kubectl-convert.sha256) kubectl-convert&#34; | sha256sum --check
+</span></span><span class="line"><span class="ln">4</span><span class="cl">sudo install -o root -g root -m 0755 kubectl-convert /usr/local/bin/kubectl-convert
+</span></span><span class="line"><span class="ln">5</span><span class="cl">kubectl convert --help
+</span></span></code></pre></div><h2 id="3生产环境安装k8s">3.生产环境安装K8s</h2>
+<p>参考：</p>
+<ul>
+<li><a href="https://kubernetes.io/zh/docs/setup/production-environment/">https://kubernetes.io/zh/docs/setup/production-environment/</a></li>
+<li>使用 kubeadm 创建集群:https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/</li>
+<li>kubeadm configurations: <a href="https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/">https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/</a></li>
+</ul>
+<p>使用kubeadm安装和配置生产集群。</p>
+<h3 id="31-安装kubeadmkubelet">3.1 安装kubeadm/kubelet</h3>
+<p>参考：</p>
+<ul>
+<li>安装kubeadm(推荐)：https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/</li>
+<li>使用 kubeadm 配置集群中的每个 kubelet： <a href="https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/kubelet-integration/">https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/kubelet-integration/</a></li>
+</ul>
+<h4 id="311-官网推荐方法-科学上网">3.1.1 官网推荐方法 (科学上网)</h4>
+<p>通过apt，yum等安装： <a href="https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/</a></p>
+<h4 id="312-手动下载release包网络受限">3.1.2 手动下载release包（网络受限）</h4>
+<p>这种方式适合官网被墙时使用。</p>
+<p>重点：安装kubeadm，kubectl和kubelet，其中kubectl在上一步已经安装好了。</p>
+<ul>
+<li>由于内部被墙，需要从github上下载release包。</li>
+</ul>
+<p>地址：https://github.com/kubernetes/kubernetes/releases</p>
+<ul>
+<li>解压之后，运行其中的./cluster/get-kube-binaries.sh下载各个组件。</li>
+</ul>
+<p>最终获得<code>client/kubernetes-client-linux-amd64.tar.gz</code> 和 <code>server/kubernetes-server-linux-amd64.tar.gz</code></p>
+<p>继续解压获得server的几个重要组件的二进制。</p>
+<ul>
+<li>安装kubelet，kubeadm</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo install -o root -g root -m 0755 ./k8s_bin/kubelet /usr/local/bin/kubelet
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo install -o root -g root -m 0755 ./k8s_bin/kubeadm /usr/local/bin/kubeadm
+</span></span></code></pre></div><p>在原文中，是使用apt-get安装的kubelet，所以kubelet会被systemd自动拉起。但是由于此处我们是手动安装，所以必须手动安装kubelet。</p>
+<ul>
+<li>安装kubelet的systemd配置文件</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">cat &gt; /lib/systemd/system/kubelet.service  &lt;&lt; EOF
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">[Unit]
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">Description=kubelet: The Kubernetes Node Agent
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">Documentation=http://kubernetes.io/docs/
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">Wants=network-online.target
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">After=network-online.target
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">[Service]
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">ExecStart=/usr/local/bin/kubelet
+</span></span><span class="line"><span class="ln">10</span><span class="cl">Restart=always
+</span></span><span class="line"><span class="ln">11</span><span class="cl">StartLimitInterval=0
+</span></span><span class="line"><span class="ln">12</span><span class="cl">RestartSec=10
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl">[Install]
+</span></span><span class="line"><span class="ln">15</span><span class="cl">WantedBy=multi-user.target
+</span></span><span class="line"><span class="ln">16</span><span class="cl">EOF
+</span></span></code></pre></div><p>此时kubelet会不断地重启，这是正常的。</p>
+<ul>
+<li>使用kubeadm配置覆盖kubelet默认配置</li>
+</ul>
+<p>由于我们的kubeadm不是由apt-get自动安装的，所以相应的servicse文件没有安装，所以需要手动写入kubeadm为kubelet准备的service文件，以覆盖kubelet的默认配置。
+写入<code>/etc/systemd/system/kubelet.service.d/10-kubeadm.conf</code>以下内容</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">mkdir -p /etc/systemd/system/kubelet.service.d/
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">cat &gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &lt;&lt; EOF
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">[Service]
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">Environment=&#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&#34;
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">Environment=&#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&#34;
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"># 这是 &#34;kubeadm init&#34; 和 &#34;kubeadm join&#34; 运行时生成的文件，动态地填充 KUBELET_KUBEADM_ARGS 变量
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"># 这是一个文件，用户在不得已下可以将其用作替代 kubelet args。
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"># 用户最好使用 .NodeRegistration.KubeletExtraArgs 对象在配置文件中替代。
+</span></span><span class="line"><span class="ln">10</span><span class="cl"># KUBELET_EXTRA_ARGS 应该从此文件中获取。
+</span></span><span class="line"><span class="ln">11</span><span class="cl">EnvironmentFile=-/etc/default/kubelet
+</span></span><span class="line"><span class="ln">12</span><span class="cl">ExecStart=
+</span></span><span class="line"><span class="ln">13</span><span class="cl">ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+</span></span><span class="line"><span class="ln">14</span><span class="cl">EOF
+</span></span></code></pre></div><p>该文件为 kubelet 指定由 kubeadm 管理的所有文件的默认位置。</p>
+<ul>
+<li>用于 TLS 引导程序的 <code>KubeConfig</code> 文件为 <code>/etc/kubernetes/bootstrap-kubelet.conf</code>， 但仅当 <code>/etc/kubernetes/kubelet.conf</code>不存在时才能使用。</li>
+<li>具有唯一 kubelet 标识的 KubeConfig 文件为 <code>/etc/kubernetes/kubelet.conf</code>。包含 kubelet 的组件配置的文件为 <code>/var/lib/kubelet/config.yaml</code>。</li>
+<li>包含的动态环境的文件 <code>KUBELET_KUBEADM_ARGS</code>是来源于 <code>/var/lib/kubelet/kubeadm-flags.env</code>。</li>
+<li>包含用户指定标志替代的文件 <code>KUBELET_EXTRA_ARGS</code>是来源于 <code>/etc/default/kubelet</code> （对于 DEB），或者 <code>/etc/sysconfig/kubelet</code>（对于 RPM）。 <code>KUBELET_EXTRA_ARGS</code>在标志链中排在最后，并且在设置冲突时具有最高优先级。</li>
+</ul>
+<p>最后记得重启kubelet</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo systemctl daemon-reload &amp;&amp; systemctl restart kubelet &amp;&amp; systemctl enable kubelet
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo swapoff -a
+</span></span></code></pre></div><p>还要用swapoff -a关闭swap，这个是K8s要求的。</p>
+<ul>
+<li>安装crictl工具，这个是kubelet的client程序</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">VERSION=&#34;v1.22.0&#34;
+</span></span><span class="line"><span class="ln">2</span><span class="cl">wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-$VERSION-linux-amd64.tar.gz
+</span></span><span class="line"><span class="ln">3</span><span class="cl">sudo tar zxvf crictl-$VERSION-linux-amd64.tar.gz -C /usr/local/bin
+</span></span><span class="line"><span class="ln">4</span><span class="cl">rm -f crictl-$VERSION-linux-amd64.tar.gz
+</span></span></code></pre></div><h3 id="32-准备离线镜像">3.2 准备离线镜像</h3>
+<p>参考：</p>
+<ul>
+<li>安装kubeadm：https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/</li>
+<li>running kubeadm without an internet connection: <a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#without-internet-connection">https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#without-internet-connection</a></li>
+<li>use kubeadm with a config file: <a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file">https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file</a></li>
+</ul>
+<p>默认的镜像会使用<code>k8s.gcr.io</code>这个镜像仓库的，但是由于在国内无法访问，所以有必要提前准备需要的镜像，方便我们离线安装。</p>
+<p>通过以下命令可知kubeadm依赖的镜像：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubeadm config images list
+</span></span></code></pre></div><p>镜像列表为</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">k8s.gcr.io/kube-apiserver:v1.22.3
+</span></span><span class="line"><span class="ln">2</span><span class="cl">k8s.gcr.io/kube-controller-manager:v1.22.3
+</span></span><span class="line"><span class="ln">3</span><span class="cl">k8s.gcr.io/kube-scheduler:v1.22.3
+</span></span><span class="line"><span class="ln">4</span><span class="cl">k8s.gcr.io/kube-proxy:v1.22.3
+</span></span><span class="line"><span class="ln">5</span><span class="cl">k8s.gcr.io/pause:3.5
+</span></span><span class="line"><span class="ln">6</span><span class="cl">k8s.gcr.io/etcd:3.5.0-0
+</span></span><span class="line"><span class="ln">7</span><span class="cl">k8s.gcr.io/coredns/coredns:v1.8.4
+</span></span></code></pre></div><p>这些镜像都是我们拉不下来的，所以需要使用自定义的镜像。</p>
+<p>首先我们可以用 <code>kubeadm config print init-defaults </code>打印kubeadm init默认使用的config，其次修改其中的K8s版本，imageRepository字段，
+containerd（cri插件）socket位置，etcd和coredns镜像仓库及tag号等。最终使用如下的kubeadm config。</p>
+<blockquote>
+<p><b><i>Note：后面还有很多步要修改这个kubeadm config，最终完整的kubeadm config要参考附录4.1. </b></i></p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">apiVersion: kubeadm.k8s.io/v1beta3
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">bootstrapTokens:
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">- groups:
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  - system:bootstrappers:kubeadm:default-node-token
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  token: abcdef.0123456789abcdef
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  ttl: 24h0m0s
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  usages:
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  - signing
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  - authentication
+</span></span><span class="line"><span class="ln">10</span><span class="cl">kind: InitConfiguration
+</span></span><span class="line"><span class="ln">11</span><span class="cl">localAPIEndpoint:
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  advertiseAddress: &lt;Node-IP&gt;
+</span></span><span class="line"><span class="ln">13</span><span class="cl">  bindPort: 6443
+</span></span><span class="line"><span class="ln">14</span><span class="cl">nodeRegistration:
+</span></span><span class="line"><span class="ln">15</span><span class="cl">  criSocket: /var/run/containerd/containerd.sock
+</span></span><span class="line"><span class="ln">16</span><span class="cl">  imagePullPolicy: IfNotPresent
+</span></span><span class="line"><span class="ln">17</span><span class="cl">  name: node
+</span></span><span class="line"><span class="ln">18</span><span class="cl">  taints: null
+</span></span><span class="line"><span class="ln">19</span><span class="cl">---
+</span></span><span class="line"><span class="ln">20</span><span class="cl">apiServer:
+</span></span><span class="line"><span class="ln">21</span><span class="cl">  timeoutForControlPlane: 4m0s
+</span></span><span class="line"><span class="ln">22</span><span class="cl">apiVersion: kubeadm.k8s.io/v1beta3
+</span></span><span class="line"><span class="ln">23</span><span class="cl">certificatesDir: /etc/kubernetes/pki
+</span></span><span class="line"><span class="ln">24</span><span class="cl">clusterName: kubernetes
+</span></span><span class="line"><span class="ln">25</span><span class="cl">controllerManager: {}
+</span></span><span class="line"><span class="ln">26</span><span class="cl">dns: {}
+</span></span><span class="line"><span class="ln">27</span><span class="cl">etcd:
+</span></span><span class="line"><span class="ln">28</span><span class="cl">  local:
+</span></span><span class="line"><span class="ln">29</span><span class="cl">    dataDir: /var/lib/etcd
+</span></span><span class="line"><span class="ln">30</span><span class="cl">imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers
+</span></span><span class="line"><span class="ln">31</span><span class="cl">kind: ClusterConfiguration
+</span></span><span class="line"><span class="ln">32</span><span class="cl">kubernetesVersion: 1.22.3
+</span></span><span class="line"><span class="ln">33</span><span class="cl">networking:
+</span></span><span class="line"><span class="ln">34</span><span class="cl">  dnsDomain: &lt;Hostname&gt;
+</span></span><span class="line"><span class="ln">35</span><span class="cl">  serviceSubnet: 10.96.0.0/12
+</span></span><span class="line"><span class="ln">36</span><span class="cl">scheduler: {}
+</span></span></code></pre></div><p>其中K8s管控组件使用了阿里云的镜像仓库，etcd和coredns使用了docker.io镜像仓库。</p>
+<p>然后拉取镜像。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo kubeadm config images pull --config=kubeadm-init-config.yaml
+</span></span></code></pre></div><p>等待拉取完成即可。查看下镜像是否拉取成功。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo ctr -n k8s.io image ls -q
+</span></span></code></pre></div><blockquote>
+<p><b><i>Note: 这个kubeadm的config文件在init的时候也要指定。 </i></b></p>
+</blockquote>
+<h3 id="33-选择网络方案及设置kubeadm子网">3.3 选择网络方案及设置kubeadm子网</h3>
+<p>参考：</p>
+<ul>
+<li>集群网络系统： <a href="https://kubernetes.io/zh/docs/concepts/cluster-administration/networking/#how-to-implement-the-kubernetes-networking-model">https://kubernetes.io/zh/docs/concepts/cluster-administration/networking/#how-to-implement-the-kubernetes-networking-model</a></li>
+<li>Kubernetes CNI 网络最强对比：Flannel、Calico、Canal 和 Weave： <a href="https://www.infoq.cn/article/gxftm0x8z2zlhw9xlezv">https://www.infoq.cn/article/gxftm0x8z2zlhw9xlezv</a></li>
+<li>Calico安装：https://docs.projectcalico.org/getting-started/kubernetes/quickstart</li>
+</ul>
+<p>网络方案相当多，目前看Flannel, Calico和Cilium都是相当不错的选择。其中Flannel最老最简单，Cilium使用了BPF所以性能最好。但为了保证稳定性同时兼容灵活性，本项目暂时选择Calico作为网络方案，后续还需要继续调研哪种方案更好。</p>
+<p>Calico需要指定的子网为192.168.0.0/16</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+</span></span></code></pre></div><p>可以在上面的kubeadm config中加入如下一段内容：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">networking:
+</span></span><span class="line"><span class="ln">2</span><span class="cl">  ......
+</span></span><span class="line"><span class="ln">3</span><span class="cl">  podSubnet: 192.168.0.0/16
+</span></span></code></pre></div><p>等集群拉起来之后我们再继续安装Calico的组件。</p>
+<h3 id="34-配置kubelet使用systemd-cgroup驱动">3.4 配置kubelet使用systemd cgroup驱动</h3>
+<p>参考：</p>
+<ul>
+<li>配置kubelet的cgroup驱动：https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/#%E9%85%8D%E7%BD%AE-kubelet-%E7%9A%84-cgroup-%E9%A9%B1%E5%8A%A8</li>
+</ul>
+<p>在kubeadm config中加入如下配置：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kind: KubeletConfiguration
+</span></span><span class="line"><span class="ln">2</span><span class="cl">apiVersion: kubelet.config.k8s.io/v1beta1
+</span></span><span class="line"><span class="ln">3</span><span class="cl">cgroupDriver: systemd
+</span></span></code></pre></div><h3 id="35-kubeadm-init拉起集群">3.5 kubeadm init拉起集群</h3>
+<p>是时候拉起集群了，运行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo kubeadm init --config=kubeadm-init-config.yaml
+</span></span></code></pre></div><ol>
+<li>第一次启动失败，报错：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">[init] Using Kubernetes version: v1.22.3
+</span></span><span class="line"><span class="ln">2</span><span class="cl">[preflight] Running pre-flight checks
+</span></span><span class="line"><span class="ln">3</span><span class="cl">	[WARNING FileExisting-socat]: socat not found in system path
+</span></span><span class="line"><span class="ln">4</span><span class="cl">	[WARNING Hostname]: hostname &#34;node&#34; could not be reached
+</span></span><span class="line"><span class="ln">5</span><span class="cl">	[WARNING Hostname]: hostname &#34;node&#34;: lookup node on 127.0.0.53:53: server misbehaving
+</span></span><span class="line"><span class="ln">6</span><span class="cl">error execution phase preflight: [preflight] Some fatal errors occurred:
+</span></span><span class="line"><span class="ln">7</span><span class="cl">	[ERROR FileExisting-conntrack]: conntrack not found in system path
+</span></span><span class="line"><span class="ln">8</span><span class="cl">[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+</span></span><span class="line"><span class="ln">9</span><span class="cl">To see the stack trace of this error execute with --v=5 or higher
+</span></span></code></pre></div><p>几个错误：</p>
+<ul>
+<li>socat, conntrack没安装：安装。</li>
+<li>配置文件中hostname配错了：修改成本机真实的hostname=ringcloud即可。</li>
+</ul>
+<ol start="2">
+<li>第二次启动失败。从kubelet日志看，nodeName不对，以及对应的advertiseAddress设置成  1.2.3.4也不对，需要改成真实的nodeName和IP。需要先回滚修改。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sudo kubeadm reset
+</span></span></code></pre></div><ol start="3">
+<li>第三次启动失败，报错如下。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">Nov 08 08:28:14 ringcloud kubelet[231529]: I1108 08:28:14.648371  231529 server.go:199] &#34;Warning: For remote container runtime, --pod-infra-container-image is ignored in kubelet, which should be set in that remote runtime instead&#34;
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">Nov 08 08:28:15 ringcloud kubelet[231529]: I1108 08:28:15.595136  231529 server.go:440] &#34;Kubelet version&#34; kubeletVersion=&#34;v1.22.3&#34;
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">Nov 08 08:28:15 ringcloud kubelet[231529]: I1108 08:28:15.595657  231529 server.go:868] &#34;Client rotation is on, will bootstrap in background&#34;
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">Nov 08 08:28:15 ringcloud kubelet[231529]: I1108 08:28:15.601897  231529 dynamic_cafile_content.go:155] &#34;Starting controller&#34; name=&#34;client-ca-bundle::/etc/kubernetes/pki/ca.crt&#34;
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">Nov 08 08:28:15 ringcloud kubelet[231529]: E1108 08:28:15.618957  231529 certificate_manager.go:471] kubernetes.io/kube-apiserver-client-kubelet: Failed while requesting a signed certificate from the control plane: cannot create certificate signing request: Post &#34;https://103.242.173.68:6443/apis/certificates.k8s.io/v1/certificatesigningrequests&#34;: dial tcp 103.242.173.68:6443: connect: connection refused
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">Nov 08 08:28:17 ringcloud kubelet[231529]: E1108 08:28:17.743843  231529 certificate_manager.go:471] kubernetes.io/kube-apiserver-client-kubelet: Failed while requesting a signed certificate from the control plane: cannot create certificate signing request: Post &#34;https://103.242.173.68:6443/apis/certificates.k8s.io/v1/certificatesigningrequests&#34;: dial tcp 103.242.173.68:6443: connect: connection refused
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: I1108 08:28:20.654012  231529 server.go:687] &#34;--cgroups-per-qos enabled, but --cgroup-root was not specified.  defaulting to /&#34;
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: I1108 08:28:20.654341  231529 container_manager_linux.go:280] &#34;Container manager verified user specified cgroup-root exists&#34; cgroupRoot=[]
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: I1108 08:28:20.654433  231529 container_manager_linux.go:285] &#34;Creating Container Manager object based on Node Config&#34; nodeConfig={RuntimeCgroupsName: SystemCgroupsName: KubeletCgroupsName: ContainerRuntime:remote CgroupsPerQOS:true CgroupRoot:/ CgroupDriver:systemd KubeletRootDir:/var/lib/kubelet ProtectKernelDefaults:false NodeAllocatableConfig:{KubeReservedCgroupName: SystemReservedCgroupName: ReservedSystemCPUs: EnforceNodeAllocatable:map[pods:{}] KubeReserved:map[] SystemReserved:map[] HardEvictionThresholds:[{Signal:nodefs.available Operator:LessThan Value:{Quantity:&lt;nil&gt; Percentage:0.1} GracePeriod:0s MinReclaim:&lt;nil&gt;} {Signal:nodefs.inodesFree Operator:LessThan Value:{Quantity:&lt;nil&gt; Percentage:0.05} GracePeriod:0s MinReclaim:&lt;nil&gt;} {Signal:imagefs.available Operator:LessThan Value:{Quantity:&lt;nil&gt; Percentage:0.15} GracePeriod:0s MinReclaim:&lt;nil&gt;} {Signal:memory.available Operator:LessThan Value:{Quantity:100Mi Percentage:0} GracePeriod:0s MinReclaim:&lt;nil&gt;}]} QOSReserved:map[] ExperimentalCPUManagerPolicy:none ExperimentalCPUManagerPolicyOptions:map[] ExperimentalTopologyManagerScope:container ExperimentalCPUManagerReconcilePeriod:10s ExperimentalMemoryManagerPolicy:None ExperimentalMemoryManagerReservedMemory:[] ExperimentalPodPidsLimit:-1 EnforceCPULimits:true CPUCFSQuotaPeriod:100ms ExperimentalTopologyManagerPolicy:none}
+</span></span><span class="line"><span class="ln">10</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: I1108 08:28:20.654570  231529 topology_manager.go:133] &#34;Creating topology manager with policy per scope&#34; topologyPolicyName=&#34;none&#34; topologyScopeName=&#34;container&#34;
+</span></span><span class="line"><span class="ln">11</span><span class="cl">....
+</span></span><span class="line"><span class="ln">12</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: E1108 08:28:20.864633  231529 kubelet.go:2412] &#34;Error getting node&#34; err=&#34;node \&#34;ringcloud\&#34; not found&#34;
+</span></span><span class="line"><span class="ln">13</span><span class="cl">Nov 08 08:28:20 ringcloud kubelet[231529]: E1108 08:28:20.965296  231529 kubelet.go:2412] &#34;Error getting node&#34; err=&#34;node \&#34;ringcloud\&#34; not found&#34;
+</span></span></code></pre></div><p>关键信息其实是这一句：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">Nov 08 08:28:14 ringcloud kubelet[231529]: I1108 08:28:14.648371  231529 server.go:199] &#34;Warning: For remote container runtime, --pod-infra-container-image is ignored in kubelet, which should be set in that remote runtime instead&#34;
+</span></span></code></pre></div><p>containerd会无视kubelet的--pod-infra-container-image参数，而在containerd的日志中，我们确实也看到在不断的拉取k8s.gcr.io/pause容器。</p>
+<p>修改containerd的配置文件<code>/etc/containerd/config.toml</code>, 以下一行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">sandbox_image = &#34;registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.5&#34;
+</span></span></code></pre></div><p>重启containerd.</p>
+<p>最终启动成功了：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">zhangwei@ringcloud:~/program/k8s_install$ sudo kubeadm init --config=kubeadm-init-config.yaml 
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">[init] Using Kubernetes version: v1.22.3
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">[preflight] Running pre-flight checks
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">[preflight] Pulling images required for setting up a Kubernetes cluster
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">[preflight] This might take a minute or two, depending on the speed of your internet connection
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">[preflight] You can also perform this action in beforehand using &#39;kubeadm config images pull&#39;
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">[certs] Using certificateDir folder &#34;/etc/kubernetes/pki&#34;
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">[certs] Generating &#34;ca&#34; certificate and key
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">[certs] Generating &#34;apiserver&#34; certificate and key
+</span></span><span class="line"><span class="ln">10</span><span class="cl">[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.ringcloud.com ringcloud] and IPs [10.96.0.1 103.242.173.68]
+</span></span><span class="line"><span class="ln">11</span><span class="cl">[certs] Generating &#34;apiserver-kubelet-client&#34; certificate and key
+</span></span><span class="line"><span class="ln">12</span><span class="cl">[certs] Generating &#34;front-proxy-ca&#34; certificate and key
+</span></span><span class="line"><span class="ln">13</span><span class="cl">[certs] Generating &#34;front-proxy-client&#34; certificate and key
+</span></span><span class="line"><span class="ln">14</span><span class="cl">[certs] Generating &#34;etcd/ca&#34; certificate and key
+</span></span><span class="line"><span class="ln">15</span><span class="cl">[certs] Generating &#34;etcd/server&#34; certificate and key
+</span></span><span class="line"><span class="ln">16</span><span class="cl">[certs] etcd/server serving cert is signed for DNS names [localhost ringcloud] and IPs [103.242.173.68 127.0.0.1 ::1]
+</span></span><span class="line"><span class="ln">17</span><span class="cl">[certs] Generating &#34;etcd/peer&#34; certificate and key
+</span></span><span class="line"><span class="ln">18</span><span class="cl">[certs] etcd/peer serving cert is signed for DNS names [localhost ringcloud] and IPs [103.242.173.68 127.0.0.1 ::1]
+</span></span><span class="line"><span class="ln">19</span><span class="cl">[certs] Generating &#34;etcd/healthcheck-client&#34; certificate and key
+</span></span><span class="line"><span class="ln">20</span><span class="cl">[certs] Generating &#34;apiserver-etcd-client&#34; certificate and key
+</span></span><span class="line"><span class="ln">21</span><span class="cl">[certs] Generating &#34;sa&#34; key and public key
+</span></span><span class="line"><span class="ln">22</span><span class="cl">[kubeconfig] Using kubeconfig folder &#34;/etc/kubernetes&#34;
+</span></span><span class="line"><span class="ln">23</span><span class="cl">[kubeconfig] Writing &#34;admin.conf&#34; kubeconfig file
+</span></span><span class="line"><span class="ln">24</span><span class="cl">[kubeconfig] Writing &#34;kubelet.conf&#34; kubeconfig file
+</span></span><span class="line"><span class="ln">25</span><span class="cl">[kubeconfig] Writing &#34;controller-manager.conf&#34; kubeconfig file
+</span></span><span class="line"><span class="ln">26</span><span class="cl">[kubeconfig] Writing &#34;scheduler.conf&#34; kubeconfig file
+</span></span><span class="line"><span class="ln">27</span><span class="cl">[kubelet-start] Writing kubelet environment file with flags to file &#34;/var/lib/kubelet/kubeadm-flags.env&#34;
+</span></span><span class="line"><span class="ln">28</span><span class="cl">[kubelet-start] Writing kubelet configuration to file &#34;/var/lib/kubelet/config.yaml&#34;
+</span></span><span class="line"><span class="ln">29</span><span class="cl">[kubelet-start] Starting the kubelet
+</span></span><span class="line"><span class="ln">30</span><span class="cl">[control-plane] Using manifest folder &#34;/etc/kubernetes/manifests&#34;
+</span></span><span class="line"><span class="ln">31</span><span class="cl">[control-plane] Creating static Pod manifest for &#34;kube-apiserver&#34;
+</span></span><span class="line"><span class="ln">32</span><span class="cl">[control-plane] Creating static Pod manifest for &#34;kube-controller-manager&#34;
+</span></span><span class="line"><span class="ln">33</span><span class="cl">[control-plane] Creating static Pod manifest for &#34;kube-scheduler&#34;
+</span></span><span class="line"><span class="ln">34</span><span class="cl">[etcd] Creating static Pod manifest for local etcd in &#34;/etc/kubernetes/manifests&#34;
+</span></span><span class="line"><span class="ln">35</span><span class="cl">[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory &#34;/etc/kubernetes/manifests&#34;. This can take up to 4m0s
+</span></span><span class="line"><span class="ln">36</span><span class="cl">[apiclient] All control plane components are healthy after 14.504580 seconds
+</span></span><span class="line"><span class="ln">37</span><span class="cl">[upload-config] Storing the configuration used in ConfigMap &#34;kubeadm-config&#34; in the &#34;kube-system&#34; Namespace
+</span></span><span class="line"><span class="ln">38</span><span class="cl">[kubelet] Creating a ConfigMap &#34;kubelet-config-1.22&#34; in namespace kube-system with the configuration for the kubelets in the cluster
+</span></span><span class="line"><span class="ln">39</span><span class="cl">[upload-certs] Skipping phase. Please see --upload-certs
+</span></span><span class="line"><span class="ln">40</span><span class="cl">[mark-control-plane] Marking the node ringcloud as control-plane by adding the labels: [node-role.kubernetes.io/master(deprecated) node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+</span></span><span class="line"><span class="ln">41</span><span class="cl">[mark-control-plane] Marking the node ringcloud as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]
+</span></span><span class="line"><span class="ln">42</span><span class="cl">[bootstrap-token] Using token: abcdef.0123456789abcdef
+</span></span><span class="line"><span class="ln">43</span><span class="cl">[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+</span></span><span class="line"><span class="ln">44</span><span class="cl">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to get nodes
+</span></span><span class="line"><span class="ln">45</span><span class="cl">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+</span></span><span class="line"><span class="ln">46</span><span class="cl">[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+</span></span><span class="line"><span class="ln">47</span><span class="cl">[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+</span></span><span class="line"><span class="ln">48</span><span class="cl">[bootstrap-token] Creating the &#34;cluster-info&#34; ConfigMap in the &#34;kube-public&#34; namespace
+</span></span><span class="line"><span class="ln">49</span><span class="cl">[kubelet-finalize] Updating &#34;/etc/kubernetes/kubelet.conf&#34; to point to a rotatable kubelet client certificate and key
+</span></span><span class="line"><span class="ln">50</span><span class="cl">[addons] Applied essential addon: CoreDNS
+</span></span><span class="line"><span class="ln">51</span><span class="cl">[addons] Applied essential addon: kube-proxy
+</span></span><span class="line"><span class="ln">52</span><span class="cl">
+</span></span><span class="line"><span class="ln">53</span><span class="cl">Your Kubernetes control-plane has initialized successfully!
+</span></span><span class="line"><span class="ln">54</span><span class="cl">
+</span></span><span class="line"><span class="ln">55</span><span class="cl">To start using your cluster, you need to run the following as a regular user:
+</span></span><span class="line"><span class="ln">56</span><span class="cl">
+</span></span><span class="line"><span class="ln">57</span><span class="cl">  mkdir -p $HOME/.kube
+</span></span><span class="line"><span class="ln">58</span><span class="cl">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span class="line"><span class="ln">59</span><span class="cl">  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</span></span><span class="line"><span class="ln">60</span><span class="cl">
+</span></span><span class="line"><span class="ln">61</span><span class="cl">Alternatively, if you are the root user, you can run:
+</span></span><span class="line"><span class="ln">62</span><span class="cl">
+</span></span><span class="line"><span class="ln">63</span><span class="cl">  export KUBECONFIG=/etc/kubernetes/admin.conf
+</span></span><span class="line"><span class="ln">64</span><span class="cl">
+</span></span><span class="line"><span class="ln">65</span><span class="cl">You should now deploy a pod network to the cluster.
+</span></span><span class="line"><span class="ln">66</span><span class="cl">Run &#34;kubectl apply -f [podnetwork].yaml&#34; with one of the options listed at:
+</span></span><span class="line"><span class="ln">67</span><span class="cl">  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+</span></span><span class="line"><span class="ln">68</span><span class="cl">
+</span></span><span class="line"><span class="ln">69</span><span class="cl">Then you can join any number of worker nodes by running the following on each as root:
+</span></span><span class="line"><span class="ln">70</span><span class="cl">
+</span></span><span class="line"><span class="ln">71</span><span class="cl">kubeadm join 103.242.173.68:6443 --token xxx \
+</span></span><span class="line"><span class="ln">72</span><span class="cl">	--discovery-token-ca-cert-hash sha256:xxx
+</span></span></code></pre></div><p>此时由于网络还没配置好，所以coredns组件还会处于无限pending的过程中。</p>
+<h3 id="36-把网络给拉起来">3.6 把网络给拉起来</h3>
+<p>参考：</p>
+<ul>
+<li>Calico安装：https://docs.projectcalico.org/getting-started/kubernetes/quickstart</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+</span></span><span class="line"><span class="ln">2</span><span class="cl">kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+</span></span><span class="line"><span class="ln">3</span><span class="cl">watch kubectl get pods -n calico-system
+</span></span></code></pre></div><p>等到calico-system下面的所有pod都被拉起来了，就大功告成了。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">$ kubectl get pods -n calico-system
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">NAME                                       READY   STATUS    RESTARTS   AGE
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">calico-kube-controllers-845d5d6747-bl8vm   1/1     Running   0          3m12s
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">calico-node-b6l2c                          1/1     Running   0          3m13s
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">calico-typha-84dbb8d5b5-68mp7              1/1     Running   0          3m13s
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">csi-node-driver-jvckc                      2/2     Running   0          3m12s
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">$ kubectl -n kube-system get pod
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">NAME                                READY   STATUS    RESTARTS   AGE
+</span></span><span class="line"><span class="ln">10</span><span class="cl">coredns-7d89d9b6b8-9rcmw            1/1     Running   0          29m
+</span></span><span class="line"><span class="ln">11</span><span class="cl">coredns-7d89d9b6b8-k565x            1/1     Running   0          29m
+</span></span><span class="line"><span class="ln">12</span><span class="cl">etcd-ringcloud                      1/1     Running   0          30m
+</span></span><span class="line"><span class="ln">13</span><span class="cl">kube-apiserver-ringcloud            1/1     Running   0          30m
+</span></span><span class="line"><span class="ln">14</span><span class="cl">kube-controller-manager-ringcloud   1/1     Running   0          30m
+</span></span><span class="line"><span class="ln">15</span><span class="cl">kube-proxy-5szw8                    1/1     Running   0          29m
+</span></span><span class="line"><span class="ln">16</span><span class="cl">kube-scheduler-ringcloud            1/1     Running   0          30m
+</span></span></code></pre></div><p>可见calico的所有组件，以及coredns都变成运行态了。</p>
+<h3 id="37-允许在master节点调度pod可选">3.7 允许在master节点调度pod（可选）</h3>
+<p>生产环境下为了安全，这个是不建议的。当前我们只有一个测试节点，可以允许master节点调度pod运行。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+</span></span><span class="line"><span class="ln">2</span><span class="cl">kubectl taint nodes --all node-role.kubernetes.io/master-
+</span></span></code></pre></div><h3 id="38-启动个简单的pod测试一下">3.8 启动个简单的pod测试一下</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">pod.yaml
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">apiVersion: v1
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">kind: Pod
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">metadata:
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  name: test
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">spec:
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  containers:
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  - name: busybox
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    image: busybox
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    command: [&#39;sleep&#39;, &#34;1000&#34;]
+</span></span></code></pre></div><p>启动：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubectl create -f pod.yaml
+</span></span></code></pre></div><p>容器应该会成功运行</p>
+<p>删除：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">kubectl delete -f pod.yaml
+</span></span></code></pre></div><h2 id="4附录">4.附录</h2>
+<h3 id="41-完整的kubeadm-init-config">4.1 完整的kubeadm init config</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">apiVersion: kubeadm.k8s.io/v1beta3
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">bootstrapTokens:
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">- groups:
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  - system:bootstrappers:kubeadm:default-node-token
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  token: abcdef.0123456789abcdef
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  ttl: 24h0m0s
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  usages:
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  - signing
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  - authentication
+</span></span><span class="line"><span class="ln">10</span><span class="cl">kind: InitConfiguration
+</span></span><span class="line"><span class="ln">11</span><span class="cl">localAPIEndpoint:
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  advertiseAddress: 103.242.173.68
+</span></span><span class="line"><span class="ln">13</span><span class="cl">  bindPort: 6443
+</span></span><span class="line"><span class="ln">14</span><span class="cl">nodeRegistration:
+</span></span><span class="line"><span class="ln">15</span><span class="cl">  criSocket: /var/run/containerd/containerd.sock
+</span></span><span class="line"><span class="ln">16</span><span class="cl">  imagePullPolicy: IfNotPresent
+</span></span><span class="line"><span class="ln">17</span><span class="cl">  name: ringcloud
+</span></span><span class="line"><span class="ln">18</span><span class="cl">  taints: null
+</span></span><span class="line"><span class="ln">19</span><span class="cl">---
+</span></span><span class="line"><span class="ln">20</span><span class="cl">apiServer:
+</span></span><span class="line"><span class="ln">21</span><span class="cl">  timeoutForControlPlane: 4m0s
+</span></span><span class="line"><span class="ln">22</span><span class="cl">apiVersion: kubeadm.k8s.io/v1beta3
+</span></span><span class="line"><span class="ln">23</span><span class="cl">certificatesDir: /etc/kubernetes/pki
+</span></span><span class="line"><span class="ln">24</span><span class="cl">clusterName: kubernetes
+</span></span><span class="line"><span class="ln">25</span><span class="cl">controllerManager: {}
+</span></span><span class="line"><span class="ln">26</span><span class="cl">dns: {}
+</span></span><span class="line"><span class="ln">27</span><span class="cl">etcd:
+</span></span><span class="line"><span class="ln">28</span><span class="cl">  local:
+</span></span><span class="line"><span class="ln">29</span><span class="cl">    dataDir: /var/lib/etcd
+</span></span><span class="line"><span class="ln">30</span><span class="cl">imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers
+</span></span><span class="line"><span class="ln">31</span><span class="cl">kind: ClusterConfiguration
+</span></span><span class="line"><span class="ln">32</span><span class="cl">kubernetesVersion: 1.22.3
+</span></span><span class="line"><span class="ln">33</span><span class="cl">networking:
+</span></span><span class="line"><span class="ln">34</span><span class="cl">  dnsDomain: ringcloud.com
+</span></span><span class="line"><span class="ln">35</span><span class="cl">  serviceSubnet: 10.96.0.0/12
+</span></span><span class="line"><span class="ln">36</span><span class="cl">  podSubnet: 192.168.0.0/16
+</span></span><span class="line"><span class="ln">37</span><span class="cl">scheduler: {}
+</span></span><span class="line"><span class="ln">38</span><span class="cl">---
+</span></span><span class="line"><span class="ln">39</span><span class="cl">kind: KubeletConfiguration
+</span></span><span class="line"><span class="ln">40</span><span class="cl">apiVersion: kubelet.config.k8s.io/v1beta1
+</span></span><span class="line"><span class="ln">41</span><span class="cl">cgroupDriver: systemd
+</span></span></code></pre></div><h3 id="42-完整的contaienrd-config">4.2 完整的contaienrd config</h3>
+<p>文件：/etc/containerd/config.toml</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">  1</span><span class="cl">version = 2
+</span></span><span class="line"><span class="ln">  2</span><span class="cl">root = &#34;/var/lib/containerd&#34;
+</span></span><span class="line"><span class="ln">  3</span><span class="cl">state = &#34;/run/containerd&#34;
+</span></span><span class="line"><span class="ln">  4</span><span class="cl">plugin_dir = &#34;&#34;
+</span></span><span class="line"><span class="ln">  5</span><span class="cl">disabled_plugins = []
+</span></span><span class="line"><span class="ln">  6</span><span class="cl">required_plugins = []
+</span></span><span class="line"><span class="ln">  7</span><span class="cl">oom_score = 0
+</span></span><span class="line"><span class="ln">  8</span><span class="cl">
+</span></span><span class="line"><span class="ln">  9</span><span class="cl">[grpc]
+</span></span><span class="line"><span class="ln"> 10</span><span class="cl">  address = &#34;/run/containerd/containerd.sock&#34;
+</span></span><span class="line"><span class="ln"> 11</span><span class="cl">  tcp_address = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 12</span><span class="cl">  tcp_tls_cert = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 13</span><span class="cl">  tcp_tls_key = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 14</span><span class="cl">  uid = 0
+</span></span><span class="line"><span class="ln"> 15</span><span class="cl">  gid = 0
+</span></span><span class="line"><span class="ln"> 16</span><span class="cl">  max_recv_message_size = 16777216
+</span></span><span class="line"><span class="ln"> 17</span><span class="cl">  max_send_message_size = 16777216
+</span></span><span class="line"><span class="ln"> 18</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 19</span><span class="cl">[ttrpc]
+</span></span><span class="line"><span class="ln"> 20</span><span class="cl">  address = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 21</span><span class="cl">  uid = 0
+</span></span><span class="line"><span class="ln"> 22</span><span class="cl">  gid = 0
+</span></span><span class="line"><span class="ln"> 23</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 24</span><span class="cl">[debug]
+</span></span><span class="line"><span class="ln"> 25</span><span class="cl">  address = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 26</span><span class="cl">  uid = 0
+</span></span><span class="line"><span class="ln"> 27</span><span class="cl">  gid = 0
+</span></span><span class="line"><span class="ln"> 28</span><span class="cl">  level = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 29</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 30</span><span class="cl">[metrics]
+</span></span><span class="line"><span class="ln"> 31</span><span class="cl">  address = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 32</span><span class="cl">  grpc_histogram = false
+</span></span><span class="line"><span class="ln"> 33</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 34</span><span class="cl">[cgroup]
+</span></span><span class="line"><span class="ln"> 35</span><span class="cl">  path = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 36</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 37</span><span class="cl">[timeouts]
+</span></span><span class="line"><span class="ln"> 38</span><span class="cl">  &#34;io.containerd.timeout.shim.cleanup&#34; = &#34;5s&#34;
+</span></span><span class="line"><span class="ln"> 39</span><span class="cl">  &#34;io.containerd.timeout.shim.load&#34; = &#34;5s&#34;
+</span></span><span class="line"><span class="ln"> 40</span><span class="cl">  &#34;io.containerd.timeout.shim.shutdown&#34; = &#34;3s&#34;
+</span></span><span class="line"><span class="ln"> 41</span><span class="cl">  &#34;io.containerd.timeout.task.state&#34; = &#34;2s&#34;
+</span></span><span class="line"><span class="ln"> 42</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 43</span><span class="cl">[plugins]
+</span></span><span class="line"><span class="ln"> 44</span><span class="cl">  [plugins.&#34;io.containerd.gc.v1.scheduler&#34;]
+</span></span><span class="line"><span class="ln"> 45</span><span class="cl">    pause_threshold = 0.02
+</span></span><span class="line"><span class="ln"> 46</span><span class="cl">    deletion_threshold = 0
+</span></span><span class="line"><span class="ln"> 47</span><span class="cl">    mutation_threshold = 100
+</span></span><span class="line"><span class="ln"> 48</span><span class="cl">    schedule_delay = &#34;0s&#34;
+</span></span><span class="line"><span class="ln"> 49</span><span class="cl">    startup_delay = &#34;100ms&#34;
+</span></span><span class="line"><span class="ln"> 50</span><span class="cl">  [plugins.&#34;io.containerd.grpc.v1.cri&#34;]
+</span></span><span class="line"><span class="ln"> 51</span><span class="cl">    disable_tcp_service = true
+</span></span><span class="line"><span class="ln"> 52</span><span class="cl">    stream_server_address = &#34;127.0.0.1&#34;
+</span></span><span class="line"><span class="ln"> 53</span><span class="cl">    stream_server_port = &#34;0&#34;
+</span></span><span class="line"><span class="ln"> 54</span><span class="cl">    stream_idle_timeout = &#34;4h0m0s&#34;
+</span></span><span class="line"><span class="ln"> 55</span><span class="cl">    enable_selinux = false
+</span></span><span class="line"><span class="ln"> 56</span><span class="cl">    selinux_category_range = 1024
+</span></span><span class="line"><span class="ln"> 57</span><span class="cl">    sandbox_image = &#34;registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.5&#34;
+</span></span><span class="line"><span class="ln"> 58</span><span class="cl">    stats_collect_period = 10
+</span></span><span class="line"><span class="ln"> 59</span><span class="cl">    systemd_cgroup = false
+</span></span><span class="line"><span class="ln"> 60</span><span class="cl">    enable_tls_streaming = false
+</span></span><span class="line"><span class="ln"> 61</span><span class="cl">    max_container_log_line_size = 16384
+</span></span><span class="line"><span class="ln"> 62</span><span class="cl">    disable_cgroup = false
+</span></span><span class="line"><span class="ln"> 63</span><span class="cl">    disable_apparmor = false
+</span></span><span class="line"><span class="ln"> 64</span><span class="cl">    restrict_oom_score_adj = false
+</span></span><span class="line"><span class="ln"> 65</span><span class="cl">    max_concurrent_downloads = 3
+</span></span><span class="line"><span class="ln"> 66</span><span class="cl">    disable_proc_mount = false
+</span></span><span class="line"><span class="ln"> 67</span><span class="cl">    unset_seccomp_profile = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 68</span><span class="cl">    tolerate_missing_hugetlb_controller = true
+</span></span><span class="line"><span class="ln"> 69</span><span class="cl">    disable_hugetlb_controller = true
+</span></span><span class="line"><span class="ln"> 70</span><span class="cl">    ignore_image_defined_volumes = false
+</span></span><span class="line"><span class="ln"> 71</span><span class="cl">    [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd]
+</span></span><span class="line"><span class="ln"> 72</span><span class="cl">      snapshotter = &#34;overlayfs&#34;
+</span></span><span class="line"><span class="ln"> 73</span><span class="cl">      default_runtime_name = &#34;runc&#34;
+</span></span><span class="line"><span class="ln"> 74</span><span class="cl">      no_pivot = false
+</span></span><span class="line"><span class="ln"> 75</span><span class="cl">      disable_snapshot_annotations = true
+</span></span><span class="line"><span class="ln"> 76</span><span class="cl">      discard_unpacked_layers = false
+</span></span><span class="line"><span class="ln"> 77</span><span class="cl">      [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.default_runtime]
+</span></span><span class="line"><span class="ln"> 78</span><span class="cl">        runtime_type = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 79</span><span class="cl">        runtime_engine = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 80</span><span class="cl">        runtime_root = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 81</span><span class="cl">        privileged_without_host_devices = false
+</span></span><span class="line"><span class="ln"> 82</span><span class="cl">        base_runtime_spec = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 83</span><span class="cl">      [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.untrusted_workload_runtime]
+</span></span><span class="line"><span class="ln"> 84</span><span class="cl">        runtime_type = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 85</span><span class="cl">        runtime_engine = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 86</span><span class="cl">        runtime_root = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 87</span><span class="cl">        privileged_without_host_devices = false
+</span></span><span class="line"><span class="ln"> 88</span><span class="cl">        base_runtime_spec = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 89</span><span class="cl">      [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.runtimes]
+</span></span><span class="line"><span class="ln"> 90</span><span class="cl">        [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.runtimes.runc]
+</span></span><span class="line"><span class="ln"> 91</span><span class="cl">          runtime_type = &#34;io.containerd.runc.v2&#34;
+</span></span><span class="line"><span class="ln"> 92</span><span class="cl">          runtime_engine = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 93</span><span class="cl">          runtime_root = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 94</span><span class="cl">          privileged_without_host_devices = false
+</span></span><span class="line"><span class="ln"> 95</span><span class="cl">          base_runtime_spec = &#34;&#34;
+</span></span><span class="line"><span class="ln"> 96</span><span class="cl">          [plugins.&#34;io.containerd.grpc.v1.cri&#34;.containerd.runtimes.runc.options]
+</span></span><span class="line"><span class="ln"> 97</span><span class="cl">            SystemdCgroup = true
+</span></span><span class="line"><span class="ln"> 98</span><span class="cl">    [plugins.&#34;io.containerd.grpc.v1.cri&#34;.cni]
+</span></span><span class="line"><span class="ln"> 99</span><span class="cl">      bin_dir = &#34;/opt/cni/bin&#34;
+</span></span><span class="line"><span class="ln">100</span><span class="cl">      conf_dir = &#34;/etc/cni/net.d&#34;
+</span></span><span class="line"><span class="ln">101</span><span class="cl">      max_conf_num = 1
+</span></span><span class="line"><span class="ln">102</span><span class="cl">      conf_template = &#34;&#34;
+</span></span><span class="line"><span class="ln">103</span><span class="cl">    [plugins.&#34;io.containerd.grpc.v1.cri&#34;.registry]
+</span></span><span class="line"><span class="ln">104</span><span class="cl">      [plugins.&#34;io.containerd.grpc.v1.cri&#34;.registry.mirrors]
+</span></span><span class="line"><span class="ln">105</span><span class="cl">        [plugins.&#34;io.containerd.grpc.v1.cri&#34;.registry.mirrors.&#34;docker.io&#34;]
+</span></span><span class="line"><span class="ln">106</span><span class="cl">          endpoint = [&#34;https://registry-1.docker.io&#34;]
+</span></span><span class="line"><span class="ln">107</span><span class="cl">    [plugins.&#34;io.containerd.grpc.v1.cri&#34;.image_decryption]
+</span></span><span class="line"><span class="ln">108</span><span class="cl">      key_model = &#34;&#34;
+</span></span><span class="line"><span class="ln">109</span><span class="cl">    [plugins.&#34;io.containerd.grpc.v1.cri&#34;.x509_key_pair_streaming]
+</span></span><span class="line"><span class="ln">110</span><span class="cl">      tls_cert_file = &#34;&#34;
+</span></span><span class="line"><span class="ln">111</span><span class="cl">      tls_key_file = &#34;&#34;
+</span></span><span class="line"><span class="ln">112</span><span class="cl">  [plugins.&#34;io.containerd.internal.v1.opt&#34;]
+</span></span><span class="line"><span class="ln">113</span><span class="cl">    path = &#34;/opt/containerd&#34;
+</span></span><span class="line"><span class="ln">114</span><span class="cl">  [plugins.&#34;io.containerd.internal.v1.restart&#34;]
+</span></span><span class="line"><span class="ln">115</span><span class="cl">    interval = &#34;10s&#34;
+</span></span><span class="line"><span class="ln">116</span><span class="cl">  [plugins.&#34;io.containerd.metadata.v1.bolt&#34;]
+</span></span><span class="line"><span class="ln">117</span><span class="cl">    content_sharing_policy = &#34;shared&#34;
+</span></span><span class="line"><span class="ln">118</span><span class="cl">  [plugins.&#34;io.containerd.monitor.v1.cgroups&#34;]
+</span></span><span class="line"><span class="ln">119</span><span class="cl">    no_prometheus = false
+</span></span><span class="line"><span class="ln">120</span><span class="cl">  [plugins.&#34;io.containerd.runtime.v1.linux&#34;]
+</span></span><span class="line"><span class="ln">121</span><span class="cl">    shim = &#34;containerd-shim&#34;
+</span></span><span class="line"><span class="ln">122</span><span class="cl">    runtime = &#34;runc&#34;
+</span></span><span class="line"><span class="ln">123</span><span class="cl">    runtime_root = &#34;&#34;
+</span></span><span class="line"><span class="ln">124</span><span class="cl">    no_shim = false
+</span></span><span class="line"><span class="ln">125</span><span class="cl">    shim_debug = false
+</span></span><span class="line"><span class="ln">126</span><span class="cl">  [plugins.&#34;io.containerd.runtime.v2.task&#34;]
+</span></span><span class="line"><span class="ln">127</span><span class="cl">    platforms = [&#34;linux/amd64&#34;]
+</span></span><span class="line"><span class="ln">128</span><span class="cl">  [plugins.&#34;io.containerd.service.v1.diff-service&#34;]
+</span></span><span class="line"><span class="ln">129</span><span class="cl">    default = [&#34;walking&#34;]
+</span></span><span class="line"><span class="ln">130</span><span class="cl">  [plugins.&#34;io.containerd.snapshotter.v1.devmapper&#34;]
+</span></span><span class="line"><span class="ln">131</span><span class="cl">    root_path = &#34;&#34;
+</span></span><span class="line"><span class="ln">132</span><span class="cl">    pool_name = &#34;&#34;
+</span></span><span class="line"><span class="ln">133</span><span class="cl">    base_image_size = &#34;&#34;
+</span></span><span class="line"><span class="ln">134</span><span class="cl">    async_remove = false
+</span></span></code></pre></div>
+    </div>
+<div class="post_comments">
+  
+  
+    
+ <script src="https://utteranc.es/client.js"
+         repo="weizhang555/weizhang555.github.io"
+         issue-term="title"
+         theme="github-light"
+         
+         label="blog comments ✨💬✨"
+         
+         crossorigin="anonymous"
+         async>
+ </script>
+ 
+  
+  
+</div>
+
+
+
+
+  </article>
+<aside class="sidebar">
+  <section class="sidebar_inner">
+    <br>
+    
+  
+  <div class="search">
+    <input type="search" class="search_field form_field" placeholder='Search...' id="find" autocomplete="off" data-scope='original'>
+    <label for="find" class="search_label"><svg class="icon">
+  <title>search</title>
+  <use xlink:href="#search"></use>
+</svg>
+
+    </label>
+    
+    <div class="search_results results"></div>
+  </div>
+
+        <h2>张伟[weizhang555]</h2>
+      <div class="author_bio">
+        一个简简单单的技术人.</br>Live long and prosper!
+      </div>
+      <a href='https://weizhang555.github.io/about/' class="button mt-1" role="button" title='Read More'>Read More</a>
+
+    
+    
+    <h2 class="mt-4">Recent Posts</h2>
+    <ul class="flex-column">
+      <li>
+        <a href="https://weizhang555.github.io/original/k8s-setup-2/" class="nav-link" title="kubeadm拉起单节点K8s(新版)">kubeadm拉起单节点K8s(新版)</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/translate/linux-overlayfs/" class="nav-link" title="[内核文档翻译] Overlay文件系统">[内核文档翻译] Overlay文件系统</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/translate/whats-good-engineer/" class="nav-link" title="防火不如救火，治未病不如治已病，好代码不如好吆喝">防火不如救火，治未病不如治已病，好代码不如好吆喝</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/translate/using-bpf-ringbuffer/" class="nav-link" title="使用BPF ring buffer">使用BPF ring buffer</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/translate/bpf-design-qa/" class="nav-link" title="BPF的设计原则Q&amp;A">BPF的设计原则Q&amp;A</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/republish/pnp-problem/" class="nav-link" title="转载：著名的 P=NP 问题到底是什么">转载：著名的 P=NP 问题到底是什么</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/original/learn-solidity/" class="nav-link" title="Solidity入门：基于Truffle搭建本地开发环境">Solidity入门：基于Truffle搭建本地开发环境</a>
+      </li>
+      <li>
+        <a href="https://weizhang555.github.io/original/go-operators-priority/" class="nav-link" title="最准确的Go语言运算符优先级介绍">最准确的Go语言运算符优先级介绍</a>
+      </li>
+    </ul>
+    <div>
+      <h2 class="mt-4 taxonomy" id="categories-section">Categories</h2>
+      <nav class="tags_nav">
+        <a href='https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/' class="post_tag button button_translucent" title="原创">
+          原创
+          <span class="button_tally">12</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/' class="post_tag button button_translucent" title="译文">
+          译文
+          <span class="button_tally">4</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/categories/%E8%BD%AC%E8%BD%BD/' class="post_tag button button_translucent" title="转载">
+          转载
+          <span class="button_tally">1</span>
+        </a>
+        
+        
+      </nav>
+    </div>
+    <div>
+      <h2 class="mt-4 taxonomy" id="tags-section">Tags</h2>
+      <nav class="tags_nav">
+        <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' class="post_tag button button_translucent" title="容器">
+          容器
+          <span class="button_tally">8</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/' class="post_tag button button_translucent" title="内核">
+          内核
+          <span class="button_tally">4</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
+          K8S
+          <span class="button_tally">3</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/' class="post_tag button button_translucent" title="安全">
+          安全
+          <span class="button_tally">3</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/bpf/' class="post_tag button button_translucent" title="bpf">
+          BPF
+          <span class="button_tally">2</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E9%9A%8F%E7%AC%94/' class="post_tag button button_translucent" title="随笔">
+          随笔
+          <span class="button_tally">2</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/go/' class="post_tag button button_translucent" title="go">
+          GO
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/kata/' class="post_tag button button_translucent" title="kata">
+          KATA
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/pnp/' class="post_tag button button_translucent" title="pnp">
+          PNP
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/runc/' class="post_tag button button_translucent" title="runc">
+          RUNC
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/' class="post_tag button button_translucent" title="区块链">
+          区块链
+          <span class="button_tally">1</span>
+        </a>
+        
+        
+      </nav>
+    </div>
+  </section>
+</aside>
+
+  
+</div>
+    </main><svg width="0" height="0" class="hidden">
+  <symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="facebook">
+    <path d="M437 0H75C33.648 0 0 33.648 0 75v362c0 41.352 33.648 75 75 75h151V331h-60v-90h60v-61c0-49.629 40.371-90 90-90h91v90h-91v61h91l-15 90h-76v181h121c41.352 0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zm0 0"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18.001 18.001" id="twitter">
+    <path d="M15.891 4.013c.808-.496 1.343-1.173 1.605-2.034a8.68 8.68 0 0 1-2.351.861c-.703-.756-1.593-1.14-2.66-1.14-1.043 0-1.924.366-2.643 1.078a3.56 3.56 0 0 0-1.076 2.605c0 .309.039.585.117.819-3.076-.105-5.622-1.381-7.628-3.837-.34.601-.51 1.213-.51 1.846 0 1.301.549 2.332 1.645 3.089-.625-.053-1.176-.211-1.645-.47 0 .929.273 1.705.82 2.388a3.623 3.623 0 0 0 2.115 1.291c-.312.08-.641.118-.979.118-.312 0-.533-.026-.664-.083.23.757.664 1.371 1.291 1.841a3.652 3.652 0 0 0 2.152.743C4.148 14.173 2.625 14.69.902 14.69c-.422 0-.721-.006-.902-.038 1.697 1.102 3.586 1.649 5.676 1.649 2.139 0 4.029-.542 5.674-1.626 1.645-1.078 2.859-2.408 3.639-3.974a10.77 10.77 0 0 0 1.172-4.892v-.468a7.788 7.788 0 0 0 1.84-1.921 8.142 8.142 0 0 1-2.11.593z"
+      ></path>
+  </symbol>
+  <symbol aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="mail">
+    <path  d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="calendar">
+    <path d="M452 40h-24V0h-40v40H124V0H84v40H60C26.916 40 0 66.916 0 100v352c0 33.084 26.916 60 60 60h392c33.084 0 60-26.916 60-60V100c0-33.084-26.916-60-60-60zm20 412c0 11.028-8.972 20-20 20H60c-11.028 0-20-8.972-20-20V188h432v264zm0-304H40v-48c0-11.028 8.972-20 20-20h24v40h40V80h264v40h40V80h24c11.028 0 20 8.972 20 20v48z"></path>
+    <path d="M76 230h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 310h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 390h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80-80h40v40h-40z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="github">
+    <path d="M255.968 5.329C114.624 5.329 0 120.401 0 262.353c0 113.536 73.344 209.856 175.104 243.872 12.8 2.368 17.472-5.568 17.472-12.384 0-6.112-.224-22.272-.352-43.712-71.2 15.52-86.24-34.464-86.24-34.464-11.616-29.696-28.416-37.6-28.416-37.6-23.264-15.936 1.728-15.616 1.728-15.616 25.696 1.824 39.2 26.496 39.2 26.496 22.848 39.264 59.936 27.936 74.528 21.344 2.304-16.608 8.928-27.936 16.256-34.368-56.832-6.496-116.608-28.544-116.608-127.008 0-28.064 9.984-51.008 26.368-68.992-2.656-6.496-11.424-32.64 2.496-68 0 0 21.504-6.912 70.4 26.336 20.416-5.696 42.304-8.544 64.096-8.64 21.728.128 43.648 2.944 64.096 8.672 48.864-33.248 70.336-26.336 70.336-26.336 13.952 35.392 5.184 61.504 2.56 68 16.416 17.984 26.304 40.928 26.304 68.992 0 98.72-59.84 120.448-116.864 126.816 9.184 7.936 17.376 23.616 17.376 47.584 0 34.368-.32 62.08-.32 70.496 0 6.88 4.608 14.88 17.6 12.352C438.72 472.145 512 375.857 512 262.353 512 120.401 397.376 5.329 255.968 5.329z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" id="gitlab">
+    <path d="M12.3 74.7h54L43.3 3c-1-3.6-6.4-3.6-7.6 0L12.3 74.8z" />
+    <path d="M12.3 74.7L.5 111c-1 3.2 0 6.8 3 8.8l101.6 74-92.5-119z"/>
+    <path d="M105 193.7l-38.6-119h-54l92.7 119z"/>
+    <path d="M105 193.7l38.7-119H66.4l38.7 119z"/>
+    <path d="M105 193.7l38.7-119H198l-93 119z"/>
+    <path d="M198 74.7l11.6 36.2c1 3 0 6.6-3 8.6l-101.5 74 93-119z"/>
+    <path d="M198 74.7h-54.3L167 3c1.2-3.6 6.4-3.6 7.6 0L198 74.8z"/>
+  </symbol>
+  <symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="rss">
+    <circle cx="3.429" cy="20.571" r="3.429"></circle>
+    <path d="M11.429 24h4.57C15.999 15.179 8.821 8.001 0 8v4.572c6.302.001 11.429 5.126 11.429 11.428z"></path>
+    <path d="M24 24C24 10.766 13.234 0 0 0v4.571c10.714 0 19.43 8.714 19.43 19.429z"></path>
+  </symbol>
+  <symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="linkedin">
+    <path d="M437 0H75C33.648 0 0 33.648 0 75v362c0 41.352 33.648 75 75 75h362c41.352 0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zM181 406h-60V196h60zm0-240h-60v-60h60zm210 240h-60V286c0-16.54-13.46-30-30-30s-30 13.46-30 30v120h-60V196h60v11.309C286.719 202.422 296.93 196 316 196c40.691.043 75 36.547 75 79.688zm0 0"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612" id="to-top">
+    <path d="M604.501 440.509L325.398 134.956c-5.331-5.357-12.423-7.627-19.386-7.27-6.989-.357-14.056 1.913-19.387 7.27L7.499 440.509c-9.999 10.024-9.999 26.298 0 36.323s26.223 10.024 36.222 0l262.293-287.164L568.28 476.832c9.999 10.024 26.222 10.024 36.221 0 9.999-10.023 9.999-26.298 0-36.323z"></path>
+  </symbol>
+  <symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="carly">
+    <path d="M504.971 239.029L448 182.059V84c0-46.317-37.682-84-84-84h-44c-13.255 0-24 10.745-24 24s10.745 24 24 24h44c19.851 0 36 16.149 36 36v108c0 6.365 2.529 12.47 7.029 16.971L454.059 256l-47.029 47.029A24.002 24.002 0 0 0 400 320v108c0 19.851-16.149 36-36 36h-44c-13.255 0-24 10.745-24 24s10.745 24 24 24h44c46.318 0 84-37.683 84-84v-98.059l56.971-56.971c9.372-9.372 9.372-24.568 0-33.941zM112 192V84c0-19.851 16.149-36 36-36h44c13.255 0 24-10.745 24-24S205.255 0 192 0h-44c-46.318 0-84 37.683-84 84v98.059l-56.971 56.97c-9.373 9.373-9.373 24.568 0 33.941L64 329.941V428c0 46.317 37.682 84 84 84h44c13.255 0 24-10.745 24-24s-10.745-24-24-24h-44c-19.851 0-36-16.149-36-36V320c0-6.365-2.529-12.47-7.029-16.971L57.941 256l47.029-47.029A24.002 24.002 0 0 0 112 192z"></path>
+  </symbol>
+  <symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="copy">
+    <path d="M23 2.75A2.75 2.75 0 0 0 20.25 0H8.75A2.75 2.75 0 0 0 6 2.75v13.5A2.75 2.75 0 0 0 8.75 19h11.5A2.75 2.75 0 0 0 23 16.25zM18.25 14.5h-7.5a.75.75 0 0 1 0-1.5h7.5a.75.75 0 0 1 0 1.5zm0-3h-7.5a.75.75 0 0 1 0-1.5h7.5a.75.75 0 0 1 0 1.5zm0-3h-7.5a.75.75 0 0 1 0-1.5h7.5a.75.75 0 0 1 0 1.5z"></path>
+    <path d="M8.75 20.5a4.255 4.255 0 0 1-4.25-4.25V2.75c0-.086.02-.166.025-.25H3.75A2.752 2.752 0 0 0 1 5.25v16A2.752 2.752 0 0 0 3.75 24h12a2.752 2.752 0 0 0 2.75-2.75v-.75z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001" id="closeme">
+    <path d="M284.286 256.002L506.143 34.144c7.811-7.811 7.811-20.475 0-28.285-7.811-7.81-20.475-7.811-28.285 0L256 227.717 34.143 5.859c-7.811-7.811-20.475-7.811-28.285 0-7.81 7.811-7.811 20.475 0 28.285l221.857 221.857L5.858 477.859c-7.811 7.811-7.811 20.475 0 28.285a19.938 19.938 0 0 0 14.143 5.857 19.94 19.94 0 0 0 14.143-5.857L256 284.287l221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475 0-28.285L284.286 256.002z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="open-menu">
+    <path d="M492 236H20c-11.046 0-20 8.954-20 20s8.954 20 20 20h472c11.046 0 20-8.954 20-20s-8.954-20-20-20zm0-160H20C8.954 76 0 84.954 0 96s8.954 20 20 20h472c11.046 0 20-8.954 20-20s-8.954-20-20-20zm0 320H20c-11.046 0-20 8.954-20 20s8.954 20 20 20h472c11.046 0 20-8.954 20-20s-8.954-20-20-20z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="instagram">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id=youtube>
+    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="stackoverflow">
+    <path d="M21 27v-8h3v11H0V19h3v8h18z"></path><path d="M17.1.2L15 1.8l7.9 10.6 2.1-1.6L17.1.2zm3.7 14.7L10.6 6.4l1.7-2 10.2 8.5-1.7 2zM7.2 12.3l12 5.6 1.1-2.4-12-5.6-1.1 2.4zm-1.8 6.8l13.56 1.96.17-2.38-13.26-2.55-.47 2.97zM19 25H5v-3h14v3z"></path>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="xing">
+    <path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 71 55" id="discord">
+    <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z"/>
+  </symbol>
+  <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 18" id="mastodon">
+    <path
+    fill="#ffffff"
+    d="m 15.054695,9.8859583 c -0.22611,1.1632697 -2.02517,2.4363497 -4.09138,2.6830797 -1.0774504,0.12856 -2.1382704,0.24673 -3.2694704,0.19484 -1.84996,-0.0848 -3.30971,-0.44157 -3.30971,-0.44157 0,0.1801 0.0111,0.35157 0.0333,0.51194 0.24051,1.82571 1.81034,1.93508 3.29737,1.98607 1.50088,0.0514 2.8373104,-0.37004 2.8373104,-0.37004 l 0.0617,1.35686 c 0,0 -1.0498104,0.56374 -2.9199404,0.66742 -1.03124,0.0567 -2.3117,-0.0259 -3.80308,-0.42069 -3.23454998,-0.85613 -3.79081998,-4.304 -3.87592998,-7.8024197 -0.026,-1.03871 -0.01,-2.01815 -0.01,-2.83732 0,-3.57732 2.34385998,-4.62587996 2.34385998,-4.62587996 1.18184,-0.54277 3.20976,-0.77101 5.318,-0.7882499985409 h 0.0518 C 9.8267646,0.01719834 11.856025,0.24547834 13.037775,0.78824834 c 0,0 2.34377,1.04855996 2.34377,4.62587996 0,0 0.0294,2.63937 -0.32687,4.47183"/>
+ <path
+    fill="#000000"
+    d="m 12.616925,5.6916583 v 4.3315297 h -1.71607 V 5.8189683 c 0,-0.88624 -0.37289,-1.33607 -1.1187604,-1.33607 -0.82467,0 -1.23799,0.53361 -1.23799,1.58875 v 2.30122 h -1.70594 v -2.30122 c 0,-1.05514 -0.4134,-1.58875 -1.23808,-1.58875 -0.74587,0 -1.11876,0.44983 -1.11876,1.33607 v 4.2042197 h -1.71607 V 5.6916583 c 0,-0.88527 0.22541,-1.58876 0.67817,-2.10922 0.46689,-0.52047 1.07833,-0.78727 1.83735,-0.78727 0.87816,0 1.54317,0.33752 1.98288,1.01267 l 0.42744,0.71655 0.42753,-0.71655 c 0.43961,-0.67515 1.10463,-1.01267 1.9828704,-1.01267 0.75893,0 1.37037,0.2668 1.83735,0.78727 0.45268,0.52046 0.67808,1.22395 0.67808,2.10922"/>
+  </symbol>
+</svg>
+
+<footer class="footer">
+  <div class="footer_inner wrap pale">
+    <img src='https://weizhang555.github.io/icons/apple-touch-icon.png' class="icon icon_2 transparent" alt=" © Zhang Wei(weizhang555)">
+    <p>Copyright&nbsp;<span class="year"></span>&nbsp; © ZHANG WEI(WEIZHANG555). All Rights Reserved</p><a class="to_top" href="#documentTop">
+  <svg class="icon">
+  <title>to-top</title>
+  <use xlink:href="#to-top"></use>
+</svg>
+
+</a>
+
+  </div>
+</footer>
+
+<script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
+
+  <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
+
+  </body>
+</html>
