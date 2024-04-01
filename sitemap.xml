@@ -3,27 +3,42 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://weizhang555.github.io/categories/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/coco/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/original/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/tdx/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/original/tdx-trust-chain/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
+  </url><url>
+    <loc>https://weizhang555.github.io/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/</loc>
+    <lastmod>2024-02-02T00:21:15+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/k8s/</loc>
     <lastmod>2023-10-17T20:18:00+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/original/k8s-setup-2/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/original/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/tags/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/</loc>
-    <lastmod>2023-10-17T20:18:00+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/</loc>
     <lastmod>2023-10-17T20:18:00+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/translate/linux-overlayfs/</loc>
@@ -84,9 +99,6 @@
     <lastmod>2019-12-11T11:30:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/tags/runc/</loc>
-    <lastmod>2019-12-11T11:30:46+08:00</lastmod>
-  </url><url>
-    <loc>https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/</loc>
     <lastmod>2019-12-11T11:30:46+08:00</lastmod>
   </url><url>
     <loc>https://weizhang555.github.io/original/kubernetes-setup/</loc>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CoCo on WeiZhang555</title>
+    <link>https://weizhang555.github.io/tags/coco/</link>
+    <description>Recent content in CoCo on WeiZhang555</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright> © Zhang Wei(weizhang555)</copyright>
+    <lastBuildDate>Fri, 02 Feb 2024 00:21:15 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/coco/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>基于Intel TDX的机密容器（CoCo）安全性分析</title>
+      <link>https://weizhang555.github.io/original/tdx-trust-chain/</link>
+      <pubDate>Fri, 02 Feb 2024 00:21:15 +0800</pubDate>
+      
+      <guid>https://weizhang555.github.io/original/tdx-trust-chain/</guid>
+      <description>
+        
+          
+            随着公有云的推广，云上的安全问题也越来越受到关注。在云上运行的应用，尤其是一些数据敏感的应用，对数据在计算过程中的机密性也越发重视。磁盘和网络的数据加密有较多的方案来处理，计算的机密性则强依赖硬件提供的安全能力。两大CPU厂商，Intel和AMD，都提供了一些硬件安全技术，如Intel的SGX和TDX，AMD的SEV等来解决此类问题。
+本文将基于Intel TDX技术，来分析Confidential Contianers（简称CoCo）项目的安全性。CoCo项目是一个开源项目，它基于流行的Kata Containers项目做了增强，在其上增加了机密计算能力，安全性从单向保护（防止基础设施受到上层workload侵害），扩展到了双向保护（同时可以保护workload免受基础设施窥探）。
+本文将介绍Intel TDX的可信启动流程，串联到CoCo的启动流程，进而通过信任链的传递角度来分析CoCo及TDX的安全性。
+本文对阅读对象做了如下假设：
+了解TDX是什么，应用于什么场景，对TDX有至少一定的了解。 听说过CoCo项目，大致知道CoCo是什么，应用于什么场景。 了解Kata Containers是什么，对Kata Containers有一定了解。 基于以上假设，本文不对CoCo和TDX做太多科普工作，前置知识的获得交给用户自己去完成。本文着重来分析CoCo的可信链条，对应的源码仓库在参考文档中有给出。
+以下是正文。
+TDX基本介绍 Intel给CPU加了个新的模式，叫SEAM （安全仲裁模式，Secure-Arbitration Mode, SEAM），执行 Intel 提供的、经过数字签名但未加密的安全服务模块，Intel TDX 模块位于由 SEAM-range 寄存器（SEAMRR）指定的保留内存空间中，CPU 仅允许访问SEAM模式的软件访问这段内容，其他所有软件和 DMA 都无法访问。SEAM 对其他受保护的区域如 SMM 和 SGX 保护的内存没有访问权限。
+增加了SEAM mode之后，原先的VMM的模式从2个扩展到4个：
+VMX-root VMX-non-root SEAM-VMX-root（新增） SEAM-VMX-non-root（新增） Intel TDX 为 TD 提供了以下功能：
+内存机密性和完整性（MKTME private key加密内存） 地址转换完整性（secure EPT） CPU 状态机密性和完整性(寄存器状态 &amp;amp; VMCS 保存与恢复) 安全中断和异常传递(virtual APIC) 远程认证（remote attestation） 具体参考whitepaper，不详细展开了。
+加载SEAMLDR及TDX module TDX功能的启用始于Intel TDX模块，信任根在于CPU。
+Intel TDX module加载流程如下：
+加载Intel TXTSEAM loader（SEAMLDR）: SEAM loader是由Intel TXT认证过的代码模块（Authenticated-Code Module, ACM） SEAMLDR可以集成在UEFI里，也可以放在ESP或磁盘上，后面会展开 VMM调用SEAMLDR ACM, 请求load TDX module。TDX module也可以在BIOS到kernel启动阶段完成。 SEAMLDR 验证TDX module数字签名，加载TDX module到SEAM memory。 TDX module的度量值（measurement）和安全版本号(security-version number, SVN)被SEAMLDR记录到硬件度量寄存器中，然后TDX module 被load到SEAM memory内。 原文来自whitepaper[1]：
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -203,7 +203,7 @@
 <p>Ganache建议安装支持Filecoin的最新版本，虽然我们还没用到Filecoin，但是提前准备总是没错的。</p>
 <p>参考：https://trufflesuite.com/docs/ganache/quickstart/#1-install-ganache</p>
 <p>所有可用的版本列表：https://github.com/trufflesuite/ganache-ui/releases</p>
-<p>手动安装最新版本，我用的版本是2.6.0-beta.3.1390，<a href="https://objects.githubusercontent.com/github-production-release-asset-2e65be/79269625/2280be80-93f7-11eb-8bc5-2a7862e546bf?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220524%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20220524T123543Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=344e8589ec865396b7f650befadc3d10ab0a8e3cccd70662aeca7bd1b9a2ff80&amp;X-Amz-SignedHeaders=host&amp;actor_id=1203611&amp;key_id=0&amp;repo_id=79269625&amp;response-content-disposition=attachment%3B%20filename%3DGanache-2.6.0-beta.3-mac.dmg&amp;response-content-type=application%2Foctet-stream">下载地址</a></p>
+<p>手动安装最新版本，我用的版本是2.6.0-beta.3.1390，<a href="https://objects.githubusercontent.com/github-production-release-asset-2e65be/79269625/2280be80-93f7-11eb-8bc5-2a7862e546bf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220524T123543Z&X-Amz-Expires=300&X-Amz-Signature=344e8589ec865396b7f650befadc3d10ab0a8e3cccd70662aeca7bd1b9a2ff80&X-Amz-SignedHeaders=host&actor_id=1203611&key_id=0&repo_id=79269625&response-content-disposition=attachment%3B%20filename%3DGanache-2.6.0-beta.3-mac.dmg&response-content-type=application%2Foctet-stream">下载地址</a></p>
 <h2 id="truffle一些操作技巧及常用命令">Truffle一些操作技巧及常用命令</h2>
 <p>参考：https://trufflesuite.com/docs/truffle/quickstart/</p>
 <p>Truffle Quick Start里面的例子使用的MetaCoin，我们这里从truffle init开始建一个新的truffle工程。</p>
@@ -229,17 +229,17 @@
 <img src="/static/images/post/truffle-4.png" width=800 height=800 />
 <h3 id="3-配置truffle-project连接到ganache-ui">3. 配置Truffle Project连接到Ganache UI</h3>
 <p>图片里可以看到，Ganache的监听地址为http://127.0.0.1:7545 ，我们把这个地址配置到<code>truffle-config.js</code>里。</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">module.exports = {
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  ...
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl">  networks: {
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    development: {
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">      host: &#34;127.0.0.1&#34;,     // Localhost (default: none)
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">      port: 7545,            // Standard Ethereum port (default: none)
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">      network_id: &#34;*&#34;,       // Any network (default: none)
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    }
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  },
-</span></span><span class="line"><span class="ln">10</span><span class="cl">  ...
-</span></span><span class="line"><span class="ln">11</span><span class="cl">}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">module</span><span class="o">.</span><span class="n">exports</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  <span class="o">...</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">  <span class="n">networks</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="n">development</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">      <span class="n">host</span><span class="p">:</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span>     <span class="o">//</span> <span class="n">Localhost</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">none</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">      <span class="n">port</span><span class="p">:</span> <span class="mi">7545</span><span class="p">,</span>            <span class="o">//</span> <span class="n">Standard</span> <span class="n">Ethereum</span> <span class="n">port</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">none</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">      <span class="n">network_id</span><span class="p">:</span> <span class="s2">&#34;*&#34;</span><span class="p">,</span>       <span class="o">//</span> <span class="n">Any</span> <span class="n">network</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">none</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">  <span class="o">...</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>启动truffle console测试下是否成功：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">$ truffle console
 </span></span><span class="line"><span class="ln"> 2</span><span class="cl">truffle(development)&gt; let accounts = await web3.eth.getAccounts()
@@ -265,45 +265,45 @@
 <li>编写新合约</li>
 </ol>
 <p>contracts/Payable.sol</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">// SPDX-License-Identifier: MIT
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">pragma solidity ^0.8.13;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="o">//</span> <span class="n">SPDX</span><span class="o">-</span><span class="n">License</span><span class="o">-</span><span class="n">Identifier</span><span class="p">:</span> <span class="n">MIT</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="n">pragma</span> <span class="n">solidity</span> <span class="o">^</span><span class="mf">0.8</span><span class="o">.</span><span class="mi">13</span><span class="p">;</span>
 </span></span><span class="line"><span class="ln"> 3</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">contract Payable {
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    // Payable address can receive Ether
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    address payable public owner;
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="n">contract</span> <span class="n">Payable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="o">//</span> <span class="n">Payable</span> <span class="n">address</span> <span class="n">can</span> <span class="n">receive</span> <span class="n">Ether</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="n">address</span> <span class="n">payable</span> <span class="n">public</span> <span class="n">owner</span><span class="p">;</span>
 </span></span><span class="line"><span class="ln"> 7</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    // Payable constructor can receive Ether
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    constructor() payable {
-</span></span><span class="line"><span class="ln">10</span><span class="cl">        owner = payable(msg.sender);
-</span></span><span class="line"><span class="ln">11</span><span class="cl">    }
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="o">//</span> <span class="n">Payable</span> <span class="n">constructor</span> <span class="n">can</span> <span class="n">receive</span> <span class="n">Ether</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="n">constructor</span><span class="p">()</span> <span class="n">payable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="n">owner</span> <span class="o">=</span> <span class="n">payable</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">sender</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="ln">12</span><span class="cl">
-</span></span><span class="line"><span class="ln">13</span><span class="cl">    // Function to deposit Ether into this contract.
-</span></span><span class="line"><span class="ln">14</span><span class="cl">    // Call this function along with some Ether.
-</span></span><span class="line"><span class="ln">15</span><span class="cl">    // The balance of this contract will be automatically updated.
-</span></span><span class="line"><span class="ln">16</span><span class="cl">    function deposit() public payable {}
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="o">//</span> <span class="n">Function</span> <span class="n">to</span> <span class="n">deposit</span> <span class="n">Ether</span> <span class="n">into</span> <span class="n">this</span> <span class="n">contract</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="o">//</span> <span class="n">Call</span> <span class="n">this</span> <span class="n">function</span> <span class="n">along</span> <span class="n">with</span> <span class="n">some</span> <span class="n">Ether</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="o">//</span> <span class="n">The</span> <span class="n">balance</span> <span class="n">of</span> <span class="n">this</span> <span class="n">contract</span> <span class="n">will</span> <span class="n">be</span> <span class="n">automatically</span> <span class="n">updated</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="n">function</span> <span class="n">deposit</span><span class="p">()</span> <span class="n">public</span> <span class="n">payable</span> <span class="p">{}</span>
 </span></span><span class="line"><span class="ln">17</span><span class="cl">
-</span></span><span class="line"><span class="ln">18</span><span class="cl">    // Call this function along with some Ether.
-</span></span><span class="line"><span class="ln">19</span><span class="cl">    // The function will throw an error since this function is not payable.
-</span></span><span class="line"><span class="ln">20</span><span class="cl">    function notPayable() public {}
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="o">//</span> <span class="n">Call</span> <span class="n">this</span> <span class="n">function</span> <span class="n">along</span> <span class="n">with</span> <span class="n">some</span> <span class="n">Ether</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="o">//</span> <span class="n">The</span> <span class="n">function</span> <span class="n">will</span> <span class="n">throw</span> <span class="n">an</span> <span class="n">error</span> <span class="n">since</span> <span class="n">this</span> <span class="n">function</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">payable</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="n">function</span> <span class="n">notPayable</span><span class="p">()</span> <span class="n">public</span> <span class="p">{}</span>
 </span></span><span class="line"><span class="ln">21</span><span class="cl">
-</span></span><span class="line"><span class="ln">22</span><span class="cl">    // Function to withdraw all Ether from this contract.
-</span></span><span class="line"><span class="ln">23</span><span class="cl">    function withdraw() public {
-</span></span><span class="line"><span class="ln">24</span><span class="cl">        // get the amount of Ether stored in this contract
-</span></span><span class="line"><span class="ln">25</span><span class="cl">        uint amount = address(this).balance;
+</span></span><span class="line"><span class="ln">22</span><span class="cl">    <span class="o">//</span> <span class="n">Function</span> <span class="n">to</span> <span class="n">withdraw</span> <span class="n">all</span> <span class="n">Ether</span> <span class="n">from</span> <span class="n">this</span> <span class="n">contract</span><span class="o">.</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="n">function</span> <span class="n">withdraw</span><span class="p">()</span> <span class="n">public</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">        <span class="o">//</span> <span class="n">get</span> <span class="n">the</span> <span class="n">amount</span> <span class="n">of</span> <span class="n">Ether</span> <span class="n">stored</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">contract</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">        <span class="n">uint</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">address</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="o">.</span><span class="n">balance</span><span class="p">;</span>
 </span></span><span class="line"><span class="ln">26</span><span class="cl">
-</span></span><span class="line"><span class="ln">27</span><span class="cl">        // send all Ether to owner
-</span></span><span class="line"><span class="ln">28</span><span class="cl">        // Owner can receive Ether since the address of owner is payable
-</span></span><span class="line"><span class="ln">29</span><span class="cl">        (bool success, ) = owner.call{value: amount}(&#34;&#34;);
-</span></span><span class="line"><span class="ln">30</span><span class="cl">        require(success, &#34;Failed to send Ether&#34;);
-</span></span><span class="line"><span class="ln">31</span><span class="cl">    }
+</span></span><span class="line"><span class="ln">27</span><span class="cl">        <span class="o">//</span> <span class="n">send</span> <span class="n">all</span> <span class="n">Ether</span> <span class="n">to</span> <span class="n">owner</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">        <span class="o">//</span> <span class="n">Owner</span> <span class="n">can</span> <span class="n">receive</span> <span class="n">Ether</span> <span class="n">since</span> <span class="n">the</span> <span class="n">address</span> <span class="n">of</span> <span class="n">owner</span> <span class="n">is</span> <span class="n">payable</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">        <span class="p">(</span><span class="ne">bool</span> <span class="n">success</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">call</span><span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">amount</span><span class="p">}(</span><span class="s2">&#34;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">        <span class="n">require</span><span class="p">(</span><span class="n">success</span><span class="p">,</span> <span class="s2">&#34;Failed to send Ether&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="ln">32</span><span class="cl">
-</span></span><span class="line"><span class="ln">33</span><span class="cl">    // Function to transfer Ether from this contract to address from input
-</span></span><span class="line"><span class="ln">34</span><span class="cl">    function transfer(address payable _to, uint _amount) public {
-</span></span><span class="line"><span class="ln">35</span><span class="cl">        // Note that &#34;to&#34; is declared as payable
-</span></span><span class="line"><span class="ln">36</span><span class="cl">        (bool success, ) = _to.call{value: _amount}(&#34;&#34;);
-</span></span><span class="line"><span class="ln">37</span><span class="cl">        require(success, &#34;Failed to send Ether&#34;);
-</span></span><span class="line"><span class="ln">38</span><span class="cl">    }
-</span></span><span class="line"><span class="ln">39</span><span class="cl">}
+</span></span><span class="line"><span class="ln">33</span><span class="cl">    <span class="o">//</span> <span class="n">Function</span> <span class="n">to</span> <span class="n">transfer</span> <span class="n">Ether</span> <span class="n">from</span> <span class="n">this</span> <span class="n">contract</span> <span class="n">to</span> <span class="n">address</span> <span class="n">from</span> <span class="n">input</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">    <span class="n">function</span> <span class="n">transfer</span><span class="p">(</span><span class="n">address</span> <span class="n">payable</span> <span class="n">_to</span><span class="p">,</span> <span class="n">uint</span> <span class="n">_amount</span><span class="p">)</span> <span class="n">public</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">        <span class="o">//</span> <span class="n">Note</span> <span class="n">that</span> <span class="s2">&#34;to&#34;</span> <span class="n">is</span> <span class="n">declared</span> <span class="n">as</span> <span class="n">payable</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">        <span class="p">(</span><span class="ne">bool</span> <span class="n">success</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">_to</span><span class="o">.</span><span class="n">call</span><span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">_amount</span><span class="p">}(</span><span class="s2">&#34;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">37</span><span class="cl">        <span class="n">require</span><span class="p">(</span><span class="n">success</span><span class="p">,</span> <span class="s2">&#34;Failed to send Ether&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>大致讲解下：</p>
 <ul>
 <li>deposit：存eth进合约。</li>
@@ -316,11 +316,11 @@
 </ol>
 <p>migration文件是指导truffle如何部署合约的文件，具体原理还没深入看过，目测是truffle会先部署一个deploy用的合约，后面的合约会借助这个deployer来做。</p>
 <p>migrations/2_payable_migration.js</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">const Payable = artifacts.require(&#34;Payable&#34;);
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">const</span> <span class="n">Payable</span> <span class="o">=</span> <span class="n">artifacts</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&#34;Payable&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="ln">2</span><span class="cl">
-</span></span><span class="line"><span class="ln">3</span><span class="cl">module.exports = function (deployer) {
-</span></span><span class="line"><span class="ln">4</span><span class="cl">  deployer.deploy(Payable);
-</span></span><span class="line"><span class="ln">5</span><span class="cl">};
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">module</span><span class="o">.</span><span class="n">exports</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">deployer</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">  <span class="n">deployer</span><span class="o">.</span><span class="n">deploy</span><span class="p">(</span><span class="n">Payable</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">};</span>
 </span></span></code></pre></div><ol start="3">
 <li>部署</li>
 </ol>
@@ -425,28 +425,28 @@
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">web3.utils.toWei(&#34;1&#34;, &#39;ether&#39;)
 </span></span></code></pre></div><p>结果：'1000000000000000000'</p>
 <p>web3.utils有很多有用的JS函数，在truffle console中敲入web3.utils. 按两次tab键可以看到：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">web3.utils.__proto__                     web3.utils.constructor                   web3.utils.hasOwnProperty
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">web3.utils.isPrototypeOf                 web3.utils.propertyIsEnumerable          web3.utils.toLocaleString
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl">web3.utils.toString                      web3.utils.valueOf
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">__proto__</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">constructor</span>                   <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hasOwnProperty</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isPrototypeOf</span>                 <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">propertyIsEnumerable</span>          <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toLocaleString</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toString</span>                      <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">valueOf</span>
 </span></span><span class="line"><span class="ln"> 4</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">web3.utils.BN                            web3.utils._fireError                    web3.utils._flattenTypes
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">web3.utils._jsonInterfaceMethodToString  web3.utils.asciiToHex                    web3.utils.bytesToHex
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">web3.utils.checkAddressChecksum          web3.utils.compareBlockNumbers           web3.utils.encodePacked
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">web3.utils.fromAscii                     web3.utils.fromDecimal                   web3.utils.fromUtf8
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">web3.utils.fromWei                       web3.utils.hexToAscii                    web3.utils.hexToBytes
-</span></span><span class="line"><span class="ln">10</span><span class="cl">web3.utils.hexToNumber                   web3.utils.hexToNumberString             web3.utils.hexToString
-</span></span><span class="line"><span class="ln">11</span><span class="cl">web3.utils.hexToUtf8                     web3.utils.isAddress                     web3.utils.isBN
-</span></span><span class="line"><span class="ln">12</span><span class="cl">web3.utils.isBigNumber                   web3.utils.isBloom                       web3.utils.isContractAddressInBloom
-</span></span><span class="line"><span class="ln">13</span><span class="cl">web3.utils.isHex                         web3.utils.isHexStrict                   web3.utils.isInBloom
-</span></span><span class="line"><span class="ln">14</span><span class="cl">web3.utils.isTopic                       web3.utils.isTopicInBloom                web3.utils.isUserEthereumAddressInBloom
-</span></span><span class="line"><span class="ln">15</span><span class="cl">web3.utils.keccak256                     web3.utils.leftPad                       web3.utils.numberToHex
-</span></span><span class="line"><span class="ln">16</span><span class="cl">web3.utils.padLeft                       web3.utils.padRight                      web3.utils.randomHex
-</span></span><span class="line"><span class="ln">17</span><span class="cl">web3.utils.rightPad                      web3.utils.sha3                          web3.utils.sha3Raw
-</span></span><span class="line"><span class="ln">18</span><span class="cl">web3.utils.soliditySha3                  web3.utils.soliditySha3Raw               web3.utils.stringToHex
-</span></span><span class="line"><span class="ln">19</span><span class="cl">web3.utils.stripHexPrefix                web3.utils.toAscii                       web3.utils.toBN
-</span></span><span class="line"><span class="ln">20</span><span class="cl">web3.utils.toChecksumAddress             web3.utils.toDecimal                     web3.utils.toHex
-</span></span><span class="line"><span class="ln">21</span><span class="cl">web3.utils.toNumber                      web3.utils.toTwosComplement              web3.utils.toUtf8
-</span></span><span class="line"><span class="ln">22</span><span class="cl">web3.utils.toWei                         web3.utils.unitMap                       web3.utils.utf8ToHex
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">BN</span>                            <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">_fireError</span>                    <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">_flattenTypes</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">_jsonInterfaceMethodToString</span>  <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">asciiToHex</span>                    <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">bytesToHex</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">checkAddressChecksum</span>          <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">compareBlockNumbers</span>           <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">encodePacked</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fromAscii</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fromDecimal</span>                   <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fromUtf8</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fromWei</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToAscii</span>                    <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToBytes</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToNumber</span>                   <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToNumberString</span>             <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToString</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hexToUtf8</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isAddress</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isBN</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isBigNumber</span>                   <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isBloom</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isContractAddressInBloom</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isHex</span>                         <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isHexStrict</span>                   <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isInBloom</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isTopic</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isTopicInBloom</span>                <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isUserEthereumAddressInBloom</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">keccak256</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">leftPad</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">numberToHex</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">padLeft</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">padRight</span>                      <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">randomHex</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">rightPad</span>                      <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sha3</span>                          <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sha3Raw</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">soliditySha3</span>                  <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">soliditySha3Raw</span>               <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">stringToHex</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">stripHexPrefix</span>                <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toAscii</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toBN</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toChecksumAddress</span>             <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toDecimal</span>                     <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toHex</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toNumber</span>                      <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toTwosComplement</span>              <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toUtf8</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">toWei</span>                         <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">unitMap</span>                       <span class="n">web3</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">utf8ToHex</span>
 </span></span></code></pre></div><ul>
 <li>函数调用</li>
 </ul>
@@ -510,6 +510,9 @@
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
+        <a href="https://weizhang555.github.io/original/tdx-trust-chain/" class="nav-link" title="基于Intel TDX的机密容器（CoCo）安全性分析">基于Intel TDX的机密容器（CoCo）安全性分析</a>
+      </li>
+      <li>
         <a href="https://weizhang555.github.io/original/k8s-setup-2/" class="nav-link" title="kubeadm拉起单节点K8s(新版)">kubeadm拉起单节点K8s(新版)</a>
       </li>
       <li>
@@ -530,16 +533,13 @@
       <li>
         <a href="https://weizhang555.github.io/original/learn-solidity/" class="nav-link" title="Solidity入门：基于Truffle搭建本地开发环境">Solidity入门：基于Truffle搭建本地开发环境</a>
       </li>
-      <li>
-        <a href="https://weizhang555.github.io/original/go-operators-priority/" class="nav-link" title="最准确的Go语言运算符优先级介绍">最准确的Go语言运算符优先级介绍</a>
-      </li>
     </ul>
     <div>
       <h2 class="mt-4 taxonomy" id="categories-section">Categories</h2>
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/' class="post_tag button button_translucent" title="原创">
           原创
-          <span class="button_tally">12</span>
+          <span class="button_tally">13</span>
         </a>
         
         <a href='https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/' class="post_tag button button_translucent" title="译文">
@@ -560,7 +560,7 @@
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' class="post_tag button button_translucent" title="容器">
           容器
-          <span class="button_tally">8</span>
+          <span class="button_tally">9</span>
         </a>
         
         <a href='https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/' class="post_tag button button_translucent" title="内核">
@@ -568,13 +568,13 @@
           <span class="button_tally">4</span>
         </a>
         
-        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
-          K8S
-          <span class="button_tally">3</span>
-        </a>
-        
         <a href='https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/' class="post_tag button button_translucent" title="安全">
           安全
+          <span class="button_tally">4</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
+          K8S
           <span class="button_tally">3</span>
         </a>
         
@@ -588,6 +588,11 @@
           <span class="button_tally">2</span>
         </a>
         
+        <a href='https://weizhang555.github.io/tags/coco/' class="post_tag button button_translucent" title="coco">
+          COCO
+          <span class="button_tally">1</span>
+        </a>
+        
         <a href='https://weizhang555.github.io/tags/go/' class="post_tag button button_translucent" title="go">
           GO
           <span class="button_tally">1</span>
@@ -598,8 +603,8 @@
           <span class="button_tally">1</span>
         </a>
         
-        <a href='https://weizhang555.github.io/tags/pnp/' class="post_tag button button_translucent" title="pnp">
-          PNP
+        <a href='https://weizhang555.github.io/tags/pnp/' class="post_tag button button_translucent" title="p&amp;np">
+          P&amp;NP
           <span class="button_tally">1</span>
         </a>
         
@@ -608,8 +613,18 @@
           <span class="button_tally">1</span>
         </a>
         
+        <a href='https://weizhang555.github.io/tags/tdx/' class="post_tag button button_translucent" title="tdx">
+          TDX
+          <span class="button_tally">1</span>
+        </a>
+        
         <a href='https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/' class="post_tag button button_translucent" title="区块链">
           区块链
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/' class="post_tag button button_translucent" title="机密计算">
+          机密计算
           <span class="button_tally">1</span>
         </a>
         
@@ -713,7 +728,7 @@
 
 <script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
 
-  <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
+  <script src="https://weizhang555.github.io/js/search.min.73cb82d8f274395dd220d6594053cd3d3d8ac8c97d874b5142a60b9744f3704d765551e0ade104d5803c66b731f5a7a00ac2cff33c8c9090ff8100169a3e2574.js"></script>
 
   </body>
 </html>

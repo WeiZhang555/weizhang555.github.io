@@ -255,10 +255,10 @@ Update March 30th, 2021: This article is …" />
 <p>It would be impractical for me to show you how to use the functionalities in a raw way by defining ourselves all the needed helpers definitions for the BPF functionalities we use.</p>
 <p>A very good explaination about BPF helpers can be found at ebpf.io.</p>
 </blockquote>
-<p>您可以在 <a href="https://man7.org/linux/man-pages/man7/bpf-helpers.7.html##IMPLEMENTATION">bpf-helpers(7)</a> 查看所有 BPF 助手的完整列表。</p>
+<p>您可以在 <a href="https://man7.org/linux/man-pages/man7/bpf-helpers.7.html#%23IMPLEMENTATION">bpf-helpers(7)</a> 查看所有 BPF 助手的完整列表。</p>
 <p>有了这些前提，并且为了简单起见，我决定使用 libbpf 和 BCC 来展示新功能的两个不同使用示例。</p>
 <p>对我来说，通过为我们使用的 BPF 功能定义所有所需的helper定义，来向您展示如何以原始方式使用这些功能是不切实际的。</p>
-<p>关于 BPF 助手的完整的解释可以在 <a href="https://ebpf.io/what-is-ebpf##helper-calls">ebpf.io</a> 找到。</p>
+<p>关于 BPF 助手的完整的解释可以在 <a href="https://ebpf.io/what-is-ebpf#%23helper-calls">ebpf.io</a> 找到。</p>
 <h2 id="使用-libbpf">使用 libbpf</h2>
 <blockquote>
 <p>Fortunately, the kernel provides a complete API that does all the work of exporting the helpers for us.</p>
@@ -283,7 +283,7 @@ Update March 30th, 2021: This article is …" />
 </blockquote>
 <p>BPF 程序如下：</p>
 <p>程序本身非常简单，我们attach到tracepoint上，每次 execve 系统调用完成时会触发。</p>
-<p><code>BPF_MAP_TYPE_RINGBUF</code> 有趣的部分是使用 <code>bpf_map_def</code> 初始化map。 这种类型的map不需要 <code>.key</code> 和 <code>.value</code> 部分，而对于 <code>.max_entries</code> 值，补丁表明它需要设置为 2 的幂（译者注：2的n次方）。 这并不完全正确，该值还需要与当前页移位大小进行页面对齐。 在当前的 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/asm-generic/page.h?id=457f44363a8894135c85b7a9afd2bd8196db24ab##n18">asm_generic/page.h</a> 中，它被定义为 1 &lt;&lt; 12，因此 4096 的任何倍数都可以。</p>
+<p><code>BPF_MAP_TYPE_RINGBUF</code> 有趣的部分是使用 <code>bpf_map_def</code> 初始化map。 这种类型的map不需要 <code>.key</code> 和 <code>.value</code> 部分，而对于 <code>.max_entries</code> 值，补丁表明它需要设置为 2 的幂（译者注：2的n次方）。 这并不完全正确，该值还需要与当前页移位大小进行页面对齐。 在当前的 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/asm-generic/page.h?id=457f44363a8894135c85b7a9afd2bd8196db24ab#%23n18">asm_generic/page.h</a> 中，它被定义为 1 &lt;&lt; 12，因此 4096 的任何倍数都可以。</p>
 <blockquote>
 <p>Once the map is initialized, look at what we do in our tracepoint, there are two ringbuf specific calls:</p>
 <ul>
@@ -598,6 +598,9 @@ Update March 30th, 2021: This article is …" />
     <h2 class="mt-4">Recent Posts</h2>
     <ul class="flex-column">
       <li>
+        <a href="https://weizhang555.github.io/original/tdx-trust-chain/" class="nav-link" title="基于Intel TDX的机密容器（CoCo）安全性分析">基于Intel TDX的机密容器（CoCo）安全性分析</a>
+      </li>
+      <li>
         <a href="https://weizhang555.github.io/original/k8s-setup-2/" class="nav-link" title="kubeadm拉起单节点K8s(新版)">kubeadm拉起单节点K8s(新版)</a>
       </li>
       <li>
@@ -618,16 +621,13 @@ Update March 30th, 2021: This article is …" />
       <li>
         <a href="https://weizhang555.github.io/original/learn-solidity/" class="nav-link" title="Solidity入门：基于Truffle搭建本地开发环境">Solidity入门：基于Truffle搭建本地开发环境</a>
       </li>
-      <li>
-        <a href="https://weizhang555.github.io/original/go-operators-priority/" class="nav-link" title="最准确的Go语言运算符优先级介绍">最准确的Go语言运算符优先级介绍</a>
-      </li>
     </ul>
     <div>
       <h2 class="mt-4 taxonomy" id="categories-section">Categories</h2>
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/' class="post_tag button button_translucent" title="原创">
           原创
-          <span class="button_tally">12</span>
+          <span class="button_tally">13</span>
         </a>
         
         <a href='https://weizhang555.github.io/categories/%E8%AF%91%E6%96%87/' class="post_tag button button_translucent" title="译文">
@@ -648,7 +648,7 @@ Update March 30th, 2021: This article is …" />
       <nav class="tags_nav">
         <a href='https://weizhang555.github.io/tags/%E5%AE%B9%E5%99%A8/' class="post_tag button button_translucent" title="容器">
           容器
-          <span class="button_tally">8</span>
+          <span class="button_tally">9</span>
         </a>
         
         <a href='https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/' class="post_tag button button_translucent" title="内核">
@@ -656,13 +656,13 @@ Update March 30th, 2021: This article is …" />
           <span class="button_tally">4</span>
         </a>
         
-        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
-          K8S
-          <span class="button_tally">3</span>
-        </a>
-        
         <a href='https://weizhang555.github.io/tags/%E5%AE%89%E5%85%A8/' class="post_tag button button_translucent" title="安全">
           安全
+          <span class="button_tally">4</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/k8s/' class="post_tag button button_translucent" title="k8s">
+          K8S
           <span class="button_tally">3</span>
         </a>
         
@@ -676,6 +676,11 @@ Update March 30th, 2021: This article is …" />
           <span class="button_tally">2</span>
         </a>
         
+        <a href='https://weizhang555.github.io/tags/coco/' class="post_tag button button_translucent" title="coco">
+          COCO
+          <span class="button_tally">1</span>
+        </a>
+        
         <a href='https://weizhang555.github.io/tags/go/' class="post_tag button button_translucent" title="go">
           GO
           <span class="button_tally">1</span>
@@ -686,8 +691,8 @@ Update March 30th, 2021: This article is …" />
           <span class="button_tally">1</span>
         </a>
         
-        <a href='https://weizhang555.github.io/tags/pnp/' class="post_tag button button_translucent" title="pnp">
-          PNP
+        <a href='https://weizhang555.github.io/tags/pnp/' class="post_tag button button_translucent" title="p&amp;np">
+          P&amp;NP
           <span class="button_tally">1</span>
         </a>
         
@@ -696,8 +701,18 @@ Update March 30th, 2021: This article is …" />
           <span class="button_tally">1</span>
         </a>
         
+        <a href='https://weizhang555.github.io/tags/tdx/' class="post_tag button button_translucent" title="tdx">
+          TDX
+          <span class="button_tally">1</span>
+        </a>
+        
         <a href='https://weizhang555.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/' class="post_tag button button_translucent" title="区块链">
           区块链
+          <span class="button_tally">1</span>
+        </a>
+        
+        <a href='https://weizhang555.github.io/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/' class="post_tag button button_translucent" title="机密计算">
+          机密计算
           <span class="button_tally">1</span>
         </a>
         
@@ -801,7 +816,7 @@ Update March 30th, 2021: This article is …" />
 
 <script type="text/javascript" src="https://weizhang555.github.io/en/js/bundle.bbf6eab9d0e31d2d45a0d302b93cfbdd7c169deb9518a671024c06b869cc688d310d3e3d6f813aade70aa8dfb8f5b467207588efc0b8a721cbeeb3e059b229da.js" integrity="sha512-u/bqudDjHS1FoNMCuTz73XwWneuVGKZxAkwGuGnMaI0xDT49b4E6recKqN&#43;49bRnIHWI78C4pyHL7rPgWbIp2g==" crossorigin="anonymous"></script>
 
-  <script src="https://weizhang555.github.io/js/search.min.b19f217359693afb8f0abd75ca8de6becceec41f5304950fc48e165914ef227f44d10005d02a281a66e33b482e2ff27e6eb893111505deb4f072c307e1f887bb.js"></script>
+  <script src="https://weizhang555.github.io/js/search.min.73cb82d8f274395dd220d6594053cd3d3d8ac8c97d874b5142a60b9744f3704d765551e0ade104d5803c66b731f5a7a00ac2cff33c8c9090ff8100169a3e2574.js"></script>
 
   </body>
 </html>
