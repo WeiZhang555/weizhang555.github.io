@@ -3,6 +3,12 @@ backend:
   name: github
   repo: WeiZhang555/myblog
   branch: master
+  # Sveltia CMS Authenticator deployed on Cloudflare Workers
+  base_url: https://sveltia-cms-auth.zhangwei-cs.workers.dev
+  # domain checked against the worker's ALLOWED_DOMAINS
+  site_domain: weizhang555.github.io
+  # minimal scope: myblog is a public repository
+  auth_scope: public_repo
 
 # 编辑后提交为 Pull Request，合并 PR 后由 GitHub Actions 自动构建并发布
 publish_mode: editorial_workflow
