@@ -10,18 +10,18 @@ const imageAltClass = 'img_alt';
 
 
 const defaultSiteLanguage = 'en';
-const baseURL = 'http://localhost:1313/';
+const baseURL = 'https://weizhang555.github.io/';
 const searchFieldClass = '.search_field';
 const searchClass = '.search';
 const goBackClass = 'button_back';
 const lineClass = '.line';
 
 // defined in i18n / translation files
-const quickLinks = 'Results';
-const searchResultsLabel = 'Search Results';
-const shortSearchQuery = 'Query is too short'
-const typeToSearch = 'Type to search';
-const noMatchesFound = 'No results found';
+const quickLinks = '搜索到的结果';
+const searchResultsLabel = '搜索到的结果';
+const shortSearchQuery = '搜索字符太短'
+const typeToSearch = '请输入内容查找';
+const noMatchesFound = '未找到结果';
 
 ;
 // global variables
@@ -47,7 +47,7 @@ function elem(selector, parent = document){
 
 function elems(selector, parent = document) {
   let elems = parent.querySelectorAll(selector);
-  return elems.length ? elems : false;
+  return elems;
 }
 
 function pushClass(el, targetClass) {
@@ -899,28 +899,25 @@ function fileClosure(){
     hljs.initHighlightingOnLoad();
   }
 
-  function largeImages(baseParent, images = []) {
-    if(images) {
-      images.forEach(function(image) {
-        window.setTimeout(function(){
-          let actualWidth = image.naturalWidth;
-          let parentWidth = baseParent.offsetWidth;
-          let actionableRatio = actualWidth / parentWidth;
+ function mark_image_as_scalable(baseParent, image) {
+  let actualWidth = image.naturalWidth;
+  let parentWidth = baseParent.offsetWidth;
+  let actionableRatio = actualWidth / parentWidth;
 
-          if (actionableRatio > 1) {
-            pushClass(image.parentNode.parentNode, imageScalableClass);
-            image.parentNode.parentNode.dataset.scale = actionableRatio;
-          }
-        }, 100)
-      });
-    }
+  if (actionableRatio > 1) {
+    pushClass(image.parentNode.parentNode, imageScalableClass);
+    image.parentNode.parentNode.dataset.scale = actionableRatio;
   }
+ }
 
   (function AltImage() {
     let post = elem('.post_content');
-    let images = post ? post.querySelectorAll('img') : false;
+    let images = post ? post.querySelectorAll('img') : [];
     images ? populateAlt(images) : false;
-    largeImages(post, images);
+
+    images.forEach((image) => image.addEventListener('load', (e) => {
+      mark_image_as_scalable(post, image);
+    }));
   })();
 
   doc.addEventListener('click', function(event) {
@@ -988,6 +985,14 @@ function fileClosure(){
   })();
 
   (function navToggle() {
+    elems('.nav_parent').forEach((link) => link.addEventListener('mouseenter', function(event) {
+      event.target.children[0].classList.add('nav_open')
+    }));
+
+    elems('.nav_parent').forEach((link) => link.addEventListener('mouseleave', function(event) {
+      event.target.children[0].classList.remove('nav_open')
+    }));
+
     doc.addEventListener('click', function(event){
       const target = event.target;
       const open = 'jsopen';

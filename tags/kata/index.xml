@@ -1,31 +1,9 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Kata on WeiZhang555</title>
-    <link>https://weizhang555.github.io/tags/kata/</link>
-    <description>Recent content in Kata on WeiZhang555</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Sun, 08 Apr 2018 22:00:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/kata/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Kata Containers介绍，附上演讲ppt</title>
-      <link>https://weizhang555.github.io/original/kata-containers-introduction/</link>
-      <pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid>
-      <description>
-        
-          
-            最近在51cto举办的meetup上做了关于Kata Containers的演讲， KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv， 融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。
-详细可以直接参观Kata Containers的github主页： https://github.com/kata-containers/runtime
-演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html
-完整的演讲ppt可以在此处下载： Kata介绍与Huawei_iSula安全容器-张伟.ppt
-          
-          
-        
-      </description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kata on WeiZhang555</title><link>https://weizhang555.github.io/tags/kata/</link><description>Recent content in Kata on WeiZhang555</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright> © Zhang Wei(weizhang555)</copyright><lastBuildDate>Sun, 08 Apr 2018 22:00:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/kata/index.xml" rel="self" type="application/rss+xml"/><item><title>Kata Containers介绍，附上演讲ppt</title><link>https://weizhang555.github.io/original/kata-containers-introduction/</link><pubDate>Sun, 08 Apr 2018 22:00:00 +0800</pubDate><guid>https://weizhang555.github.io/original/kata-containers-introduction/</guid><description>
+&lt;p&gt;最近在51cto举办的meetup上做了关于Kata Containers的演讲，
+KataContainers是github上的新项目，前身是Intel的clear container和Hyper的runv，
+融合了普通容器的轻快和虚拟机的高隔离高安全性的优点。&lt;/p&gt;
+&lt;p&gt;详细可以直接参观Kata Containers的github主页：
+&lt;a href="https://github.com/kata-containers/runtime"&gt;https://github.com/kata-containers/runtime&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;演讲的链接传送门：http://developer.huawei.com/ict/forum/thread-48823.html&lt;/p&gt;
+&lt;p&gt;完整的演讲ppt可以在此处下载：
+&lt;a href="https://weizhang555.github.io/post/files/Kata%E4%BB%8B%E7%BB%8D%E4%B8%8EHuawei_iSula%E5%AE%89%E5%85%A8%E5%AE%B9%E5%99%A8-%E5%BC%A0%E4%BC%9F.ppt"&gt;Kata介绍与Huawei_iSula安全容器-张伟.ppt&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

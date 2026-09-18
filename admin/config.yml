@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+backend:
+  name: github
+  repo: WeiZhang555/myblog
+  branch: master
+
+# 编辑后提交为 Pull Request，合并 PR 后由 GitHub Actions 自动构建并发布
+publish_mode: editorial_workflow
+
+media_folder: static/images
+public_folder: /images
+
+collections:
+  - name: original
+    label: 原创
+    label_singular: 原创文章
+    folder: content/original
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
+      - { label: 标签, name: tags, widget: list, required: false, hint: "如：容器、K8S" }
+      - { label: 分类, name: categories, widget: list, required: false }
+      - { label: 显示目录, name: toc, widget: boolean, default: true }
+      - { label: 草稿, name: draft, widget: boolean, default: false, hint: "草稿不会发布到网站" }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: translate
+    label: 译文
+    label_singular: 译文文章
+    folder: content/translate
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
+      - { label: 标签, name: tags, widget: list, required: false }
+      - { label: 分类, name: categories, widget: list, required: false }
+      - { label: 显示目录, name: toc, widget: boolean, default: true }
+      - { label: 草稿, name: draft, widget: boolean, default: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: republish
+    label: 转载
+    label_singular: 转载文章
+    folder: content/republish
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
+      - { label: 标签, name: tags, widget: list, required: false }
+      - { label: 分类, name: categories, widget: list, required: false }
+      - { label: 显示目录, name: toc, widget: boolean, default: true }
+      - { label: 草稿, name: draft, widget: boolean, default: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: about
+    label: 关于页
+    files:
+      - name: about
+        label: 关于我
+        file: content/about/index.md
+        fields:
+          - { label: 标题, name: title, widget: string }
+          - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
+          - { label: 草稿, name: draft, widget: boolean, default: false }
+          - { label: 正文, name: body, widget: markdown }

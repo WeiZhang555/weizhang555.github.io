@@ -1,103 +1,137 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>内核 on WeiZhang555</title>
-    <link>https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/</link>
-    <description>Recent content in 内核 on WeiZhang555</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright> © Zhang Wei(weizhang555)</copyright>
-    <lastBuildDate>Wed, 16 Aug 2023 16:10:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>[内核文档翻译] Overlay文件系统</title>
-      <link>https://weizhang555.github.io/translate/linux-overlayfs/</link>
-      <pubDate>Wed, 16 Aug 2023 16:10:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/translate/linux-overlayfs/</guid>
-      <description>
-        
-          
-            本文原文来自内核源码文档，源码链接。
-官方网站：https://docs.kernel.org
-Overlay文件系统（Overlay Filesystem） This document describes a prototype for a new approach to providing overlay-filesystem functionality in Linux (sometimes referred to as union-filesystems). An overlay-filesystem tries to present a filesystem which is the result over overlaying one filesystem on top of the other.
-本文档描述了在 Linux 中提供Overlay(覆盖)文件系统功能（有时称为联合文件系统）的新方法的原型。 Overlay文件系统尝试呈现一种文件系统，该文件系统是将一个文件系统覆盖在另一个文件系统之上的结果。
-Overlay对象 （Overlay objects） The overlay filesystem approach is &#39;hybrid&#39;, because the objects that appear in the filesystem do not always appear to belong to that filesystem.
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>使用BPF ring buffer</title>
-      <link>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</link>
-      <pubDate>Mon, 24 Jul 2023 23:36:46 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</guid>
-      <description>
-        
-          
-            本文介绍如何使用BPF ring buffer，原文来自这里。
-在学习ring buffer的使用时，我翻阅了很多文档，筛选过后发现这篇文章是很不错的学习材料，即便它最后一次更新停留在2021年3月，内容也依旧可靠。
-以下为正文。
-Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)
-2021 年 3 月 30 日更新：如果您正在寻找有关如何使用 BPF 环形缓冲区的实际示例，本文仍然具有相关性。 如果您想深入了解其工作原理，我建议访问此功能主要作者 Andrii 的博客。 享受学习的乐趣吧！ :)
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>BPF的设计原则Q&amp;A</title>
-      <link>https://weizhang555.github.io/translate/bpf-design-qa/</link>
-      <pubDate>Fri, 21 Jul 2023 00:10:46 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/translate/bpf-design-qa/</guid>
-      <description>
-        
-          
-            原文链接：BPF Design Q&amp;amp;A
-声明：
-本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。 由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。 这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。
-以下是正文。
-问：BPF是一种类似x86和arm64的通用指令集吗？ 答: NO.
-问：BPF是通用的虚拟机吗？ 答：NO。
-BPF是遵循C语言调用约定(C calling convention)的一种通用指令集。
-问：为什么选择了C语言调用约定？ 答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集(同时也考虑到了其他架构的一些重要“怪癖”)，也定义了与那些架构上的linux kernel的C调用约定兼容的调用约定。
-问：未来会支持多个返回值吗？ 答：NO。BPF仅支持使用R0寄存器作为函数返回值。
-问：未来会支持超过5个函数参数吗？ 答：NO。BPF 调用约定仅允许寄存器 R1-R5 用作参数。 BPF 不是一个独立的指令集。 （与允许 msft、cdecl 和其他约定的 x64 ISA 不同）
-问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？ 答：NO
-问：BPF程序可以访问栈指针(stack pointer)吗？ 答：NO。
-只有帧指针(frame pointer)(寄存器R10)可以被访问。从编译器角度看，拥有栈指针是有必要的。例如，LLVM定义了寄存器R11作为BPF后端的栈指针，但是它确保了生成的代码永远不会使用它。
-问：C 调用约定是否会减少可能的用例？ 答：YES。
-BPF的设计强制以内核helper函数和内核对象（像BPF maps）的形式添加主要功能，并且他们之间可以无缝互操作。它允许kernel调用BPF程序，并且BPF程序可以零开销调用kernel helpers，因为他们都是原生C代码。对于与本机内核 C 代码无法区分的 JIT 化 BPF 程序尤其如此。
-问：这是否意味着对BPF代码进行‘创新’扩展是不允许的？ 答：算对吧（Soft yes）。
-至少到目前为止成立，直到BPF代码支持了bpf-to-bpf calls, indirect calls, loops, global variables, jump tables, read-only sections, 和其他所有C代码可以产生的结构。
-          
-          
-        
-      </description>
-    </item>
-    
-    <item>
-      <title>Kernel调试基础--制作initramfs</title>
-      <link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link>
-      <pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate>
-      
-      <guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid>
-      <description>
-        
-          
-            通过自己制作initramfs可以使用qemu启动自定义的内核， 可以用于调试或测试。这里记录一下制作简单的initramfs的脚本， 方便后续使用。
-本文参考了链接：Building a minimal Linux / Busybox OS for Qemu
-完整脚本如下：
-1#!/bin/bash 2set -e 3 4CWD=`pwd` 5BUSYBOX_FILE=busybox-1.28.1 6BUSYBOX_SRC=/tmp/busybox 7BUSYBOX_BUILD=/tmp/busybox-build 8INITRAMFS_DIR=/tmp/initramfs 9 10mkdir -p $BUSYBOX_SRC $BUSYBOX_BUILD $INITRAMFS_DIR 11if [ ! -e $BUSYBOX_FILE ]; then 12 wget http://busybox.net/downloads/${BUSYBOX_FILE}.tar.bz2 13fi 14tar -C $BUSYBOX_SRC -xvf ${BUSYBOX_FILE}.tar.bz2 15 16cd ${BUSYBOX_SRC}/${BUSYBOX_FILE} &amp;amp;&amp;amp; make O=${BUSYBOX_BUILD} defconfig 17# enable busybox static build 18cd ${BUSYBOX_BUILD} &amp;amp;&amp;amp; sed -i &amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34; .config \ 19 &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make install 20 21cd $INITRAMFS_DIR &amp;amp;&amp;amp; rm -rfv * &amp;amp;&amp;amp; mkdir -p bin sbin etc proc sys usr/bin usr/sbin \ 22 &amp;amp;&amp;amp; cp -a $BUSYBOX_BUILD/_install/* .
-          
-          
-        
-      </description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>内核 on WeiZhang555</title><link>https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/</link><description>Recent content in 内核 on WeiZhang555</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright> © Zhang Wei(weizhang555)</copyright><lastBuildDate>Wed, 16 Aug 2023 16:10:00 +0800</lastBuildDate><atom:link href="https://weizhang555.github.io/tags/%E5%86%85%E6%A0%B8/index.xml" rel="self" type="application/rss+xml"/><item><title>[内核文档翻译] Overlay文件系统</title><link>https://weizhang555.github.io/translate/linux-overlayfs/</link><pubDate>Wed, 16 Aug 2023 16:10:00 +0800</pubDate><guid>https://weizhang555.github.io/translate/linux-overlayfs/</guid><description>
+&lt;p&gt;本文原文来自内核源码文档，&lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;源码链接&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;官方网站：https://docs.kernel.org&lt;/p&gt;
+&lt;h1 id="overlay文件系统overlay-filesystem"&gt;Overlay文件系统（Overlay Filesystem）&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This document describes a prototype for a new approach to providing overlay-filesystem functionality in Linux (sometimes referred to as union-filesystems). An overlay-filesystem tries to present a filesystem which is the result over overlaying one filesystem on top of the other.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本文档描述了在 Linux 中提供Overlay(覆盖)文件系统功能（有时称为联合文件系统）的新方法的原型。 Overlay文件系统尝试呈现一种文件系统，该文件系统是将一个文件系统覆盖在另一个文件系统之上的结果。&lt;/p&gt;
+&lt;h2 id="overlay对象-overlay-objects"&gt;Overlay对象 （Overlay objects）&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The overlay filesystem approach is 'hybrid', because the objects that appear in the filesystem do not always appear to belong to that filesystem. In many cases, an object accessed in the union will be indistinguishable from accessing the corresponding object from the original filesystem. This is most obvious from the 'st_dev' field returned by stat(2).&lt;/p&gt;</description></item><item><title>使用BPF ring buffer</title><link>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</link><pubDate>Mon, 24 Jul 2023 23:36:46 +0800</pubDate><guid>https://weizhang555.github.io/translate/using-bpf-ringbuffer/</guid><description>
+&lt;p&gt;本文介绍如何使用BPF ring buffer，原文来自&lt;a href="https://fntlnz.wtf/post/bpf-ring-buffer-usage/"&gt;这里&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;在学习ring buffer的使用时，我翻阅了很多文档，筛选过后发现这篇文章是很不错的学习材料，即便它最后一次更新停留在2021年3月，内容也依旧可靠。&lt;/p&gt;
+&lt;p&gt;以下为正文。&lt;/p&gt;
+&lt;hr&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Update March 30th, 2021: This article is still relevant if you are looking for a practical example on how to use the BPF Ring Buffer. If you want a deep explaination on how it works I suggest to visit the blog of the main author of this feature Andrii here. Enjoy the learning! :)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;2021 年 3 月 30 日更新：如果您正在寻找有关如何使用 BPF 环形缓冲区的实际示例，本文仍然具有相关性。 如果您想深入了解其工作原理，我建议访问此功能主要作者 Andrii 的&lt;a href="https://nakryiko.com/posts/bpf-ringbuf/"&gt;博客&lt;/a&gt;。 享受学习的乐趣吧！ :)&lt;/p&gt;</description></item><item><title>BPF的设计原则Q&amp;A</title><link>https://weizhang555.github.io/translate/bpf-design-qa/</link><pubDate>Fri, 21 Jul 2023 00:10:46 +0800</pubDate><guid>https://weizhang555.github.io/translate/bpf-design-qa/</guid><description>
+&lt;p&gt;原文链接：&lt;a href="https://www.kernel.org/doc/html/latest/bpf/bpf_design_QA.html#q-new-functionality-via-kernel-modules"&gt;BPF Design Q&amp;amp;A&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;声明：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;本文根据截止2023-07-22日的文档最新内容进行翻译，无法保证永远是最新的。&lt;/li&gt;
+&lt;li&gt;由于作者水平有限，难免出现错误和遗漏，如果发现有错误的内容欢迎在下方评论区留言指正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这篇文章是以文档的形式介绍了ebpf的设计上的考虑，对于提升ebpf的理解很有好处，这是为什么单独挑选这篇文章进行翻译的原因。&lt;/p&gt;
+&lt;p&gt;以下是正文。&lt;/p&gt;
+&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：BPF是一种类似x86和arm64的通用指令集吗？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答: NO.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：BPF是通用的虚拟机吗？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：NO。&lt;/p&gt;
+&lt;p&gt;BPF是遵循C语言调用约定(C calling convention)的一种通用指令集。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：为什么选择了C语言调用约定？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：因为BPF程序是为在Linux kernel内运行而设计的，kernel是用C语言写的，因而BPF定义了与x86和arm64两个最常用的架构兼容的指令集(同时也考虑到了其他架构的一些重要“怪癖”)，也定义了与那些架构上的linux kernel的C调用约定兼容的调用约定。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：未来会支持多个返回值吗？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：NO。BPF仅支持使用R0寄存器作为函数返回值。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：未来会支持超过5个函数参数吗？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：NO。BPF 调用约定仅允许寄存器 R1-R5 用作参数。 BPF 不是一个独立的指令集。 （与允许 msft、cdecl 和其他约定的 x64 ISA 不同）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：BPF程序可以访问指令指针(instruction pointer)或返回地址吗？ &lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：NO&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：BPF程序可以访问栈指针(stack pointer)吗？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：NO。&lt;/p&gt;
+&lt;p&gt;只有帧指针(frame pointer)(寄存器R10)可以被访问。从编译器角度看，拥有栈指针是有必要的。例如，LLVM定义了寄存器R11作为BPF后端的栈指针，但是它确保了生成的代码永远不会使用它。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：C 调用约定是否会减少可能的用例？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：YES。&lt;/p&gt;
+&lt;p&gt;BPF的设计强制以内核helper函数和内核对象（像BPF maps）的形式添加主要功能，并且他们之间可以无缝互操作。它允许kernel调用BPF程序，并且BPF程序可以零开销调用kernel helpers，因为他们都是原生C代码。对于与本机内核 C 代码无法区分的 JIT 化 BPF 程序尤其如此。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;u&gt;问：这是否意味着对BPF代码进行‘创新’扩展是不允许的？&lt;/u&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;答：算对吧（Soft yes）。&lt;/p&gt;
+&lt;p&gt;至少到目前为止成立，直到BPF代码支持了bpf-to-bpf calls, indirect calls, loops, global variables, jump tables, read-only sections, 和其他所有C代码可以产生的结构。&lt;/p&gt;</description></item><item><title>Kernel调试基础--制作initramfs</title><link>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</link><pubDate>Thu, 12 Apr 2018 19:10:00 +0800</pubDate><guid>https://weizhang555.github.io/original/make-initramfs-for-qemu-start/</guid><description>
+&lt;p&gt;通过自己制作initramfs可以使用qemu启动自定义的内核，
+可以用于调试或测试。这里记录一下制作简单的initramfs的脚本，
+方便后续使用。&lt;/p&gt;
+&lt;p&gt;本文参考了链接：&lt;a href="https://gist.github.com/pacalet/660fa6472e0bcd53f71fc31f167c628f"&gt;Building a minimal Linux / Busybox OS for Qemu&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;完整脚本如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#!/bin/bash
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;set&lt;/span&gt; -e
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;CWD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="nb"&gt;pwd&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;busybox-1.28.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_SRC&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/busybox
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/busybox-build
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;INITRAMFS_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/initramfs
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;mkdir -p &lt;span class="nv"&gt;$BUSYBOX_SRC&lt;/span&gt; &lt;span class="nv"&gt;$BUSYBOX_BUILD&lt;/span&gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt; ! -e &lt;span class="nv"&gt;$BUSYBOX_FILE&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt; wget http://busybox.net/downloads/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.bz2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;tar -C &lt;span class="nv"&gt;$BUSYBOX_SRC&lt;/span&gt; -xvf &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.bz2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_SRC&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_FILE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make &lt;span class="nv"&gt;O&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; defconfig
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# enable busybox static build&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;18&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BUSYBOX_BUILD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; sed -i &lt;span class="s2"&gt;&amp;#34;s/# CONFIG_STATIC is not set/CONFIG_STATIC=y/&amp;#34;&lt;/span&gt; .config &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;19&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make install
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;20&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;21&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; rm -rfv * &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; mkdir -p bin sbin etc proc sys usr/bin usr/sbin &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;22&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; cp -a &lt;span class="nv"&gt;$BUSYBOX_BUILD&lt;/span&gt;/_install/* .
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;23&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;24&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# if you want to add iozone binary and its linked .so, you can add command here:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;25&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# cp iozone $INITRAMFS_DIR/bin&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;26&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;27&lt;/span&gt;&lt;span class="cl"&gt;cat &amp;gt; &lt;span class="nv"&gt;$INITRAMFS_DIR&lt;/span&gt;/init &lt;span class="s"&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;28&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;29&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;30&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;mount -t proc none /proc
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;31&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;mount -t sysfs none /sys
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;32&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;33&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;cat &amp;lt;&amp;lt;!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;34&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;35&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;36&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;Boot took $(cut -d&amp;#39; &amp;#39; -f1 /proc/uptime) seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;37&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;38&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; _ _ __ _
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;39&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; /\/\ (_)_ __ (_) / /(_)_ __ _ ___ __
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;40&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt; / \| | &amp;#39;_ \| | / / | | &amp;#39;_ \| | | \ \/ /
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;41&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;/ /\/\ \ | | | | | / /__| | | | | |_| |&amp;gt; &amp;lt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;42&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;\/ \/_|_| |_|_| \____/_|_| |_|\__,_/_/\_\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;43&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;44&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;45&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;Welcome to mini_linux
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;46&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;47&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;48&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;49&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;exec /bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;50&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="s"&gt;EOF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;51&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;52&lt;/span&gt;&lt;span class="cl"&gt;chmod +x init
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;53&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;54&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# package into a initramfs&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;55&lt;/span&gt;&lt;span class="cl"&gt;rm -fv /tmp/initramfs.cpio.gz &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;56&lt;/span&gt;&lt;span class="cl"&gt;find . -print0 &lt;span class="p"&gt;|&lt;/span&gt; cpio --null -ov --format&lt;span class="o"&gt;=&lt;/span&gt;newc &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;57&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;|&lt;/span&gt; gzip -9 &amp;gt; /tmp/initramfs.cpio.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;58&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;59&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;===========&amp;gt; initramfs is saved as /tmp/initramfs.cpio.gz&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;60&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;61&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CWD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;62&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# boot with qemu&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;63&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# sudo qemu-system-x86_64 -enable-kvm -kernel build/kernel -initrd initramfs.cpio.gz -nographic -append &amp;#34;console=ttyS0&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item></channel></rss>
