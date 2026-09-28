@@ -22,9 +22,11 @@ collections:
     label_singular: 原创文章
     folder: content/original
     create: true
+    identifier_field: slug
     slug: "{{slug}}"
     summary: "{{title}}"
     fields:
+      - { label: 链接标识, name: slug, widget: string, pattern: ['^[a-z0-9][-a-z0-9.]*[a-z0-9]$', "只能用小写字母、数字、连字符，如 my-first-post"], hint: "英文短标识，用于文件名和URL" }
       - { label: 标题, name: title, widget: string }
       - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
       - { label: 标签, name: tags, widget: list, required: false, hint: "如：容器、K8S" }
@@ -38,9 +40,11 @@ collections:
     label_singular: 译文文章
     folder: content/translate
     create: true
+    identifier_field: slug
     slug: "{{slug}}"
     summary: "{{title}}"
     fields:
+      - { label: 链接标识, name: slug, widget: string, pattern: ['^[a-z0-9][-a-z0-9.]*[a-z0-9]$', "只能用小写字母、数字、连字符，如 my-first-post"], hint: "英文短标识，用于文件名和URL" }
       - { label: 标题, name: title, widget: string }
       - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
       - { label: 标签, name: tags, widget: list, required: false }
@@ -54,9 +58,11 @@ collections:
     label_singular: 转载文章
     folder: content/republish
     create: true
+    identifier_field: slug
     slug: "{{slug}}"
     summary: "{{title}}"
     fields:
+      - { label: 链接标识, name: slug, widget: string, pattern: ['^[a-z0-9][-a-z0-9.]*[a-z0-9]$', "只能用小写字母、数字、连字符，如 my-first-post"], hint: "英文短标识，用于文件名和URL" }
       - { label: 标题, name: title, widget: string }
       - { label: 发布日期, name: date, widget: datetime, format: "YYYY-MM-DD HH:mm:ss ZZ", time_format: false }
       - { label: 标签, name: tags, widget: list, required: false }
