@@ -8,7 +8,9 @@
 &lt;p&gt;本文档描述了在 Linux 中提供Overlay(覆盖)文件系统功能（有时称为联合文件系统）的新方法的原型。 Overlay文件系统尝试呈现一种文件系统，该文件系统是将一个文件系统覆盖在另一个文件系统之上的结果。&lt;/p&gt;
 &lt;h2 id="overlay对象-overlay-objects"&gt;Overlay对象 （Overlay objects）&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;The overlay filesystem approach is 'hybrid', because the objects that appear in the filesystem do not always appear to belong to that filesystem. In many cases, an object accessed in the union will be indistinguishable from accessing the corresponding object from the original filesystem. This is most obvious from the 'st_dev' field returned by stat(2).&lt;/p&gt;</description></item><item><title>防火不如救火，治未病不如治已病，好代码不如好吆喝</title><link>https://weizhang555.github.io/translate/whats-good-engineer/</link><pubDate>Wed, 26 Jul 2023 19:10:46 +0800</pubDate><guid>https://weizhang555.github.io/translate/whats-good-engineer/</guid><description>
+&lt;p&gt;The overlay filesystem approach is 'hybrid', because the objects that appear in the filesystem do not always appear to belong to that filesystem. In many cases, an object accessed in the union will be indistinguishable from accessing the corresponding object from the original filesystem. This is most obvious from the 'st_dev' field returned by stat(2).&lt;/p&gt;
+&lt;p&gt;While directories will report an st_dev from the overlay-filesystem, non-directory objects may report an st_dev from the lower filesystem or upper filesystem that is providing the object. Similarly st_ino will only be unique when combined with st_dev, and both of these can change over the lifetime of a non-directory object. Many applications and tools ignore these values and will not be affected.&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>防火不如救火，治未病不如治已病，好代码不如好吆喝</title><link>https://weizhang555.github.io/translate/whats-good-engineer/</link><pubDate>Wed, 26 Jul 2023 19:10:46 +0800</pubDate><guid>https://weizhang555.github.io/translate/whats-good-engineer/</guid><description>
 &lt;h2 id="1-古代版"&gt;1. 古代版&lt;/h2&gt;
 &lt;p&gt;暖曰：“王独不闻魏文王之问扁鹊耶？&lt;/p&gt;
 &lt;p&gt;曰：‘子昆弟三人其孰最善为医？’&lt;/p&gt;
