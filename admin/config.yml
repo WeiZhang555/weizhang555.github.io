@@ -10,8 +10,7 @@ backend:
   # minimal scope: myblog is a public repository
   auth_scope: public_repo
 
-# 编辑后提交为 Pull Request，合并 PR 后由 GitHub Actions 自动构建并发布
-publish_mode: editorial_workflow
+# CMS 保存后直接提交到 master，自动触发 GitHub Actions 构建并发布
 
 media_folder: static/images
 public_folder: /images
