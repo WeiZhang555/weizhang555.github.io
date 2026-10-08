@@ -4,8 +4,8 @@
  * Comments are powered by utterances, which stores them as issues (with a
  * specific label) in the GitHub Pages repository. This script queries the
  * public GitHub REST API for the most recently updated comment issues and
- * lists them in the sidebar, linking straight to the issue thread so the
- * blog owner and visitors can read and reply on GitHub.
+ * lists them in the sidebar, linking to the original blog article (extracted
+ * from the utterances issue body) so visitors can jump straight to the post.
  */
 (function () {
   'use strict';
@@ -31,19 +31,25 @@
     return new Date(iso).toLocaleDateString('zh-CN');
   }
 
+  // utterances 在 issue body 末尾存了博客文章 URL，格式为 markdown 链接
+  function extractBlogUrl(body) {
+    if (!body) return null;
+    var m = body.match(/\[https?:\/\/[^\]]+\]\((https?:\/\/[^)]+)\)\s*$/);
+    return m ? m[1] : null;
+  }
+
   function render(issues) {
     if (!issues.length) return;
     section.hidden = false;
     issues.forEach(function (issue) {
-      // utterances titles look like "Post Title | Site Name"
       var title = issue.title.split(' | ')[0] || issue.title;
       var li = document.createElement('li');
       li.className = 'recent-comment-item';
 
+      var blogUrl = extractBlogUrl(issue.body);
       var a = document.createElement('a');
-      a.href = issue.html_url;
-      a.target = '_blank';
-      a.rel = 'noopener';
+      a.href = blogUrl || issue.html_url;
+      if (!blogUrl) { a.target = '_blank'; a.rel = 'noopener'; }
       a.className = 'recent-comment-title';
       a.textContent = title;
 
